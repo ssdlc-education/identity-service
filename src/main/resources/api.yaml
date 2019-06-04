@@ -1,9 +1,8 @@
 openapi: 3.0.0
 info:
-  title: Vox Service
+  title: Identity Service
   description: |
-    It's a music service for managing your favorite tracks.
-    It references the design of [Spotify API](https://developer.spotify.com/documentation/web-api/reference/)
+    It's an service that allows you to create and manage account, and issue login credentials.
   version: 0.1.0
 servers:
   - url: http://api.example.com/v1
@@ -11,488 +10,270 @@ servers:
   - url: http://staging-api.example.com/v1
     description: Staging server
 paths:
-  /tracks/{id}:
-    parameters:
-      - name: "id"
-        in: "path"
-        schema:
-          type: string
-          pattern: '^\d+$'
-        required: true
-    get:
-      summary: Get a track.
-      description: Get a track.
-      operationId: "getTrack"
-      responses:
-        '200':
-          description: |
-            Successfully get the track.
-            The response will contain the track ID.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Track'
-        '401':
-          description: Authorization error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 401000
-                message: "Authorization error"
-        '404':
-          description: The track doesn't exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404001
-                message: "The track doesn't exist"
-        '500':
-          description: Fail to get the track.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-    delete:
-      summary: Delete a track.
-      description: Delete a track.
-      operationId: "deleteTrack"
-      responses:
-        '204':
-          description: Successfully delete the track.
-        '401':
-          description: Authorization error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 401000
-                message: "Authorization error"
-        '404':
-          description: The track doesn't exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404001
-                message: "The track doesn't exist"
-        '500':
-          description: Fail to delete the track.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-    patch:
-      summary: Update a track.
-      description: Update a track.
-      operationId: "updateTrack"
-      responses:
-        '204':
-          description: Successfully upate the track.
-        '401':
-          description: Authorization error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 401000
-                message: "Authorization error"
-        '404':
-          description: The track doesn't exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404001
-                message: "The track doesn't exist"
-        '500':
-          description: Fail to update the track.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-  /tracks:
+  /accounts:
     post:
-      summary: Create a new track
-      description: Create a new track
-      operationId: "createTrack"
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Track'
-      responses:
-        '201':
-          description: The track is created successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Track'
-    get:
-      summary: Query for tracks
-      description: Query for tracks
-      operationId: "getTracks"
-      parameters:
-        - name: playlists
-          description: |
-            Comma separated list of playlist ID's. Only get the tracks in the playlists.
-          in: query
-          schema:
-            type: array
-            items:
-              type: string
-          style: form
-          explode: false
-          required: false
-        - name: cursor
-          in: query
-          schema:
-            type: string
-          required: false
-        - name: limit
-          in: query
-          schema:
-            type: integer
-            minimum: 0
-            maximum: 100
-            default: 100
-      responses:
-        '200':
-          description: |
-            Successfully get the tracks.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Tracks'
-        '400':
-          description: The query is invalid.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 400000
-                message: "The query is invalid"
-        '401':
-          description: Authorization error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 401000
-                message: "Authorization error"
-        '500':
-          description: Fail to query the tracks.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-  /playlists/{id}:
-    parameters:
-      - name: "id"
-        in: "path"
-        schema:
-          type: string
-          pattern: '^\d+$'
-        required: true
-    get:
-      summary: Get a playlist.
-      description: Get a playlist.
-      operationId: "getPlaylist"
-      responses:
-        '200':
-          description: |
-            Successfully get the playlist.
-            The response will contain the playlist ID.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Playlist'
-        '401':
-          description: Authorization error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 401000
-                message: "Authorization error"
-        '404':
-          description: The playlist doesn't exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404001
-                message: "The playlist doesn't exist"
-        '500':
-          description: Fail to get the playlist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-    delete:
-      summary: Delete a playlist.
-      description: Delete a playlist.
-      operationId: "deletePlaylist"
-      responses:
-        '204':
-          description: Successfully delete the playlist.
-        '401':
-          description: Authorization error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 401000
-                message: "Authorization error"
-        '404':
-          description: The playlist doesn't exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404001
-                message: "The playlist doesn't exist"
-        '500':
-          description: Fail to delete the playlist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-  /playlists:
-    post:
-      summary: Create a new playlist
-      description: Create a new playlist
-      operationId: "createPlaylist"
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Playlist'
-      responses:
-        '201':
-          description: The track is created successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Playlist'
-    get:
-      summary: Gets the playlists.
-      description: Gets the playlists.
-      operationId: "getPlaylists"
-      parameters:
-        - name: cursor
-          in: query
-          schema:
-            type: string
-          required: false
-        - name: limit
-          in: query
-          schema:
-            type: integer
-            minimum: 0
-            maximum: 100
-            default: 100
-      responses:
-        '200':
-          description: |
-            Successfully get the playlists.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Playlists'
-        '400':
-          description: The query is invalid.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 400000
-                message: "The query is invalid"
-        '401':
-          description: Authorization error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 401000
-                message: "Authorization error"
-        '500':
-          description: Fail to query the tracks.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-
-  /playlists/{playlistId}/tracks:
-    parameters:
-      - name: playlistId
-        in: path
-        required: true
-        schema:
-          type: string
-    put:
-      summary: Update tracks of a playlist.
+      summary: Create an account.
       description: |
-        Update tracks of a playlist.
-        To insert a track, use "insert" operation.
-        To delete a track, use "delete" operation.
-      operationId: "updatePlaylistTracks"
+        Create an account, and issue cookie credential.
+        Initially, the account is in inactive state, user need to email verification to activate it.
+        The issued cookie will be returned with "Set-Cookie" header.
       requestBody:
-        required: true
         content:
-          application/json:
+          'application/json':
             schema:
-              $ref: '#/components/schemas/PlaylistTracks'
+              $ref: '#/components/schemas/Account'
       responses:
-        '204':
-          description: |
-            The tracks are updated successfully.
+        '201':
+          description: The account is created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+        '400':
+          description: Invalid request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Unknown error occurs.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /accounts/{id}:
+    parameters:
+      - name: "id"
+        in: "path"
+        schema:
+          type: string
+          minLength: 1
+        required: true
     get:
-      summary: Gets the tracks of a playlist.
-      description: Gets the playlists.
-      operationId: "getPlaylistTracks"
-      parameters:
-        - name: cursor
-          in: query
-          schema:
-            type: string
-          required: false
-        - name: limit
-          in: query
-          schema:
-            type: integer
-            minimum: 0
-            maximum: 100
-            default: 100
+      summary: Get user's account.
+      description: |
+        It gets the user's account information.
+        If "id" is the special string "@me", it means the cookie credential will be used to determine the account to get.
+        If cookie credential is given, belongs to the same account as the owner of the account to get, then the following information
+        will be returned:
+        - username
+        - firstName
+        - lastName
+        - emails
+        - description
+
+        Otherwise, only the following information will be returned:
+        - username
+        - description
       responses:
         '200':
-          description: |
-            Successfully get the tracks.
-            The responded tracks won't contain the "operation" field.
+          description: Success.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PlaylistTracks'
-        '400':
-          description: The query is invalid.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 400000
-                message: "The query is invalid"
+                $ref: '#/components/schemas/Account'
         '401':
-          description: Authorization error
+          description: |
+            Invalid cookie credential is used.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-              example:
-                code: 401000
-                message: "Authorization error"
+        '404':
+          description: Account not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
         '500':
-          description: Fail to get the tracks.
+          description: Unknown error occurs.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+  /accounts/@me:
+    put:
+      summary: Update an account.
+      description: |
+        Updates an account's information. The user's cookie credential must be carried.
+        The following fields can be updated:
+        - password
+        - description
+        - emails
 
+        If "emails" is carried, it will be merged with the existing emails. If a duplicate one is found, 400 is returned.
+        An account can have at most two emails, and at least one.
+        If an account already has one verified email, the new email will be appended with "verified" being false.
+        After the new email is verified, the new one will replace the old one, and there will be only one email.
+        If the account has only one unverified email, the new email will directly replace the old one.
+      parameters:
+        - name: "token"
+          in: "query"
+          schema:
+            type: string
+          required: true
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/Account'
+      responses:
+        '204':
+          description: Successfully upate the account.
+        '400':
+          description: Invalid request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: |
+            Invalid cookie credential is used.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Account not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Unknown error occurs.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /sessions:
+    post:
+      summary: Create a new login session.
+      description: |
+        Given the username and password, login and obtain the cookie credential.
+        The issued cookie will be returned with "Set-Cookie" header.
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/Session'
+      responses:
+        '201':
+          description: The session is created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Session'
+        '400':
+          description: Invalid request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Unknown error occurs.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /tokens:
+    post:
+      summary: Create a new token.
+      description: |
+        Create a new token.
+        Cookie credential must be carried.
+        Depending on the type of the requested token, different criteria must be met:
+        - standard:
+          - Only need a valid and unexpired credential.
+        - critical:
+          - The credential must be valid and be issued in the last 5 minutes.
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/Token'
+      responses:
+        '201':
+          description: The session is created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Session'
+        '400':
+          description: Invalid request or credential too old.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Invalid credential.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Unknown error occurs.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 components:
   schemas:
-    Track:
+    Account:
       type: "object"
       properties:
-        id:
+        username:
           type: "string"
-          pattern: '^\d+$'
-        title:
-          type: "string"
+          pattern: '^[A-Za-z0-9_-]{3,32}$'
         createTime:
           type: "string"
           format: "date-time"
         updateTime:
           type: "string"
           format: "date-time"
-        playlists:
-          description: |
-            List of playlist ID's that this track belongs to.
+        password:
+          type: "string"
+          minLength: 6
+          maxLength: 30
+        description:
+          type: "string"
+          maxLength: 500
+        emails:
+          type: "array"
+          items:
+            $ref: '#/components/schemas/Email'
+    Email:
+      type: "object"
+      properties:
+        value:
+          type: "string"
+          maxLength: 256
+        verified:
+          type: "boolean"
+      required:
+        - "value"
+    Session:
+      type: "object"
+      properties:
+        username:
+          type: "string"
+        password:
+          type: "string"
+        tags:
           type: array
-          maxItems: 10
           items:
             type: string
-    Tracks:
+            enum:
+              - emailUnverified
+    Token:
       type: "object"
       properties:
-        playlists:
-          type: "array"
-          items:
-            $ref: '#/components/schemas/Track'
-        pagination:
-          $ref: '#/components/schemas/Pagination'
-    Playlist:
-      type: "object"
-      properties:
-        id:
+        value:
           type: "string"
-          pattern: '^\d+$'
-        name:
+        type:
           type: "string"
-    Pagination:
-      type: "object"
-      properties:
-        nextCursor:
-          type: "string"
-        resultsTotal:
-          type: "integer"
-    Playlists:
-      type: "object"
-      properties:
-        playlists:
-          type: "array"
-          items:
-            $ref: '#/components/schemas/Playlist'
-        pagination:
-          $ref: '#/components/schemas/Pagination'
-    PlaylistTrack:
-      type: "object"
-      properties:
-        track:
-          $ref: '#/components/schemas/Track'
-        positions:
-          type: "array"
-          items:
-            type: "integer"
-            minimum: 0
-        operation:
-          type: "string"
-          enum: ["insert", "delete"]
-    PlaylistTracks:
-      type: "object"
-      properties:
-        tracks:
-          type: "array"
-          items:
-            $ref: '#/components/schemas/PlaylistTrack'
-        pagination:
-          $ref: '#/components/schemas/Pagination'
+          enum:
+            - standard
+            - critical
     Error:
       type: "object"
       properties:

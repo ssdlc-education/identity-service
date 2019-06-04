@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTd Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.yahoo.identity.services.storage.sql.AccountMapper">
+    <insert id="insertAccount" parameterType="AccountModel" keyProperty="account.username" useGeneratedKeys="false">
+        INSERT INTO `account` (`username`, `create_ts`, `update_ts`, `description`)
+        VALUES (
+            #{account.username, jdbcType=VARCHAR},
+            #{account.createTs, jdbcType=BIGINT},
+            #{account.updateTs, jdbcType=BIGINT},
+            #{account.description, jdbcType=VARCHAR}
+        )
+    </insert>
+</mapper>
