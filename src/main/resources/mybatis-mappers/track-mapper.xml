@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTd Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!-- if we put CCU here, we should have a better name -->
+<mapper namespace="com.vox.services.storage.sql.TrackMapper">
+    <insert id="insertTrack" parameterType="TrackModel" keyProperty="track.id" useGeneratedKeys="false">
+        INSERT INTO `track` (`id`, `create_ts`, `update_ts`, `title`)
+        VALUES (
+            #{track.id, jdbcType=VARCHAR},
+            #{track.createTs, jdbcType=BIGINT},
+            #{track.updateTs, jdbcType=BIGINT},
+            #{track.title, jdbcType=VARCHAR}
+        )
+    </insert>
+</mapper>
