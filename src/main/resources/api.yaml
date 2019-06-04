@@ -1,0 +1,504 @@
+openapi: 3.0.0
+info:
+  title: Vox Service
+  description: |
+    It's a music service for managing your favorite tracks.
+    It references the design of [Spotify API](https://developer.spotify.com/documentation/web-api/reference/)
+  version: 0.1.0
+servers:
+  - url: http://api.example.com/v1
+    description: Production server
+  - url: http://staging-api.example.com/v1
+    description: Staging server
+paths:
+  /tracks/{id}:
+    parameters:
+      - name: "id"
+        in: "path"
+        schema:
+          type: string
+          pattern: '^\d+$'
+        required: true
+    get:
+      summary: Get a track.
+      description: Get a track.
+      operationId: "getTrack"
+      responses:
+        '200':
+          description: |
+            Successfully get the track.
+            The response will contain the track ID.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Track'
+        '401':
+          description: Authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: 401000
+                message: "Authorization error"
+        '404':
+          description: The track doesn't exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: 404001
+                message: "The track doesn't exist"
+        '500':
+          description: Fail to get the track.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      summary: Delete a track.
+      description: Delete a track.
+      operationId: "deleteTrack"
+      responses:
+        '204':
+          description: Successfully delete the track.
+        '401':
+          description: Authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: 401000
+                message: "Authorization error"
+        '404':
+          description: The track doesn't exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: 404001
+                message: "The track doesn't exist"
+        '500':
+          description: Fail to delete the track.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    patch:
+      summary: Update a track.
+      description: Update a track.
+      operationId: "updateTrack"
+      responses:
+        '204':
+          description: Successfully upate the track.
+        '401':
+          description: Authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: 401000
+                message: "Authorization error"
+        '404':
+          description: The track doesn't exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: 404001
+                message: "The track doesn't exist"
+        '500':
+          description: Fail to update the track.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /tracks:
+    post:
+      summary: Create a new track
+      description: Create a new track
+      operationId: "createTrack"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Track'
+      responses:
+        '201':
+          description: The track is created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Track'
+    get:
+      summary: Query for tracks
+      description: Query for tracks
+      operationId: "getTracks"
+      parameters:
+        - name: playlists
+          description: |
+            Comma separated list of playlist ID's. Only get the tracks in the playlists.
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+          required: false
+        - name: cursor
+          in: query
+          schema:
+            type: string
+          required: false
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            maximum: 100
+            default: 100
+      responses:
+        '200':
+          description: |
+            Successfully get the tracks.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tracks'
+        '400':
+          description: The query is invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: 400000
+                message: "The query is invalid"
+        '401':
+          description: Authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: 401000
+                message: "Authorization error"
+        '500':
+          description: Fail to query the tracks.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /playlists/{id}:
+    parameters:
+      - name: "id"
+        in: "path"
+        schema:
+          type: string
+          pattern: '^\d+$'
+        required: true
+    get:
+      summary: Get a playlist.
+      description: Get a playlist.
+      operationId: "getPlaylist"
+      responses:
+        '200':
+          description: |
+            Successfully get the playlist.
+            The response will contain the playlist ID.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Playlist'
+        '401':
+          description: Authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: 401000
+                message: "Authorization error"
+        '404':
+          description: The playlist doesn't exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: 404001
+                message: "The playlist doesn't exist"
+        '500':
+          description: Fail to get the playlist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      summary: Delete a playlist.
+      description: Delete a playlist.
+      operationId: "deletePlaylist"
+      responses:
+        '204':
+          description: Successfully delete the playlist.
+        '401':
+          description: Authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: 401000
+                message: "Authorization error"
+        '404':
+          description: The playlist doesn't exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: 404001
+                message: "The playlist doesn't exist"
+        '500':
+          description: Fail to delete the playlist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /playlists:
+    post:
+      summary: Create a new playlist
+      description: Create a new playlist
+      operationId: "createPlaylist"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Playlist'
+      responses:
+        '201':
+          description: The track is created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Playlist'
+    get:
+      summary: Gets the playlists.
+      description: Gets the playlists.
+      operationId: "getPlaylists"
+      parameters:
+        - name: cursor
+          in: query
+          schema:
+            type: string
+          required: false
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            maximum: 100
+            default: 100
+      responses:
+        '200':
+          description: |
+            Successfully get the playlists.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Playlists'
+        '400':
+          description: The query is invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: 400000
+                message: "The query is invalid"
+        '401':
+          description: Authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: 401000
+                message: "Authorization error"
+        '500':
+          description: Fail to query the tracks.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /playlists/{playlistId}/tracks:
+    parameters:
+      - name: playlistId
+        in: path
+        required: true
+        schema:
+          type: string
+    put:
+      summary: Update tracks of a playlist.
+      description: |
+        Update tracks of a playlist.
+        To insert a track, use "insert" operation.
+        To delete a track, use "delete" operation.
+      operationId: "updatePlaylistTracks"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlaylistTracks'
+      responses:
+        '204':
+          description: |
+            The tracks are updated successfully.
+    get:
+      summary: Gets the tracks of a playlist.
+      description: Gets the playlists.
+      operationId: "getPlaylistTracks"
+      parameters:
+        - name: cursor
+          in: query
+          schema:
+            type: string
+          required: false
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            maximum: 100
+            default: 100
+      responses:
+        '200':
+          description: |
+            Successfully get the tracks.
+            The responded tracks won't contain the "operation" field.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlaylistTracks'
+        '400':
+          description: The query is invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: 400000
+                message: "The query is invalid"
+        '401':
+          description: Authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: 401000
+                message: "Authorization error"
+        '500':
+          description: Fail to get the tracks.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    Track:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+          pattern: '^\d+$'
+        title:
+          type: "string"
+        createTime:
+          type: "string"
+          format: "date-time"
+        updateTime:
+          type: "string"
+          format: "date-time"
+        playlists:
+          description: |
+            List of playlist ID's that this track belongs to.
+          type: array
+          maxItems: 10
+          items:
+            type: string
+    Tracks:
+      type: "object"
+      properties:
+        playlists:
+          type: "array"
+          items:
+            $ref: '#/components/schemas/Track'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+    Playlist:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+          pattern: '^\d+$'
+        name:
+          type: "string"
+    Pagination:
+      type: "object"
+      properties:
+        nextCursor:
+          type: "string"
+        resultsTotal:
+          type: "integer"
+    Playlists:
+      type: "object"
+      properties:
+        playlists:
+          type: "array"
+          items:
+            $ref: '#/components/schemas/Playlist'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+    PlaylistTrack:
+      type: "object"
+      properties:
+        track:
+          $ref: '#/components/schemas/Track'
+        positions:
+          type: "array"
+          items:
+            type: "integer"
+            minimum: 0
+        operation:
+          type: "string"
+          enum: ["insert", "delete"]
+    PlaylistTracks:
+      type: "object"
+      properties:
+        tracks:
+          type: "array"
+          items:
+            $ref: '#/components/schemas/PlaylistTrack'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+    Error:
+      type: "object"
+      properties:
+        code:
+          type: "integer"
+          example: 500000
+        message:
+          type: "string"
+          example: "Unknown server error"
