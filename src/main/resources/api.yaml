@@ -180,6 +180,89 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+  /verifications:
+    post:
+      summary: Send a new email verification.
+      description: |
+        Send a new email verification for the given email address.
+        The email address must be one of the unverified email of the account. Otherwise, 400 is returned.
+      parameters:
+        - name: "token"
+          in: "query"
+          schema:
+            type: string
+          required: true
+          description: |
+            The issue time of the token must be within 5 minutes.
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/Verification'
+      responses:
+        '201':
+          description: The verification is created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Verification'
+        '400':
+          description: Invalid request or credential too old.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Invalid credential or token (including expired cases).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Unknown error occurs.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    put:
+      summary: Submitting email verification OTP code.
+      description: |
+        Submitting OTP code for email verification for the given email address.
+        The email address must be one of the unverified email of the account. Otherwise, 400 is returned.
+      parameters:
+        - name: "token"
+          in: "query"
+          schema:
+            type: string
+          required: true
+          description: |
+            The issue time of the token must be within 5 minutes.
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/Verification'
+      responses:
+        '204':
+          description: The verification is finished successfully or the email is already verified.
+        '400':
+          description: Invalid request or credential too old.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Invalid credential or token (including expired cases).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Unknown error occurs.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /tokens:
     post:
       summary: Create a new token.
@@ -279,6 +362,17 @@ components:
           enum:
             - standard
             - critical
+    Verification:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - email
+        value:
+          type: string
+        otp:
+          type: string
     Error:
       type: "object"
       properties:
