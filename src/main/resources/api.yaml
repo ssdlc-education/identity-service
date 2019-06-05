@@ -101,8 +101,10 @@ paths:
         - description
         - emails
 
-        If "emails" is carried, it will be merged with the existing emails. If a duplicate one is found, 400 is returned.
-        An account can have at most two emails, and at least one.
+        If "emails" is carried, it will be merged with the existing emails. Only one email can be carried at a time.
+        If a duplicate one is found, 400 is returned.
+        An account can have at most two emails, and at least one, and at most one can be verified, at most one can be
+        unverified.
         If an account already has one verified email, the new email will be appended with "verified" being false.
         After the new email is verified, the new one will replace the old one, and there will be only one email.
         If the account has only one unverified email, the new email will directly replace the old one.
@@ -112,6 +114,9 @@ paths:
           schema:
             type: string
           required: true
+          description: |
+            When updating password or email, the issue time of the token must be within 5 minutes.
+            Otherwise, any unexpired and valid token will work.
       requestBody:
         content:
           'application/json':
