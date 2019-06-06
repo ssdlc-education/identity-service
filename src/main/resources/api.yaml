@@ -185,15 +185,11 @@ paths:
       summary: Send a new email verification.
       description: |
         Send a new email verification for the given email address.
-        The email address must be one of the unverified email of the account. Otherwise, 400 is returned.
-      parameters:
-        - name: "token"
-          in: "query"
-          schema:
-            type: string
-          required: true
-          description: |
-            The issue time of the token must be within 5 minutes.
+        If "username" is carried, it will be used to lookup the account.
+        It should happen for sending verification email when user forgets password.
+        Otherwise, try to use cookie to decide the identity. It should happen when the
+        user is verifying an unverified email. Therefore, the email must be one of the
+        unverified email of the account. Otherwise, 400 is returned.
       requestBody:
         content:
           'application/json':
@@ -228,15 +224,11 @@ paths:
       summary: Submitting email verification OTP code.
       description: |
         Submitting OTP code for email verification for the given email address.
-        The email address must be one of the unverified email of the account. Otherwise, 400 is returned.
-      parameters:
-        - name: "token"
-          in: "query"
-          schema:
-            type: string
-          required: true
-          description: |
-            The issue time of the token must be within 5 minutes.
+        If `username` is carried, it's used to decide the identity, and a new cookie
+        credential is returned via `Set-Cookie` header on success.
+        Otherwise, cookie credential must be present, and will be used to decide the
+        identity. In such case, no new cookie credential is issued, and the email address
+        must be one of the unverified email of the account.
       requestBody:
         content:
           'application/json':
@@ -365,6 +357,8 @@ components:
     Verification:
       type: object
       properties:
+        username:
+          type: string
         type:
           type: string
           enum:
