@@ -1,4 +1,4 @@
-package com.yahoo.identity;
+package com.yahoo.identity.services.account;
 
 import javax.annotation.Nonnull;
 import java.time.Instant;

@@ -3,6 +3,8 @@ info:
   title: Identity Service
   description: |
     It's an service that allows you to create and manage account, and issue login credentials.
+    This file is the API spec written in OpenAPI. It's what the API may look like if it's really implemented as a RESTful
+    backend service. It's not actually used for now.
   version: 0.1.0
 servers:
   - url: http://api.example.com/v1
