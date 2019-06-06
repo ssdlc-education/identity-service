@@ -1,6 +1,6 @@
 package com.yahoo.identity.services.storage.sql;
 
-import com.yahoo.identity.AccountCreate;
+import com.yahoo.identity.services.account.AccountCreate;
 import com.yahoo.identity.IdentityException;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -33,7 +33,7 @@ public class SqlAccountCreate implements AccountCreate {
 
     @Nonnull
     @Override
-    public AccountCreate setTitle(@Nonnull String title) {
+    public AccountCreate setDescription(@Nonnull String title) {
         account.setDescription(title);
         return this;
     }

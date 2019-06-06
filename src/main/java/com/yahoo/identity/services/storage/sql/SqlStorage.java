@@ -1,7 +1,7 @@
 package com.yahoo.identity.services.storage.sql;
 
-import com.yahoo.identity.Account;
-import com.yahoo.identity.AccountCreate;
+import com.yahoo.identity.services.account.Account;
+import com.yahoo.identity.services.account.AccountCreate;
 import com.yahoo.identity.IdentityError;
 import com.yahoo.identity.IdentityException;
 import com.yahoo.identity.services.storage.Storage;

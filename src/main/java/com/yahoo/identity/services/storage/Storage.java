@@ -1,7 +1,7 @@
 package com.yahoo.identity.services.storage;
 
-import com.yahoo.identity.Account;
-import com.yahoo.identity.AccountCreate;
+import com.yahoo.identity.services.account.Account;
+import com.yahoo.identity.services.account.AccountCreate;
 
 import javax.annotation.Nonnull;
 

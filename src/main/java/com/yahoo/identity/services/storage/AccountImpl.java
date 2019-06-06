@@ -1,6 +1,6 @@
 package com.yahoo.identity.services.storage;
 
-import com.yahoo.identity.Account;
+import com.yahoo.identity.services.account.Account;
 
 import javax.annotation.Nonnull;
 import java.time.Instant;
