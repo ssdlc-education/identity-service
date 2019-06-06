@@ -101,8 +101,10 @@ paths:
         - description
         - emails
 
-        If "emails" is carried, it will be merged with the existing emails. If a duplicate one is found, 400 is returned.
-        An account can have at most two emails, and at least one.
+        If "emails" is carried, it will be merged with the existing emails. Only one email can be carried at a time.
+        If a duplicate one is found, 400 is returned.
+        An account can have at most two emails, and at least one, and at most one can be verified, at most one can be
+        unverified.
         If an account already has one verified email, the new email will be appended with "verified" being false.
         After the new email is verified, the new one will replace the old one, and there will be only one email.
         If the account has only one unverified email, the new email will directly replace the old one.
@@ -112,6 +114,9 @@ paths:
           schema:
             type: string
           required: true
+          description: |
+            When updating password or email, the issue time of the token must be within 5 minutes.
+            Otherwise, any unexpired and valid token will work.
       requestBody:
         content:
           'application/json':
@@ -165,6 +170,89 @@ paths:
                 $ref: '#/components/schemas/Session'
         '400':
           description: Invalid request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Unknown error occurs.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /verifications:
+    post:
+      summary: Send a new email verification.
+      description: |
+        Send a new email verification for the given email address.
+        The email address must be one of the unverified email of the account. Otherwise, 400 is returned.
+      parameters:
+        - name: "token"
+          in: "query"
+          schema:
+            type: string
+          required: true
+          description: |
+            The issue time of the token must be within 5 minutes.
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/Verification'
+      responses:
+        '201':
+          description: The verification is created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Verification'
+        '400':
+          description: Invalid request or credential too old.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Invalid credential or token (including expired cases).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Unknown error occurs.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    put:
+      summary: Submitting email verification OTP code.
+      description: |
+        Submitting OTP code for email verification for the given email address.
+        The email address must be one of the unverified email of the account. Otherwise, 400 is returned.
+      parameters:
+        - name: "token"
+          in: "query"
+          schema:
+            type: string
+          required: true
+          description: |
+            The issue time of the token must be within 5 minutes.
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/Verification'
+      responses:
+        '204':
+          description: The verification is finished successfully or the email is already verified.
+        '400':
+          description: Invalid request or credential too old.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Invalid credential or token (including expired cases).
           content:
             application/json:
               schema:
@@ -274,6 +362,17 @@ components:
           enum:
             - standard
             - critical
+    Verification:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - email
+        value:
+          type: string
+        otp:
+          type: string
     Error:
       type: "object"
       properties:
