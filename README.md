@@ -24,3 +24,9 @@ http://localhost:8080/v1/swagger.json
 
 Note that if you have configured the `host` to be something other than localhost, the calls through
 swagger-ui will be directed to that host and not localhost!
+
+Use a simple call to the API:
+```
+curl http://localhost:8080/v1/accounts/123
+{"code":4,"type":"ok","message":"magic!"}
+```
