@@ -11,4 +11,9 @@
             #{account.description, jdbcType=VARCHAR}
         )
     </insert>
+    <select id="getAccount" resultType="AccountModel">
+        SELECT * FROM account
+        WHERE username = #{username}
+    </select>
+
 </mapper>
