@@ -1,10 +1,15 @@
 package com.yahoo.identity.services.storage.sql;
 
 public class AccountModel {
+    private String id;
     private String username;
     private String description;
     private long createTs;
     private long updateTs;
+
+    public String getId() { return id; }
+
+    public void setId() { this.id = id; }
 
     public String getUsername() {
         return username;

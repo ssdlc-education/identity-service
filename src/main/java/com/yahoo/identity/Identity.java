@@ -2,6 +2,7 @@ package com.yahoo.identity;
 
 import com.yahoo.identity.services.account.AccountService;
 import com.yahoo.identity.services.session.SessionService;
+import com.yahoo.identity.services.storage.sql.SqlAccountService;
 import com.yahoo.identity.services.token.TokenService;
 import com.yahoo.identity.services.storage.Storage;
 import com.yahoo.identity.services.challenge.ChallengeService;
@@ -20,8 +21,8 @@ public class Identity {
 
     @Nonnull
     public AccountService getAccountService() {
-        //TODO
-        return null;
+        AccountService sqlAccountService = new SqlAccountService(storage);
+        return sqlAccountService;
     }
 
     @Nonnull

@@ -21,7 +21,8 @@ public class AccountsApiServiceImpl extends AccountsApiService {
 
     @Override
     public Response accountsIdGet(String id, SecurityContext securityContext) throws NotFoundException {
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        String username = identity.getAccountService().getAccount(id).getId();
+        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, username)).build();
     }
 
     @Override
