@@ -15,10 +15,17 @@ public class SqlAccount implements Account {
         try (SqlSession session = sqlSessionFactory.openSession()) {
             AccountMapper mapper = session.getMapper(AccountMapper.class);
             this.account = mapper.getAccount(id);
+            //System.out.println(this.account.getDescription());
             session.commit();
         } catch (Exception e) {
             this.account = new AccountModel();
         }
+    }
+
+    @Override
+    @Nonnull
+    public int getUid() {
+        return this.account.getUid();
     }
 
     @Override
@@ -29,15 +36,44 @@ public class SqlAccount implements Account {
 
     @Override
     @Nonnull
+    public String getFirstname() {
+        return this.account.getFirstname();
+    }
+
+    @Override
+    @Nonnull
+    public String getLastname() {
+        return this.account.getLastname();
+    }
+
+    @Override
+    @Nonnull
+    public String getEmail() {
+        return this.account.getEmail();
+    }
+
+    @Override
+    @Nonnull
+    public String getPassword() {
+        return this.account.getPassword();
+    }
+
+    @Override
+    @Nonnull
     public Instant getCreateTime() {
         return Instant.ofEpochMilli(account.getCreateTs());
     }
-
 
     @Override
     @Nonnull
     public Instant getUpdateTime() {
         return Instant.ofEpochMilli(account.getUpdateTs());
+    }
+
+    @Override
+    @Nonnull
+    public String getDescription() {
+        return this.account.getDescription();
     }
 
 }

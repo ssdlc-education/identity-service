@@ -16,8 +16,38 @@ public class AccountImpl implements Account {
 
     @Nonnull
     @Override
+    public int getUid() {
+        return -1;
+    }
+
+    @Nonnull
+    @Override
     public String getUsername() {
         return data.get("id").toString();
+    }
+
+    @Nonnull
+    @Override
+    public String getFirstname() {
+        return null;
+    }
+
+    @Nonnull
+    @Override
+    public String getLastname() {
+        return null;
+    }
+
+    @Nonnull
+    @Override
+    public String getEmail() {
+        return null;
+    }
+
+    @Nonnull
+    @Override
+    public String getPassword() {
+        return null;
     }
 
     @Nonnull
@@ -31,5 +61,12 @@ public class AccountImpl implements Account {
     public Instant getUpdateTime() {
         return Instant.ofEpochMilli(Long.valueOf(data.get("update_ts").toString()));
     }
+
+    @Nonnull
+    @Override
+    public String getDescription() {
+        return null;
+    }
+
 
 }
