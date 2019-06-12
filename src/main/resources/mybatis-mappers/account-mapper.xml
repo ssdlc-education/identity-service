@@ -11,8 +11,16 @@
             #{account.description, jdbcType=VARCHAR}
         )
     </insert>
-    <select id="getAccount" resultType="AccountModel">
-        SELECT * FROM account
+
+    <resultMap id="accountResultMap" type="AccountModel">
+        <id property="username" column="username" />
+        <result property="createTs" column="create_ts"/>
+        <result property="updateTs" column="update_ts"/>
+        <result property="description" column="description"/>
+    </resultMap>
+
+    <select id="getAccount" resultMap="accountResultMap">
+        SELECT username, create_ts, update_ts, description FROM account
         WHERE username = #{username}
     </select>
 
