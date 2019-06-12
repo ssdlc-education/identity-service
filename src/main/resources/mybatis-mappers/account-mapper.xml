@@ -14,9 +14,15 @@
 
     <resultMap id="accountResultMap" type="AccountModel">
         <id property="username" column="username" />
+        <result property="uid" column="uid" />
+        <result property="firstName" column="firstname" />
+        <result property="lastName" column="lastname" />
+        <result property="email" column="email" />
+        <result property="password" column="password"/>
         <result property="createTs" column="create_ts"/>
         <result property="updateTs" column="update_ts"/>
         <result property="description" column="description"/>
+
     </resultMap>
 
     <select id="getAccount" resultMap="accountResultMap">

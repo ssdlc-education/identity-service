@@ -1,6 +1,7 @@
 package org.openapitools.api.impl;
 
 import com.yahoo.identity.Identity;
+import com.yahoo.identity.services.storage.sql.AccountModel;
 import org.openapitools.api.AccountsApiService;
 import org.openapitools.api.ApiResponseMessage;
 import org.openapitools.api.NotFoundException;
@@ -20,9 +21,9 @@ public class AccountsApiServiceImpl extends AccountsApiService {
     }
 
     @Override
-    public Response accountsIdGet(String id, SecurityContext securityContext) throws NotFoundException {
-        String username = identity.getAccountService().getAccount(id).getId();
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, username)).build();
+    public Response accountsIdGet(String username, SecurityContext securityContext) throws NotFoundException {
+        Account account = (new Account()).username(identity.getAccountService().getAccount(username).getUsername());
+        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, account.getUsername())).build();
     }
 
     @Override

@@ -23,7 +23,7 @@ public class SqlAccount implements Account {
 
     @Override
     @Nonnull
-    public String getId() {
+    public String getUsername() {
         return this.account.getUsername();
     }
 
