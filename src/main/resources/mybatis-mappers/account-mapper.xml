@@ -15,8 +15,8 @@
     <resultMap id="accountResultMap" type="AccountModel">
         <id property="uid" column="uid" />
         <result property="username" column="username" />
-        <result property="firstname" column="firstname" />
-        <result property="lastname" column="lastname" />
+        <result property="firstName" column="firstname" />
+        <result property="lastName" column="lastname" />
         <result property="email" column="email" />
         <result property="password" column="password"/>
         <result property="createTs" column="create_ts"/>

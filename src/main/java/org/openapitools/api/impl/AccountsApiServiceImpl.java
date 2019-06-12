@@ -24,15 +24,15 @@ public class AccountsApiServiceImpl extends AccountsApiService {
     public Response accountsIdGet(String username, SecurityContext securityContext) throws NotFoundException {
 
         int uid = identity.getAccountService().getAccount(username).getUid();
-        String firstname = identity.getAccountService().getAccount(username).getFirstname();
-        String lastname = identity.getAccountService().getAccount(username).getLastname();
+        String firstName = identity.getAccountService().getAccount(username).getFirstName();
+        String lastName = identity.getAccountService().getAccount(username).getLastName();
         String email = identity.getAccountService().getAccount(username).getEmail();
         String password = identity.getAccountService().getAccount(username).getPassword();
         Instant createTs = identity.getAccountService().getAccount(username).getCreateTime();
         Instant updateTs = identity.getAccountService().getAccount(username).getUpdateTime();
         String description = identity.getAccountService().getAccount(username).getDescription();
 
-        String msg = email;
+        String msg = lastName;
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, msg)).build();
     }
 

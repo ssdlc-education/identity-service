@@ -12,10 +12,10 @@ public interface Account {
     String getUsername();
 
     @Nonnull
-    String getFirstname();
+    String getFirstName();
 
     @Nonnull
-    String getLastname();
+    String getLastName();
 
     @Nonnull
     String getEmail();
