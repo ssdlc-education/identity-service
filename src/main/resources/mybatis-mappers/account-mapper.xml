@@ -11,4 +11,22 @@
             #{account.description, jdbcType=VARCHAR}
         )
     </insert>
+
+    <resultMap id="accountResultMap" type="AccountModel">
+        <id property="uid" column="uid" />
+        <result property="username" column="username" />
+        <result property="firstname" column="firstname" />
+        <result property="lastname" column="lastname" />
+        <result property="email" column="email" />
+        <result property="password" column="password"/>
+        <result property="createTs" column="create_ts"/>
+        <result property="updateTs" column="update_ts"/>
+        <result property="description" column="description"/>
+    </resultMap>
+
+    <select id="getAccount" resultMap="accountResultMap">
+        SELECT uid, username, firstname, lastname, email, password, create_ts, update_ts, description FROM account
+        WHERE username = #{username}
+    </select>
+
 </mapper>
