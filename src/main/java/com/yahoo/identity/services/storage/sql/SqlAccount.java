@@ -35,14 +35,14 @@ public class SqlAccount implements Account {
 
     @Override
     @Nonnull
-    public String getFirstname() {
-        return this.account.getFirstname();
+    public String getFirstName() {
+        return this.account.getFirstName();
     }
 
     @Override
     @Nonnull
-    public String getLastname() {
-        return this.account.getLastname();
+    public String getLastName() {
+        return this.account.getLastName();
     }
 
     @Override

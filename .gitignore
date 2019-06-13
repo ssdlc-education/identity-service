@@ -27,7 +27,7 @@ hs_err_pid*
 .idea/*
 *.iml
 
-*.sqlite
+# *.sqlite
 
-# OS X Local File 
+# OS X local file
 .DS_Store

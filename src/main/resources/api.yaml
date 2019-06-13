@@ -305,7 +305,16 @@ components:
       properties:
         username:
           type: "string"
-          pattern: '^[A-Za-z0-9_-]{3,32}$'
+          pattern: '^[A-Za-z0-9_-]{1,30}$'
+        firstName:
+          type: "string"
+          pattern: '^[A-Za-z]{1,20}$'
+        lastName:
+          type: "string"
+          pattern: '^[A-Za-z]{1,20}$'
+        email:
+          type: "string"
+          pattern: '^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
         createTime:
           type: "string"
           format: "date-time"

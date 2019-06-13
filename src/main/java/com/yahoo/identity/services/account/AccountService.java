@@ -11,5 +11,5 @@ public interface AccountService {
     Account getAccount(@Nonnull String id);
 
     @Nonnull
-    AccountUpdate newAccountUpdate();
+    AccountUpdate newAccountUpdate(@Nonnull String id);
 }
