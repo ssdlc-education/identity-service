@@ -37,5 +37,4 @@
         SELECT uid, username, firstname, lastname, email, password, create_ts, update_ts, description FROM account
         WHERE username = #{username}
     </select>
-
 </mapper>

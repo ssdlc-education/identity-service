@@ -31,9 +31,7 @@ public class AccountModel {
 
     public void setEmail(String email) { this.email = email; }
 
-    public String getDescription() {
-        return description;
-    }
+    public String getDescription() { return description; }
 
     public void setDescription(String description) { this.description = description; }
 
@@ -41,19 +39,11 @@ public class AccountModel {
 
     public void setPassword(String password) { this.password = password; }
 
-    public long getCreateTs() {
-        return createTs;
-    }
+    public long getCreateTs() { return createTs; }
 
-    public void setCreateTs(long createTs) {
-        this.createTs = createTs;
-    }
+    public void setCreateTs(long createTs) { this.createTs = createTs; }
 
-    public long getUpdateTs() {
-        return updateTs;
-    }
+    public long getUpdateTs() { return updateTs; }
 
-    public void setUpdateTs(long updateTs) {
-        this.updateTs = updateTs;
-    }
+    public void setUpdateTs(long updateTs) { this.updateTs = updateTs; }
 }
