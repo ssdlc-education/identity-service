@@ -3,9 +3,13 @@
 
 <mapper namespace="com.yahoo.identity.services.storage.sql.AccountMapper">
     <insert id="insertAccount" parameterType="AccountModel" keyProperty="account.username" useGeneratedKeys="false">
-        INSERT INTO `account` (`username`, `create_ts`, `update_ts`, `description`)
+        INSERT INTO `account` (`username`, `firstname`, `lastname`, `email`, `password`, `create_ts`, `update_ts`, `description`)
         VALUES (
             #{account.username, jdbcType=VARCHAR},
+            #{account.firstName, jdbcType=VARCHAR},
+            #{account.lastName, jdbcType=VARCHAR},
+            #{account.email, jdbcType=VARCHAR},
+            #{account.password, jdbcType=VARCHAR},
             #{account.createTs, jdbcType=BIGINT},
             #{account.updateTs, jdbcType=BIGINT},
             #{account.description, jdbcType=VARCHAR}
@@ -25,6 +29,11 @@
     </resultMap>
 
     <select id="getAccount" resultMap="accountResultMap">
+        SELECT uid, username, firstname, lastname, email, password, create_ts, update_ts, description FROM account
+        WHERE username = #{username}
+    </select>
+
+    <select id="updateAccount" resultMap="accountResultMap">
         SELECT uid, username, firstname, lastname, email, password, create_ts, update_ts, description FROM account
         WHERE username = #{username}
     </select>

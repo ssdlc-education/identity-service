@@ -1,12 +1,15 @@
 package org.openapitools.api.impl;
 
 import com.yahoo.identity.Identity;
+import com.yahoo.identity.services.account.AccountCreate;
+import com.yahoo.identity.services.account.AccountUpdate;
 import org.openapitools.api.AccountsApiService;
 import org.openapitools.api.ApiResponseMessage;
 import org.openapitools.api.NotFoundException;
 import org.openapitools.model.Account;
 
 import java.time.Instant;
+
 import javax.annotation.Nonnull;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
@@ -22,8 +25,7 @@ public class AccountsApiServiceImpl extends AccountsApiService {
 
     @Override
     public Response accountsIdGet(String username, SecurityContext securityContext) throws NotFoundException {
-
-        int uid = identity.getAccountService().getAccount(username).getUid();
+        long uid = identity.getAccountService().getAccount(username).getUid();
         String firstName = identity.getAccountService().getAccount(username).getFirstName();
         String lastName = identity.getAccountService().getAccount(username).getLastName();
         String email = identity.getAccountService().getAccount(username).getEmail();
@@ -38,11 +40,33 @@ public class AccountsApiServiceImpl extends AccountsApiService {
 
     @Override
     public Response accountsPost(Account account, SecurityContext securityContext) throws NotFoundException {
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        AccountCreate accountCreate = identity.getAccountService().newAccountCreate();
+        accountCreate.setUsername(account.getUsername());
+        accountCreate.setFirstName(account.getFirstName());
+        accountCreate.setLastName(account.getLastName());
+        accountCreate.setEmail(account.getEmail());
+        accountCreate.setPassword(account.getPassword());
+        accountCreate.setCreateTime(account.getCreateTime().toInstant());
+        accountCreate.setUpdateTime(account.getUpdateTime().toInstant());
+        accountCreate.setDescription(account.getDescription());
+        accountCreate.create();
+
+        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "POST!")).build();
     }
 
     @Override
     public Response accountsmePut(String token, Account account, SecurityContext securityContext) throws NotFoundException {
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        AccountUpdate accountUpdate = identity.getAccountService().newAccountUpdate(account.getUsername());
+        accountUpdate.setUsername(account.getUsername());
+        accountUpdate.setFirstName(account.getFirstName());
+        accountUpdate.setLastName(account.getLastName());
+        accountUpdate.setEmail(account.getEmail());
+        accountUpdate.setPassword(account.getPassword());
+        accountUpdate.setCreateTime(account.getCreateTime().toInstant());
+        accountUpdate.setUpdateTime(account.getUpdateTime().toInstant());
+        accountUpdate.setDescription(account.getDescription());
+        accountUpdate.update();
+
+        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "PUT!")).build();
     }
 }

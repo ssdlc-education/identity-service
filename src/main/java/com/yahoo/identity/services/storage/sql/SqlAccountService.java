@@ -27,7 +27,7 @@ public class SqlAccountService implements AccountService {
 
     @Override
     @Nonnull
-    public AccountUpdate newAccountUpdate() {
-        return this.storage.newAccountUpdate();
+    public AccountUpdate newAccountUpdate(@Nonnull String username) {
+        return this.storage.newAccountUpdate(username);
     }
 }
