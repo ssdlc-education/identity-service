@@ -14,34 +14,6 @@ public class SqlAccountUpdate implements AccountUpdate {
 
     public SqlAccountUpdate(@Nonnull SqlSessionFactory sqlSessionFactory, @Nonnull String id) {
         this.sqlSessionFactory = sqlSessionFactory;
-
-        try(SqlSession session = sqlSessionFactory.openSession()){
-            AccountMapper mapper = session.getMapper(AccountMapper.class);
-            this.account = mapper.getAccount(id);
-        }catch (Exception e) {
-            this.account = new AccountModel();
-        }
-    }
-
-    @Override
-    @Nonnull
-    public AccountUpdate setUsername(@Nonnull String username) {
-        account.setUsername(username);
-        return this;
-    }
-
-    @Override
-    @Nonnull
-    public AccountUpdate setFirstName(@Nonnull String firstName) {
-        account.setFirstName(firstName);
-        return this;
-    }
-
-    @Override
-    @Nonnull
-    public AccountUpdate setLastName(@Nonnull String lastName) {
-        account.setLastName(lastName);
-        return this;
     }
 
     @Override
@@ -55,13 +27,6 @@ public class SqlAccountUpdate implements AccountUpdate {
     @Nonnull
     public AccountUpdate setPassword(@Nonnull String password) {
         account.setPassword(password);
-        return this;
-    }
-
-    @Override
-    @Nonnull
-    public AccountUpdate setCreateTime(@Nonnull Instant createTime) {
-        account.setCreateTs(createTime.toEpochMilli());
         return this;
     }
 
@@ -82,14 +47,11 @@ public class SqlAccountUpdate implements AccountUpdate {
     @Nonnull
     @Override
     public String update() throws IdentityException {
-        /*
         try (SqlSession session = sqlSessionFactory.openSession()) {
             AccountMapper mapper = session.getMapper(AccountMapper.class);
             mapper.updateAccount(account);
             session.commit();
         }
         return account.getUsername();
-         */
-        return null;
     }
 }
