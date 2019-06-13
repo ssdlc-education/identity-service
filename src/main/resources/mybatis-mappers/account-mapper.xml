@@ -33,9 +33,16 @@
         WHERE username = #{username}
     </select>
 
-    <select id="updateAccount" resultMap="accountResultMap">
-        SELECT uid, username, firstname, lastname, email, password, create_ts, update_ts, description FROM account
-        WHERE username = #{username}
-    </select>
-
+    <update id="updateAccount" parameterType="AccountModel" keyProperty="account.username" useGeneratedKeys="false">
+        Update `account` SET
+            `firstname` = #{account.firstName, jdbcType=VARCHAR},
+            `lastname` = #{account.lastName, jdbcType=VARCHAR},
+            `email` = #{account.email, jdbcType=VARCHAR},
+            `password` = #{account.password, jdbcType=VARCHAR},
+            `create_ts` = #{account.createTs, jdbcType=BIGINT},
+            `update_ts` = #{account.updateTs, jdbcType=BIGINT},
+            `description` = #{account.description, jdbcType=VARCHAR}
+        WHERE
+            `username` = #{account.username, jdbcType=VARCHAR}
+    </update>
 </mapper>
