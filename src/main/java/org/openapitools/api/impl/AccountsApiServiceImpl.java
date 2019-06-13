@@ -6,6 +6,7 @@ import org.openapitools.api.ApiResponseMessage;
 import org.openapitools.api.NotFoundException;
 import org.openapitools.model.Account;
 
+import java.time.Instant;
 import javax.annotation.Nonnull;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
@@ -20,8 +21,19 @@ public class AccountsApiServiceImpl extends AccountsApiService {
     }
 
     @Override
-    public Response accountsIdGet(String id, SecurityContext securityContext) throws NotFoundException {
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+    public Response accountsIdGet(String username, SecurityContext securityContext) throws NotFoundException {
+
+        int uid = identity.getAccountService().getAccount(username).getUid();
+        String firstname = identity.getAccountService().getAccount(username).getFirstname();
+        String lastname = identity.getAccountService().getAccount(username).getLastname();
+        String email = identity.getAccountService().getAccount(username).getEmail();
+        String password = identity.getAccountService().getAccount(username).getPassword();
+        Instant createTs = identity.getAccountService().getAccount(username).getCreateTime();
+        Instant updateTs = identity.getAccountService().getAccount(username).getUpdateTime();
+        String description = identity.getAccountService().getAccount(username).getDescription();
+
+        String msg = email;
+        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, msg)).build();
     }
 
     @Override
