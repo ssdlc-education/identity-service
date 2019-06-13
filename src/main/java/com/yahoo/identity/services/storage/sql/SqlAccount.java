@@ -15,7 +15,6 @@ public class SqlAccount implements Account {
         try (SqlSession session = sqlSessionFactory.openSession()) {
             AccountMapper mapper = session.getMapper(AccountMapper.class);
             this.account = mapper.getAccount(id);
-            //System.out.println(this.account.getDescription());
             session.commit();
         } catch (Exception e) {
             this.account = new AccountModel();
@@ -24,7 +23,7 @@ public class SqlAccount implements Account {
 
     @Override
     @Nonnull
-    public int getUid() {
+    public String getUid() {
         return this.account.getUid();
     }
 

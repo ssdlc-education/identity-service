@@ -13,16 +13,15 @@ import javax.annotation.concurrent.ThreadSafe;
 @ThreadSafe
 public class Identity {
 
-    private final Storage storage;
+    private final AccountService accountService;
 
-    public Identity(@Nonnull Storage storage) {
-        this.storage = storage;
+    public Identity(@Nonnull AccountService accountService) {
+        this.accountService = accountService;
     }
 
     @Nonnull
     public AccountService getAccountService() {
-        AccountService sqlAccountService = new SqlAccountService(storage);
-        return sqlAccountService;
+        return accountService;
     }
 
     @Nonnull

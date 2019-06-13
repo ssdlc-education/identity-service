@@ -6,7 +6,7 @@ import java.time.Instant;
 public interface Account {
 
     @Nonnull
-    int getUid();
+    String getUid();
 
     @Nonnull
     String getUsername();

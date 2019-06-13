@@ -23,7 +23,7 @@ public class AccountsApiServiceImpl extends AccountsApiService {
     @Override
     public Response accountsIdGet(String username, SecurityContext securityContext) throws NotFoundException {
 
-        int uid = identity.getAccountService().getAccount(username).getUid();
+        String uid = identity.getAccountService().getAccount(username).getUid();
         String firstname = identity.getAccountService().getAccount(username).getFirstname();
         String lastname = identity.getAccountService().getAccount(username).getLastname();
         String email = identity.getAccountService().getAccount(username).getEmail();

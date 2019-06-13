@@ -16,8 +16,8 @@ public class AccountImpl implements Account {
 
     @Nonnull
     @Override
-    public int getUid() {
-        return -1;
+    public String getUid() {
+        return null;
     }
 
     @Nonnull

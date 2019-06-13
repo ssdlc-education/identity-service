@@ -1,7 +1,7 @@
 package com.yahoo.identity.services.storage.sql;
 
 public class AccountModel {
-    private int uid;
+    private String uid;
     private String username;
     private String firstname;
     private String lastname;
@@ -11,9 +11,9 @@ public class AccountModel {
     private long createTs;
     private long updateTs;
 
-    public int getUid() { return uid; }
+    public String getUid() { return uid; }
 
-    public void setUid(int uid) { this.uid = uid; }
+    public void setUid(String uid) { this.uid = uid; }
 
     public String getUsername() { return this.username; }
 
