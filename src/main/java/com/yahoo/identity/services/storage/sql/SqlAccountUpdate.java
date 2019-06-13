@@ -82,11 +82,14 @@ public class SqlAccountUpdate implements AccountUpdate {
     @Nonnull
     @Override
     public String update() throws IdentityException {
+        /*
         try (SqlSession session = sqlSessionFactory.openSession()) {
             AccountMapper mapper = session.getMapper(AccountMapper.class);
             mapper.updateAccount(account);
             session.commit();
         }
         return account.getUsername();
+         */
+        return null;
     }
 }
