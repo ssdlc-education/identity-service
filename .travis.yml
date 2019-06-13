@@ -4,7 +4,7 @@ jdk:
 script:
   - mvn test -B
   - mvn clean package jetty:run &
-  - sleep 5
+  - sleep 30
   - curl -d '{"username":"Bob","firstName":"Bob","lastName":"Demo","email":"bobdemo@gmail.com","createTime":"2017-07-21T17:32:28Z","updateTime":"2017-07-21T17:32:28Z","description":"Test account for Bob", "password":"PASSWORD"}' -H "Content-Type: application/json" -X POST http://localhost:8080/v1/accounts/
   - curl http://localhost:8080/v1/accounts/Alice
   - curl http://localhost:8080/v1/accounts/Bob
