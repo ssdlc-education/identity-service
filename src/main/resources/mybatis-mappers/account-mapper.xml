@@ -37,11 +37,19 @@
 
     <update id="updateAccount" parameterType="AccountModel" keyProperty="account.username" useGeneratedKeys="false">
         Update `account` SET
+        <if test="account.email != null">
             `email` = #{account.email, jdbcType=VARCHAR},
+        </if>
             `verified` = #{account.verified, jdbcType=BOOLEAN},
+        <if test="account.password != null">
             `password` = #{account.password, jdbcType=VARCHAR},
+        </if>
+        <if test="account.updateTs != null">
             `update_ts` = #{account.updateTs, jdbcType=BIGINT},
+        </if>
+        <if test="account.description != null">
             `description` = #{account.description, jdbcType=VARCHAR}
+        </if>
         WHERE
             `username` = #{account.username, jdbcType=VARCHAR}
     </update>
