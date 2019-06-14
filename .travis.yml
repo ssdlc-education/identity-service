@@ -6,5 +6,5 @@ script:
   - mvn clean package jetty:run &
   # sleep to wait for jetty service to be ready
   - sleep 30
-  # directly write curl in .yml will lead to parsing problem
-  - bash .testscript.sh
+  - bash .scripts/buildDB.sh
+  - bash .scripts/curl.sh
