@@ -52,24 +52,21 @@ public class AccountsApiServiceImpl extends AccountsApiService {
             accountCreate.setDescription(account.getDescription());
             accountCreate.create();
 
-            NewCookie cookie = new NewCookie("Butter Cookie!","123");
+            NewCookie cookie = new NewCookie("ButterCookie","123112131232");
             return Response.ok(new ApiResponseMessage(ApiResponseMessage.OK, "SET!")).cookie(cookie).build();
+
         }catch (Exception e) {
-            return Response.ok(new ApiResponseMessage(ApiResponseMessage.OK, "Wrong!")).build();
+            return Response.ok(new ApiResponseMessage(ApiResponseMessage.OK, "NOT SET!")).build();
         }
     }
 
     @Override
     public Response accountsmePut(String token, Account account, SecurityContext securityContext) throws NotFoundException {
         AccountUpdate accountUpdate = identity.getAccountService().newAccountUpdate(account.getUsername());
-        accountUpdate.setUsername(account.getUsername());
-        accountUpdate.setFirstName(account.getFirstName());
-        accountUpdate.setLastName(account.getLastName());
         accountUpdate.setEmail(account.getEmail());
         accountUpdate.setPassword(account.getPassword());
-        accountUpdate.setCreateTime(account.getCreateTime().toInstant());
-        accountUpdate.setUpdateTime(account.getUpdateTime().toInstant());
         accountUpdate.setDescription(account.getDescription());
+        accountUpdate.setUpdateTime(account.getUpdateTime().toInstant());
         accountUpdate.update();
 
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "PUT!")).build();
