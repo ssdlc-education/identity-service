@@ -4,6 +4,7 @@ import com.yahoo.identity.services.account.Account;
 import com.yahoo.identity.IdentityException;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
+import org.openapitools.model.Email;
 
 import javax.annotation.Nonnull;
 import java.time.Instant;
@@ -47,9 +48,7 @@ public class SqlAccount implements Account {
 
     @Override
     @Nonnull
-    public String getEmail() {
-        return this.account.getEmail();
-    }
+    public String getEmail() { return this.account.getEmail(); }
 
     @Override
     @Nonnull

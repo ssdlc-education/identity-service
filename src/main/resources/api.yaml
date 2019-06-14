@@ -93,6 +93,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+
   /accounts/@update:
     put:
       summary: Update an account.

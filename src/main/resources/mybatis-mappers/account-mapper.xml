@@ -3,12 +3,13 @@
 
 <mapper namespace="com.yahoo.identity.services.storage.sql.AccountMapper">
     <insert id="insertAccount" parameterType="AccountModel" keyProperty="account.username" useGeneratedKeys="false">
-        INSERT INTO `account` (`username`, `firstname`, `lastname`, `email`, `password`, `create_ts`, `update_ts`, `description`)
+        INSERT INTO `account` (`username`, `firstname`, `lastname`, `email`, `verified`, `password`, `create_ts`, `update_ts`, `description`)
         VALUES (
             #{account.username, jdbcType=VARCHAR},
             #{account.firstName, jdbcType=VARCHAR},
             #{account.lastName, jdbcType=VARCHAR},
             #{account.email, jdbcType=VARCHAR},
+            #{account.verified, jdbcType=BOOLEAN},
             #{account.password, jdbcType=VARCHAR},
             #{account.createTs, jdbcType=BIGINT},
             #{account.updateTs, jdbcType=BIGINT},
@@ -22,6 +23,7 @@
         <result property="firstName" column="firstname" />
         <result property="lastName" column="lastname" />
         <result property="email" column="email" />
+        <result property="verified" column="verified" />
         <result property="password" column="password"/>
         <result property="createTs" column="create_ts"/>
         <result property="updateTs" column="update_ts"/>
@@ -29,13 +31,14 @@
     </resultMap>
 
     <select id="getAccount" resultMap="accountResultMap">
-        SELECT uid, username, firstname, lastname, email, password, create_ts, update_ts, description FROM account
+        SELECT uid, username, firstname, lastname, email, verified, password, create_ts, update_ts, description FROM account
         WHERE username = #{username}
     </select>
 
     <update id="updateAccount" parameterType="AccountModel" keyProperty="account.username" useGeneratedKeys="false">
         Update `account` SET
             `email` = #{account.email, jdbcType=VARCHAR},
+            `verified` = #{account.verified, jdbcType=BOOLEAN},
             `password` = #{account.password, jdbcType=VARCHAR},
             `update_ts` = #{account.updateTs, jdbcType=BIGINT},
             `description` = #{account.description, jdbcType=VARCHAR}
