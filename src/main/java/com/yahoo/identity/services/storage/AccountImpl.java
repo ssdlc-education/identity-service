@@ -16,8 +16,8 @@ public class AccountImpl implements Account {
 
     @Nonnull
     @Override
-    public int getUid() {
-        return -1;
+    public String getUid() {
+        return null;
     }
 
     @Nonnull
@@ -28,13 +28,13 @@ public class AccountImpl implements Account {
 
     @Nonnull
     @Override
-    public String getFirstname() {
+    public String getFirstName() {
         return null;
     }
 
     @Nonnull
     @Override
-    public String getLastname() {
+    public String getLastName() {
         return null;
     }
 

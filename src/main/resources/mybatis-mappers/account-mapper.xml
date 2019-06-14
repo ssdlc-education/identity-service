@@ -3,9 +3,13 @@
 
 <mapper namespace="com.yahoo.identity.services.storage.sql.AccountMapper">
     <insert id="insertAccount" parameterType="AccountModel" keyProperty="account.username" useGeneratedKeys="false">
-        INSERT INTO `account` (`username`, `create_ts`, `update_ts`, `description`)
+        INSERT INTO `account` (`username`, `firstname`, `lastname`, `email`, `password`, `create_ts`, `update_ts`, `description`)
         VALUES (
             #{account.username, jdbcType=VARCHAR},
+            #{account.firstName, jdbcType=VARCHAR},
+            #{account.lastName, jdbcType=VARCHAR},
+            #{account.email, jdbcType=VARCHAR},
+            #{account.password, jdbcType=VARCHAR},
             #{account.createTs, jdbcType=BIGINT},
             #{account.updateTs, jdbcType=BIGINT},
             #{account.description, jdbcType=VARCHAR}
@@ -15,8 +19,8 @@
     <resultMap id="accountResultMap" type="AccountModel">
         <id property="uid" column="uid" />
         <result property="username" column="username" />
-        <result property="firstname" column="firstname" />
-        <result property="lastname" column="lastname" />
+        <result property="firstName" column="firstname" />
+        <result property="lastName" column="lastname" />
         <result property="email" column="email" />
         <result property="password" column="password"/>
         <result property="createTs" column="create_ts"/>
@@ -29,4 +33,13 @@
         WHERE username = #{username}
     </select>
 
+    <update id="updateAccount" parameterType="AccountModel" keyProperty="account.username" useGeneratedKeys="false">
+        Update `account` SET
+            `email` = #{account.email, jdbcType=VARCHAR},
+            `password` = #{account.password, jdbcType=VARCHAR},
+            `update_ts` = #{account.updateTs, jdbcType=BIGINT},
+            `description` = #{account.description, jdbcType=VARCHAR}
+        WHERE
+            `username` = #{account.username, jdbcType=VARCHAR}
+    </update>
 </mapper>

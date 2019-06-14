@@ -19,6 +19,41 @@ public class SqlAccountCreate implements AccountCreate {
 
     @Override
     @Nonnull
+    public AccountCreate setUsername(@Nonnull String username) {
+        account.setUsername(username);
+        return this;
+    }
+
+    @Override
+    @Nonnull
+    public AccountCreate setFirstName(@Nonnull String firstName) {
+        account.setFirstName(firstName);
+        return this;
+    }
+
+    @Override
+    @Nonnull
+    public AccountCreate setLastName(@Nonnull String lastName) {
+        account.setLastName(lastName);
+        return this;
+    }
+
+    @Override
+    @Nonnull
+    public AccountCreate setEmail(@Nonnull String email) {
+        account.setEmail(email);
+        return this;
+    }
+
+    @Override
+    @Nonnull
+    public AccountCreate setPassword(@Nonnull String password) {
+        account.setPassword(password);
+        return this;
+    }
+
+    @Override
+    @Nonnull
     public AccountCreate setCreateTime(@Nonnull Instant createTime) {
         account.setCreateTs(createTime.toEpochMilli());
         return this;

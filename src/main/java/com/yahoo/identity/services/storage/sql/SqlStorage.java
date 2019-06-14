@@ -37,7 +37,7 @@ public class SqlStorage implements Storage {
 
     @Nonnull
     @Override
-    public AccountUpdate newAccountUpdate() { return new SqlAccountUpdate(sqlSessionFactory); }
+    public AccountUpdate newAccountUpdate(@Nonnull String username) { return new SqlAccountUpdate(sqlSessionFactory, username); }
 
     @Nonnull
     private SqlSessionFactory createSessionFactory() {
