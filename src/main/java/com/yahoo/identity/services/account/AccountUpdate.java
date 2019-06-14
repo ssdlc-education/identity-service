@@ -20,17 +20,5 @@ public interface AccountUpdate {
     AccountUpdate setDescription(@Nonnull String description);
 
     @Nonnull
-    AccountUpdate setEmail(@Nonnull String email);
-
-    @Nonnull
-    AccountUpdate setPassword(@Nonnull String password);
-
-    @Nonnull
-    AccountUpdate setUpdateTime(@Nonnull Instant updateTime);
-
-    @Nonnull
-    AccountUpdate setDescription(@Nonnull String description);
-
-    @Nonnull
     String update() throws IdentityException;
 }
