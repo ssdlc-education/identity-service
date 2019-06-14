@@ -61,7 +61,7 @@ public class AccountsApiServiceImpl extends AccountsApiService {
     }
 
     @Override
-    public Response accountsmePut(String token, Account account, SecurityContext securityContext) throws NotFoundException {
+    public Response accountsupdatePut(String token, Account account, SecurityContext securityContext) throws NotFoundException {
         AccountUpdate accountUpdate = identity.getAccountService().newAccountUpdate(account.getUsername());
         accountUpdate.setEmail(account.getEmail());
         accountUpdate.setPassword(account.getPassword());
