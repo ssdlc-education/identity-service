@@ -10,6 +10,7 @@ import org.openapitools.model.Account;
 
 import java.time.Instant;
 import javax.annotation.Nonnull;
+import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
@@ -39,31 +40,33 @@ public class AccountsApiServiceImpl extends AccountsApiService {
 
     @Override
     public Response accountsPost(Account account, SecurityContext securityContext) throws NotFoundException {
-        AccountCreate accountCreate = identity.getAccountService().newAccountCreate();
-        accountCreate.setUsername(account.getUsername());
-        accountCreate.setFirstName(account.getFirstName());
-        accountCreate.setLastName(account.getLastName());
-        accountCreate.setEmail(account.getEmail());
-        accountCreate.setPassword(account.getPassword());
-        accountCreate.setCreateTime(account.getCreateTime().toInstant());
-        accountCreate.setUpdateTime(account.getUpdateTime().toInstant());
-        accountCreate.setDescription(account.getDescription());
-        accountCreate.create();
+        try {
+            AccountCreate accountCreate = identity.getAccountService().newAccountCreate();
+            accountCreate.setUsername(account.getUsername());
+            accountCreate.setFirstName(account.getFirstName());
+            accountCreate.setLastName(account.getLastName());
+            accountCreate.setEmail(account.getEmail());
+            accountCreate.setPassword(account.getPassword());
+            accountCreate.setCreateTime(account.getCreateTime().toInstant());
+            accountCreate.setUpdateTime(account.getUpdateTime().toInstant());
+            accountCreate.setDescription(account.getDescription());
+            accountCreate.create();
 
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "POST!")).build();
+            NewCookie cookie = new NewCookie("ButterCookie","123112131232");
+            return Response.ok(new ApiResponseMessage(ApiResponseMessage.OK, "SET!")).cookie(cookie).build();
+
+        }catch (Exception e) {
+            return Response.ok(new ApiResponseMessage(ApiResponseMessage.OK, "NOT SET!")).build();
+        }
     }
 
     @Override
     public Response accountsmePut(String token, Account account, SecurityContext securityContext) throws NotFoundException {
         AccountUpdate accountUpdate = identity.getAccountService().newAccountUpdate(account.getUsername());
-        accountUpdate.setUsername(account.getUsername());
-        accountUpdate.setFirstName(account.getFirstName());
-        accountUpdate.setLastName(account.getLastName());
         accountUpdate.setEmail(account.getEmail());
         accountUpdate.setPassword(account.getPassword());
-        accountUpdate.setCreateTime(account.getCreateTime().toInstant());
-        accountUpdate.setUpdateTime(account.getUpdateTime().toInstant());
         accountUpdate.setDescription(account.getDescription());
+        accountUpdate.setUpdateTime(account.getUpdateTime().toInstant());
         accountUpdate.update();
 
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "PUT!")).build();
