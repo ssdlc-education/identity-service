@@ -1,6 +1,6 @@
 language: java
 jdk:
-  - oraclejdk8
+  - openjdk8
 script:
   - mvn test -B
   - mvn clean package jetty:run &
