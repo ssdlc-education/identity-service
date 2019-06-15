@@ -94,7 +94,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
-  /accounts/@update:
+  /accounts/@me:
     put:
       summary: Update an account.
       description: |

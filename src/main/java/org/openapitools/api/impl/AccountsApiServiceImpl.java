@@ -66,7 +66,7 @@ public class AccountsApiServiceImpl extends AccountsApiService {
     }
 
     @Override
-    public Response accountsupdatePut(String token, Account account, SecurityContext securityContext) throws NotFoundException {
+    public Response accountsmePut(String token, Account account, SecurityContext securityContext) throws NotFoundException {
 
         try {
             NewCookie mockCookie = new NewCookie("ButterCookie","123112131232");
