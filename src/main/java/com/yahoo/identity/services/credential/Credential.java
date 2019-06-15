@@ -1,7 +1,8 @@
 package com.yahoo.identity.services.credential;
 
-import javax.annotation.Nonnull;
 import java.time.Instant;
+
+import javax.annotation.Nonnull;
 
 public interface Credential {
 
@@ -14,9 +15,6 @@ public interface Credential {
     @Nonnull
     String getSubject();
 
-    @Override
     @Nonnull
     String toString();
-
-    void validate();
 }

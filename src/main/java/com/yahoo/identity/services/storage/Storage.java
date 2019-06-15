@@ -7,6 +7,7 @@ import com.yahoo.identity.services.account.AccountUpdate;
 import javax.annotation.Nonnull;
 
 public interface Storage {
+
     @Nonnull
     AccountCreate newAccountCreate();
 

@@ -1,13 +1,14 @@
 package com.yahoo.identity.services.storage.sql;
 
-import com.yahoo.identity.services.account.Account;
-import com.yahoo.identity.services.account.AccountCreate;
 import com.yahoo.identity.IdentityException;
+import com.yahoo.identity.services.account.AccountCreate;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 
-import javax.annotation.Nonnull;
 import java.time.Instant;
+
+import javax.annotation.Nonnull;
+import javax.ws.rs.BadRequestException;
 
 
 public class SqlAccountCreate implements AccountCreate {
@@ -42,8 +43,15 @@ public class SqlAccountCreate implements AccountCreate {
 
     @Override
     @Nonnull
-    public AccountCreate setEmail(@Nonnull String email, @Nonnull Boolean verified) {
-        account.setEmail(email, verified);
+    public AccountCreate setEmail(@Nonnull String email) {
+        account.setEmail(email);
+        return this;
+    }
+
+    @Override
+    @Nonnull
+    public AccountCreate setEmailStatus(@Nonnull int emailStatus) {
+        account.setEmailStatus(emailStatus);
         return this;
     }
 
@@ -77,13 +85,15 @@ public class SqlAccountCreate implements AccountCreate {
 
     @Nonnull
     @Override
-    public AccountCreate setBlockUntil(@Nonnull long blockUntil) {
+    public AccountCreate setBlockUntilTime(@Nonnull Instant blockUntil) {
+        account.setBlockUntilTs(blockUntil.toEpochMilli());
         return this;
     }
 
     @Nonnull
     @Override
-    public AccountCreate setNthTrial(@Nonnull int nthTrial) {
+    public AccountCreate setConsecutiveFails(@Nonnull int consecutiveFails) {
+        account.setConsecutiveFails(consecutiveFails);
         return this;
     }
 
@@ -92,8 +102,12 @@ public class SqlAccountCreate implements AccountCreate {
     public String create() throws IdentityException {
         try (SqlSession session = sqlSessionFactory.openSession()) {
             AccountMapper mapper = session.getMapper(AccountMapper.class);
-            mapper.insertAccount(account);
-            session.commit();
+            if (mapper.verifyUsername(account.getUsername()) == 0) {
+                mapper.insertAccount(account);
+                session.commit();
+            } else {
+                throw new BadRequestException("account already exists");
+            }
         }
         return account.getUsername();
     }
