@@ -20,5 +20,11 @@ public interface AccountUpdate {
     AccountUpdate setDescription(@Nonnull String description);
 
     @Nonnull
+    AccountUpdate setBlockUntil(@Nonnull long blockUntil);
+
+    @Nonnull
+    AccountUpdate setNthTrial(@Nonnull int nthTrial);
+
+    @Nonnull
     String update() throws IdentityException;
 }

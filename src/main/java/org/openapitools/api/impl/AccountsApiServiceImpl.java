@@ -6,6 +6,7 @@ import com.yahoo.identity.services.account.AccountUpdate;
 import org.openapitools.api.AccountsApiService;
 import org.openapitools.api.ApiResponseMessage;
 import org.openapitools.api.NotFoundException;
+import com.yahoo.identity.IdentityException;
 import org.openapitools.model.Account;
 
 import java.time.Instant;
@@ -55,7 +56,7 @@ public class AccountsApiServiceImpl extends AccountsApiService {
             NewCookie cookie = new NewCookie("ButterCookie","123112131232");
             return Response.ok(new ApiResponseMessage(ApiResponseMessage.OK, "SET!")).cookie(cookie).build();
 
-        }catch (Exception e) {
+        } catch (IdentityException e) {
             return Response.ok(new ApiResponseMessage(ApiResponseMessage.OK, "NOT SET!")).build();
         }
     }

@@ -46,6 +46,18 @@ public class SqlAccountUpdate implements AccountUpdate {
 
     @Nonnull
     @Override
+    public AccountUpdate setBlockUntil(@Nonnull long blockUntil) {
+        return this;
+    }
+
+    @Nonnull
+    @Override
+    public AccountUpdate setNthTrial(@Nonnull int nthTrial) {
+        return this;
+    }
+
+    @Nonnull
+    @Override
     public String update() throws IdentityException {
         try (SqlSession session = sqlSessionFactory.openSession()) {
             AccountMapper mapper = session.getMapper(AccountMapper.class);
