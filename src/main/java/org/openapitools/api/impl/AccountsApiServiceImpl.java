@@ -2,6 +2,7 @@ package org.openapitools.api.impl;
 
 import com.yahoo.identity.Identity;
 import com.yahoo.identity.services.account.AccountCreate;
+import com.yahoo.identity.services.account.AccountService;
 import com.yahoo.identity.services.account.AccountUpdate;
 import org.openapitools.api.AccountsApiService;
 import org.openapitools.api.ApiResponseMessage;
@@ -24,21 +25,36 @@ public class AccountsApiServiceImpl extends AccountsApiService {
 
     @Override
     public Response accountsIdGet(String username, SecurityContext securityContext) throws NotFoundException {
-        try {
-            NewCookie mockCookie = new NewCookie("ButterCookie", "123112131232");
-            if (mockCookie.getValue().equals("123112131232")) {
-                String uid = identity.getAccountService().getAccount(username).getUid();
-                String firstName = identity.getAccountService().getAccount(username).getFirstName();
-                String lastName = identity.getAccountService().getAccount(username).getLastName();
-                String email = identity.getAccountService().getAccount(username).getEmail();
-                String password = identity.getAccountService().getAccount(username).getPassword();
-                Instant createTs = identity.getAccountService().getAccount(username).getCreateTime();
-                Instant updateTs = identity.getAccountService().getAccount(username).getUpdateTime();
-                String description = identity.getAccountService().getAccount(username).getDescription();
-                Instant blockUntil = identity.getAccountService().getAccount(username).getBlockUntil();
-                int nthTrial = identity.getAccountService().getAccount(username).getNthTrial();
+        String uid = identity.getAccountService().getAccount(username).getUid();
+        String firstName = identity.getAccountService().getAccount(username).getFirstName();
+        String lastName = identity.getAccountService().getAccount(username).getLastName();
+        String email = identity.getAccountService().getAccount(username).getEmail();
+        String password = identity.getAccountService().getAccount(username).getPassword();
+        Instant createTs = identity.getAccountService().getAccount(username).getCreateTime();
+        Instant updateTs = identity.getAccountService().getAccount(username).getUpdateTime();
+        String description = identity.getAccountService().getAccount(username).getDescription();
+        Instant blockUntil = identity.getAccountService().getAccount(username).getBlockUntil();
+        int nthTrial = identity.getAccountService().getAccount(username).getNthTrial();
 
-                String msg = email;
+        String msg = "username: " + username + ", description: " + description;
+        return Response.ok().entity(new ApiResponseMessage(Response.Status.OK.getStatusCode(), msg)).build();
+    }
+
+    @Override
+    public Response accountsmeGet(String token, SecurityContext securityContext) throws NotFoundException {
+        try {
+            // TODO: take username and cookie from token
+            String username = "Alice";
+            //TODO: get cookie by username and validate cookie
+            String cookie = "from token";
+            if (cookie.equals("from token")) {
+                AccountService accountService = identity.getAccountService();
+                String firstName = accountService.getAccount(username).getFirstName();
+                String lastName = accountService.getAccount(username).getLastName();
+                String email = accountService.getAccount(username).getEmail();
+                String description = accountService.getAccount(username).getDescription();
+
+                String msg = "username: " + username + ", firstname: " + firstName + ", lastname: " + lastName + ", email: " + email + ", description: " + description;
                 return Response.ok().entity(new ApiResponseMessage(Response.Status.OK.getStatusCode(), msg)).build();
             } else {
                 ApiResponseMessage errorMsg = new ApiResponseMessage(Response.Status.UNAUTHORIZED.getStatusCode(), "Invalid cookie credential is used.");

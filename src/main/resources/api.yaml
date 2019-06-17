@@ -95,6 +95,56 @@ paths:
                 $ref: '#/components/schemas/Error'
 
   /accounts/@me:
+    get:
+      summary: Get full profile info.
+      description: |
+        cookie credential will be used to determine the account to get.
+        If cookie credential is given, belongs to the same account as the owner of the account to get, then the following information
+        will be returned:
+        - username
+        - firstName
+        - lastName
+        - emails
+        - description
+      parameters:
+        - name: "token"
+          in: "query"
+          schema:
+            type: string
+          required: true
+##        - name: "id"
+##          in: "path"
+##          schema:
+##            type: string
+##            minLength: 1
+##          required: true
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+        '401':
+          description: |
+            Invalid cookie credential is used.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Account not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Unknown error occurs.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
     put:
       summary: Update an account.
       description: |
