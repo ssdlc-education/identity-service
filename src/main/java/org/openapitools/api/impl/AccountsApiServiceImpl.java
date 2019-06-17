@@ -13,6 +13,7 @@ import javax.annotation.Nonnull;
 import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
+import org.json.*;
 
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJerseyServerCodegen", date = "2019-05-14T20:17:48.996+08:00[Asia/Taipei]")
 public class AccountsApiServiceImpl extends AccountsApiService {
@@ -33,8 +34,16 @@ public class AccountsApiServiceImpl extends AccountsApiService {
         Instant updateTs = identity.getAccountService().getAccount(username).getUpdateTime();
         String description = identity.getAccountService().getAccount(username).getDescription();
 
-        String msg = email;
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, msg)).build();
+//        String msg = email;
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("Username", username);
+        jsonObject.put("Firstname", firstName);
+        jsonObject.put("Lastname",lastName);
+        jsonObject.put("Email", email);
+        jsonObject.put("Description",description);
+        String data = jsonObject.toString();
+
+        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, data)).build();
     }
 
     @Override
