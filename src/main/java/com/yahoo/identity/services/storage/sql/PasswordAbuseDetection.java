@@ -33,7 +33,7 @@ public class PasswordAbuseDetection implements AbuseDetection {
             if (blockTimeLeft > 0 && nthTrial >= ABUSE_MAX_TRIES) {
                 long blockTime = (long) (Math.pow(ABUSE_BLOCK_FACTOR, nthTrial - ABUSE_MAX_TRIES) * ABUSE_MIN_BLOCK);
                 accountService.newAccountUpdate(username).setNthTrial(nthTrial + 1);
-                accountService.newAccountUpdate(username).setBlockUntil(Instant.now().plusSeconds(Math.min(ABUSE_MAX_BLOCK, blockTime)).toEpochMilli());
+                accountService.newAccountUpdate(username).setBlockUntil(Instant.now().plusSeconds(Math.min(ABUSE_MAX_BLOCK, blockTime)));
             } else if (blockTimeLeft == 0 && nthTrial < ABUSE_MAX_TRIES) {
                 accountService.newAccountUpdate(username).setNthTrial(nthTrial + 1);
             }
@@ -42,7 +42,7 @@ public class PasswordAbuseDetection implements AbuseDetection {
 
         if (blockTimeLeft > 0 || nthTrial > 0) {
             accountService.newAccountUpdate(username).setNthTrial(0);
-            accountService.newAccountUpdate(username).setBlockUntil(0);
+            accountService.newAccountUpdate(username).setBlockUntil(Instant.now());
         }
         return false;
     }

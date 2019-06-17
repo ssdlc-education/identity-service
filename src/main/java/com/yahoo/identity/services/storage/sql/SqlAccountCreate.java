@@ -77,13 +77,15 @@ public class SqlAccountCreate implements AccountCreate {
 
     @Nonnull
     @Override
-    public AccountCreate setBlockUntil(@Nonnull long blockUntil) {
+    public AccountCreate setBlockUntil(@Nonnull Instant blockUntil) {
+        account.setBlockUntil(blockUntil.toEpochMilli());
         return this;
     }
 
     @Nonnull
     @Override
     public AccountCreate setNthTrial(@Nonnull int nthTrial) {
+        account.setNthTrial(nthTrial);
         return this;
     }
 

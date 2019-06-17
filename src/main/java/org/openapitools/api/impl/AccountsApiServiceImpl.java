@@ -24,17 +24,30 @@ public class AccountsApiServiceImpl extends AccountsApiService {
 
     @Override
     public Response accountsIdGet(String username, SecurityContext securityContext) throws NotFoundException {
-        String uid = identity.getAccountService().getAccount(username).getUid();
-        String firstName = identity.getAccountService().getAccount(username).getFirstName();
-        String lastName = identity.getAccountService().getAccount(username).getLastName();
-        String email = identity.getAccountService().getAccount(username).getEmail();
-        String password = identity.getAccountService().getAccount(username).getPassword();
-        Instant createTs = identity.getAccountService().getAccount(username).getCreateTime();
-        Instant updateTs = identity.getAccountService().getAccount(username).getUpdateTime();
-        String description = identity.getAccountService().getAccount(username).getDescription();
+        try {
+            NewCookie mockCookie = new NewCookie("ButterCookie", "123112131232");
+            if (mockCookie.getValue().equals("123112131232")) {
+                String uid = identity.getAccountService().getAccount(username).getUid();
+                String firstName = identity.getAccountService().getAccount(username).getFirstName();
+                String lastName = identity.getAccountService().getAccount(username).getLastName();
+                String email = identity.getAccountService().getAccount(username).getEmail();
+                String password = identity.getAccountService().getAccount(username).getPassword();
+                Instant createTs = identity.getAccountService().getAccount(username).getCreateTime();
+                Instant updateTs = identity.getAccountService().getAccount(username).getUpdateTime();
+                String description = identity.getAccountService().getAccount(username).getDescription();
+                Instant blockUntil = identity.getAccountService().getAccount(username).getBlockUntil();
+                int nthTrial = identity.getAccountService().getAccount(username).getNthTrial();
 
-        String msg = email;
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, msg)).build();
+                String msg = email;
+                return Response.ok().entity(new ApiResponseMessage(Response.Status.OK.getStatusCode(), msg)).build();
+            } else {
+                ApiResponseMessage errorMsg = new ApiResponseMessage(Response.Status.UNAUTHORIZED.getStatusCode(), "Invalid cookie credential is used.");
+                return Response.status(Response.Status.UNAUTHORIZED).entity(errorMsg).build();
+            }
+        } catch (Exception e) {
+            ApiResponseMessage errorMsg = new ApiResponseMessage(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Unknown error occurs.");
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorMsg).build();
+        }
     }
 
     @Override
@@ -52,15 +65,17 @@ public class AccountsApiServiceImpl extends AccountsApiService {
             accountCreate.setCreateTime(account.getCreateTime().toInstant());
             accountCreate.setUpdateTime(account.getUpdateTime().toInstant());
             accountCreate.setDescription(account.getDescription());
+            accountCreate.setBlockUntil(account.getBlockUntil().toInstant());
+            accountCreate.setNthTrial(account.getNthTrial());
             accountCreate.create();
 
             NewCookie cookie = new NewCookie("ButterCookie","123112131232");
 
-            ApiResponseMessage successMsg = new ApiResponseMessage(204, "The account is created successfully");
+            ApiResponseMessage successMsg = new ApiResponseMessage(Response.Status.CREATED.getStatusCode(), "The account is created successfully");
             return Response.ok().entity(successMsg).cookie(cookie).build();
 
         }catch (Exception e) {
-            ApiResponseMessage errorMsg = new ApiResponseMessage(500, "Unknown error occurs.");
+            ApiResponseMessage errorMsg = new ApiResponseMessage(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Unknown error occurs.");
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorMsg).build();
         }
     }
@@ -79,9 +94,11 @@ public class AccountsApiServiceImpl extends AccountsApiService {
                     accountUpdate.setPassword(account.getPassword());
                     accountUpdate.setDescription(account.getDescription());
                     accountUpdate.setUpdateTime(account.getUpdateTime().toInstant());
+                    accountUpdate.setBlockUntil(account.getBlockUntil().toInstant());
+                    accountUpdate.setNthTrial(account.getNthTrial());
                     accountUpdate.update();
 
-                    ApiResponseMessage successMsg = new ApiResponseMessage(204, "Successfully upate the account.");
+                    ApiResponseMessage successMsg = new ApiResponseMessage(Response.Status.NO_CONTENT.getStatusCode(), "Successfully updated the account.");
                     return Response.ok().entity(successMsg).build();
                 }
                 else{
@@ -89,11 +106,11 @@ public class AccountsApiServiceImpl extends AccountsApiService {
                 }
             }
             else{
-                ApiResponseMessage errorMsg = new ApiResponseMessage(401, "Invalid cookie credential is used.");
+                ApiResponseMessage errorMsg = new ApiResponseMessage(Response.Status.UNAUTHORIZED.getStatusCode(), "Invalid cookie credential is used.");
                 return Response.status(Response.Status.UNAUTHORIZED).entity(errorMsg).build();
             }
         }catch (Exception e){
-            ApiResponseMessage errorMsg = new ApiResponseMessage(500, "Unknown error occurs.");
+            ApiResponseMessage errorMsg = new ApiResponseMessage(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Unknown error occurs.");
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorMsg).build();
         }
     }

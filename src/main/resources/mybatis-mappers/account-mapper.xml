@@ -52,10 +52,10 @@
             `update_ts` = #{account.updateTs, jdbcType=BIGINT},
         </if>
         <if test="account.description != null">
-            `description` = #{account.description, jdbcType=VARCHAR}
+            `description` = #{account.description, jdbcType=VARCHAR},
         </if>
         <if test="account.blockUntil != null">
-            `block_until` = #{account.blockUntil, jdbcType=BIGINT}
+            `block_until` = #{account.blockUntil, jdbcType=BIGINT},
         </if>
         <if test="account.nthTrial != null">
             `nth_trial` = #{account.nthTrial, jdbcType=INTEGER}

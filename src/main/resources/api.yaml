@@ -329,6 +329,12 @@ components:
         description:
           type: "string"
           maxLength: 500
+        blockUntil:
+          type: "string"
+          format: "date-time"
+        nthTrial:
+          type: "integer"
+          minimum: 0
         emails:
           type: "array"
           items:

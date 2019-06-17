@@ -31,7 +31,7 @@ public interface AccountCreate {
     AccountCreate setDescription(@Nonnull String description);
 
     @Nonnull
-    AccountCreate setBlockUntil(@Nonnull long blockUntil);
+    AccountCreate setBlockUntil(@Nonnull Instant blockUntil);
 
     @Nonnull
     AccountCreate setNthTrial(@Nonnull int nthTrial);

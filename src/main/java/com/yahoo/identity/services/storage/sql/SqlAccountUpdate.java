@@ -2,6 +2,7 @@ package com.yahoo.identity.services.storage.sql;
 
 import com.yahoo.identity.IdentityException;
 import com.yahoo.identity.services.account.AccountUpdate;
+import io.swagger.models.auth.In;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 
@@ -47,13 +48,15 @@ public class SqlAccountUpdate implements AccountUpdate {
 
     @Nonnull
     @Override
-    public AccountUpdate setBlockUntil(@Nonnull long blockUntil) {
+    public AccountUpdate setBlockUntil(@Nonnull Instant blockUntil) {
+        account.setBlockUntil(blockUntil.toEpochMilli());
         return this;
     }
 
     @Nonnull
     @Override
     public AccountUpdate setNthTrial(@Nonnull int nthTrial) {
+        account.setNthTrial(nthTrial);
         return this;
     }
 
