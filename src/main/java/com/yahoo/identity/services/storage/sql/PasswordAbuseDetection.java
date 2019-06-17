@@ -26,10 +26,10 @@ public class PasswordAbuseDetection implements AbuseDetection {
         AccountService accountService = identity.getAccountService();
         String passwordDb = accountService.getAccount(username).getPassword();
         Instant blockUntil = accountService.getAccount(username).getBlockUntil();
-        long blockTimeLeft = Instant.now().until(blockUntil, SECONDS);
         int nthTrial = accountService.getAccount(username).getNthTrial();
+        long blockTimeLeft = Instant.now().until(blockUntil, SECONDS);
 
-        if (password.equals(passwordDb)) {
+        if (!password.equals(passwordDb)) {
             if (blockTimeLeft > 0 && nthTrial >= ABUSE_MAX_TRIES) {
                 long blockTime = (long) (Math.pow(ABUSE_BLOCK_FACTOR, nthTrial - ABUSE_MAX_TRIES) * ABUSE_MIN_BLOCK);
                 accountService.newAccountUpdate(username).setNthTrial(nthTrial + 1);
