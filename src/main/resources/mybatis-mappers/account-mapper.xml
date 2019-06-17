@@ -3,16 +3,19 @@
 
 <mapper namespace="com.yahoo.identity.services.storage.sql.AccountMapper">
     <insert id="insertAccount" parameterType="AccountModel" keyProperty="account.username" useGeneratedKeys="false">
-        INSERT INTO `account` (`username`, `firstname`, `lastname`, `email`, `password`, `create_ts`, `update_ts`, `description`)
+        INSERT INTO `account` (`username`, `firstname`, `lastname`, `email`, `verified`, `password`, `create_ts`, `update_ts`, `description`, `block_until`, `nth_trial`)
         VALUES (
             #{account.username, jdbcType=VARCHAR},
             #{account.firstName, jdbcType=VARCHAR},
             #{account.lastName, jdbcType=VARCHAR},
             #{account.email, jdbcType=VARCHAR},
+            #{account.verified, jdbcType=BOOLEAN},
             #{account.password, jdbcType=VARCHAR},
             #{account.createTs, jdbcType=BIGINT},
             #{account.updateTs, jdbcType=BIGINT},
-            #{account.description, jdbcType=VARCHAR}
+            #{account.description, jdbcType=VARCHAR},
+            #{account.blockUntil, jdbcType=BIGINT},
+            #{account.nthTrial, jdbcType=INTEGER}
         )
     </insert>
 
@@ -22,23 +25,41 @@
         <result property="firstName" column="firstname" />
         <result property="lastName" column="lastname" />
         <result property="email" column="email" />
+        <result property="verified" column="verified" />
         <result property="password" column="password"/>
         <result property="createTs" column="create_ts"/>
         <result property="updateTs" column="update_ts"/>
         <result property="description" column="description"/>
+        <result property="blockUntil" column="block_until"/>
+        <result property="nthTrial" column="nth_trial"/>
     </resultMap>
 
     <select id="getAccount" resultMap="accountResultMap">
-        SELECT uid, username, firstname, lastname, email, password, create_ts, update_ts, description FROM account
+        SELECT uid, username, firstname, lastname, email, verified, password, create_ts, update_ts, description, block_until, nth_trial FROM account
         WHERE username = #{username}
     </select>
 
     <update id="updateAccount" parameterType="AccountModel" keyProperty="account.username" useGeneratedKeys="false">
         Update `account` SET
+        <if test="account.email != null">
             `email` = #{account.email, jdbcType=VARCHAR},
+        </if>
+            `verified` = #{account.verified, jdbcType=BOOLEAN},
+        <if test="account.password != null">
             `password` = #{account.password, jdbcType=VARCHAR},
+        </if>
+        <if test="account.updateTs != null">
             `update_ts` = #{account.updateTs, jdbcType=BIGINT},
+        </if>
+        <if test="account.description != null">
             `description` = #{account.description, jdbcType=VARCHAR}
+        </if>
+        <if test="account.blockUntil != null">
+            `block_until` = #{account.blockUntil, jdbcType=BIGINT}
+        </if>
+        <if test="account.nthTrial != null">
+            `nth_trial` = #{account.nthTrial, jdbcType=INTEGER}
+        </if>
         WHERE
             `username` = #{account.username, jdbcType=VARCHAR}
     </update>

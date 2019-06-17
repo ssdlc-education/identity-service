@@ -9,6 +9,7 @@ import org.apache.ibatis.session.SqlSessionFactory;
 import javax.annotation.Nonnull;
 import java.time.Instant;
 
+
 public class SqlAccountCreate implements AccountCreate {
 
     private final SqlSessionFactory sqlSessionFactory;
@@ -41,8 +42,8 @@ public class SqlAccountCreate implements AccountCreate {
 
     @Override
     @Nonnull
-    public AccountCreate setEmail(@Nonnull String email) {
-        account.setEmail(email);
+    public AccountCreate setEmail(@Nonnull String email, @Nonnull Boolean verified) {
+        account.setEmail(email, verified);
         return this;
     }
 

@@ -1,11 +1,13 @@
 package com.yahoo.identity.services.storage.sql;
 
+
 public class AccountModel {
     private String uid;
     private String username;
     private String firstName;
     private String lastName;
     private String email;
+    private Boolean verified;
     private String password;
     private String description;
     private long createTs;
@@ -13,9 +15,7 @@ public class AccountModel {
     private long blockUntil;
     private int nthTrial;
 
-    public String getUid() { return uid; }
-
-    public void setUid(String uid) { this.uid = uid; }
+    public String getUid() { return this.uid; }
 
     public String getUsername() { return this.username; }
 
@@ -31,7 +31,10 @@ public class AccountModel {
 
     public String getEmail() { return this.email; }
 
-    public void setEmail(String email) { this.email = email; }
+    public void setEmail(String email, Boolean verified) {
+        this.email = email;
+        this.verified = verified;
+    }
 
     public String getDescription() { return this.description; }
 

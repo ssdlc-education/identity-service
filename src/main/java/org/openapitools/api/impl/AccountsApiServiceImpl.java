@@ -6,7 +6,6 @@ import com.yahoo.identity.services.account.AccountUpdate;
 import org.openapitools.api.AccountsApiService;
 import org.openapitools.api.ApiResponseMessage;
 import org.openapitools.api.NotFoundException;
-import com.yahoo.identity.IdentityException;
 import org.openapitools.model.Account;
 
 import java.time.Instant;
@@ -17,7 +16,6 @@ import javax.ws.rs.core.SecurityContext;
 
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJerseyServerCodegen", date = "2019-05-14T20:17:48.996+08:00[Asia/Taipei]")
 public class AccountsApiServiceImpl extends AccountsApiService {
-
     private final Identity identity;
 
     public AccountsApiServiceImpl(@Nonnull Identity identity) {
@@ -42,11 +40,14 @@ public class AccountsApiServiceImpl extends AccountsApiService {
     @Override
     public Response accountsPost(Account account, SecurityContext securityContext) throws NotFoundException {
         try {
+            Boolean mockVerified = true;
+
             AccountCreate accountCreate = identity.getAccountService().newAccountCreate();
             accountCreate.setUsername(account.getUsername());
             accountCreate.setFirstName(account.getFirstName());
             accountCreate.setLastName(account.getLastName());
-            accountCreate.setEmail(account.getEmail());
+            accountCreate.setEmail(account.getEmail(), mockVerified);
+
             accountCreate.setPassword(account.getPassword());
             accountCreate.setCreateTime(account.getCreateTime().toInstant());
             accountCreate.setUpdateTime(account.getUpdateTime().toInstant());
@@ -54,22 +55,46 @@ public class AccountsApiServiceImpl extends AccountsApiService {
             accountCreate.create();
 
             NewCookie cookie = new NewCookie("ButterCookie","123112131232");
-            return Response.ok(new ApiResponseMessage(ApiResponseMessage.OK, "SET!")).cookie(cookie).build();
 
-        } catch (IdentityException e) {
-            return Response.ok(new ApiResponseMessage(ApiResponseMessage.OK, "NOT SET!")).build();
+            ApiResponseMessage successMsg = new ApiResponseMessage(204, "The account is created successfully");
+            return Response.ok().entity(successMsg).cookie(cookie).build();
+
+        }catch (Exception e) {
+            ApiResponseMessage errorMsg = new ApiResponseMessage(500, "Unknown error occurs.");
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorMsg).build();
         }
     }
 
     @Override
-    public Response accountsupdatePut(String token, Account account, SecurityContext securityContext) throws NotFoundException {
-        AccountUpdate accountUpdate = identity.getAccountService().newAccountUpdate(account.getUsername());
-        accountUpdate.setEmail(account.getEmail());
-        accountUpdate.setPassword(account.getPassword());
-        accountUpdate.setDescription(account.getDescription());
-        accountUpdate.setUpdateTime(account.getUpdateTime().toInstant());
-        accountUpdate.update();
+    public Response accountsmePut(String token, Account account, SecurityContext securityContext) throws NotFoundException {
 
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "PUT!")).build();
+        try {
+            NewCookie mockCookie = new NewCookie("ButterCookie","123112131232");
+            if (mockCookie.getValue() == "123112131232") {
+                Boolean mockVerified = true;
+
+                if (mockVerified) {
+                    AccountUpdate accountUpdate = identity.getAccountService().newAccountUpdate(account.getUsername());
+                    accountUpdate.setEmail(account.getEmail(), mockVerified);
+                    accountUpdate.setPassword(account.getPassword());
+                    accountUpdate.setDescription(account.getDescription());
+                    accountUpdate.setUpdateTime(account.getUpdateTime().toInstant());
+                    accountUpdate.update();
+
+                    ApiResponseMessage successMsg = new ApiResponseMessage(204, "Successfully upate the account.");
+                    return Response.ok().entity(successMsg).build();
+                }
+                else{
+                    return null;
+                }
+            }
+            else{
+                ApiResponseMessage errorMsg = new ApiResponseMessage(401, "Invalid cookie credential is used.");
+                return Response.status(Response.Status.UNAUTHORIZED).entity(errorMsg).build();
+            }
+        }catch (Exception e){
+            ApiResponseMessage errorMsg = new ApiResponseMessage(500, "Unknown error occurs.");
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorMsg).build();
+        }
     }
 }
