@@ -8,7 +8,7 @@ import java.time.Instant;
 public interface AccountUpdate {
 
     @Nonnull
-    AccountUpdate setEmail(@Nonnull String email);
+    AccountUpdate setEmail(@Nonnull String email, @Nonnull Boolean verified);
 
     @Nonnull
     AccountUpdate setPassword(@Nonnull String password);

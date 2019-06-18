@@ -16,7 +16,7 @@ public interface AccountCreate {
     AccountCreate setUsername(@Nonnull String username);
 
     @Nonnull
-    AccountCreate setEmail(@Nonnull String email);
+    AccountCreate setEmail(@Nonnull String email, @Nonnull Boolean verified);
 
     @Nonnull
     AccountCreate setPassword(@Nonnull String password);
