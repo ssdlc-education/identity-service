@@ -36,12 +36,18 @@ public class AccountsApiServiceImpl extends AccountsApiService {
 
 //        String msg = email;
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("Username", username);
-        jsonObject.put("Firstname", firstName);
-        jsonObject.put("Lastname",lastName);
-        jsonObject.put("Email", email);
-        jsonObject.put("Description",description);
+        jsonObject.put("username", username);
+        jsonObject.put("firstname", firstName);
+        jsonObject.put("lastname",lastName);
+        jsonObject.put("email", email);
+        jsonObject.put("description",description);
+        jsonObject.put("password", password);
+        jsonObject.put("updateTs", updateTs);
+        jsonObject.put("verified", "true");
+
         String data = jsonObject.toString();
+        System.out.println(data);
+
 
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, data)).build();
     }
