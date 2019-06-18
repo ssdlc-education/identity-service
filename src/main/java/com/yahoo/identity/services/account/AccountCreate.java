@@ -31,5 +31,11 @@ public interface AccountCreate {
     AccountCreate setDescription(@Nonnull String description);
 
     @Nonnull
+    AccountCreate setBlockUntil(@Nonnull Instant blockUntil);
+
+    @Nonnull
+    AccountCreate setNthTrial(@Nonnull int nthTrial);
+
+    @Nonnull
     String create() throws IdentityException;
 }

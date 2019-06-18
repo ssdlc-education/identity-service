@@ -17,7 +17,7 @@ public class AccountImpl implements Account {
     @Nonnull
     @Override
     public String getUid() {
-        return null;
+        return "";
     }
 
     @Nonnull
@@ -29,25 +29,25 @@ public class AccountImpl implements Account {
     @Nonnull
     @Override
     public String getFirstName() {
-        return null;
+        return "";
     }
 
     @Nonnull
     @Override
     public String getLastName() {
-        return null;
+        return "";
     }
 
     @Nonnull
     @Override
     public String getEmail() {
-        return null;
+        return "";
     }
 
     @Nonnull
     @Override
     public String getPassword() {
-        return null;
+        return "";
     }
 
     @Nonnull
@@ -62,10 +62,21 @@ public class AccountImpl implements Account {
         return Instant.ofEpochMilli(Long.valueOf(data.get("update_ts").toString()));
     }
 
+    @Override
+    @Nonnull
+    public Instant getBlockUntil() {
+        return Instant.now();
+    }
+
+    @Override
+    public int getNthTrial() {
+        return 0;
+    }
+
     @Nonnull
     @Override
     public String getDescription() {
-        return null;
+        return "";
     }
 
 

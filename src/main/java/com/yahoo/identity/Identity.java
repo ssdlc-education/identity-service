@@ -23,7 +23,7 @@ public class Identity {
 
     @Nonnull
     public AccountService getAccountService() {
-        return accountService;
+        return this.accountService;
     }
 
     @Nonnull

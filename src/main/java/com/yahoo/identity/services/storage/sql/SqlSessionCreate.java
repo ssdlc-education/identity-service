@@ -5,15 +5,11 @@ import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 
 import javax.annotation.Nonnull;
+import javax.ws.rs.NotAuthorizedException;
 import java.util.NoSuchElementException;
 
 public class SqlSessionCreate implements SessionCreate {
-    private final SqlSessionFactory sqlSessionFactory;
     private final SessionModel session = new SessionModel();
-
-    public SqlSessionCreate(@Nonnull SqlSessionFactory sqlSessionFactory) {
-        this.sqlSessionFactory = sqlSessionFactory;
-    }
 
     @Override
     @Nonnull
@@ -21,6 +17,15 @@ public class SqlSessionCreate implements SessionCreate {
         session.setUsername(username);
         return this;
     }
+
+    @Override
+    @Nonnull
+    public String getUsername() { return session.getUsername(); }
+
+    @Override
+    @Nonnull
+    public String getPassword() { return session.getPassword(); }
+
 
     @Override
     @Nonnull
@@ -45,18 +50,5 @@ public class SqlSessionCreate implements SessionCreate {
 
     @Override
     @Nonnull
-    public String create(){
-        try (SqlSession session = sqlSessionFactory.openSession()) {
-            AccountMapper mapper = session.getMapper(AccountMapper.class);
-            if (mapper.verifySession(this.session.getUsername(), this.session.getPassword()) == 1){
-                session.commit();
-                return this.session.getCredential().toString();
-            }
-            throw new NoSuchElementException();
-        }
-        catch (Exception e){
-            return e.toString();
-        }
-
-    }
+    public String create(){ return this.session.getCredential().toString(); }
 }

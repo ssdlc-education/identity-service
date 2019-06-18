@@ -6,6 +6,7 @@ import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 
 import javax.annotation.Nonnull;
+import javax.ws.rs.BadRequestException;
 import java.time.Instant;
 
 
@@ -74,14 +75,18 @@ public class SqlAccountCreate implements AccountCreate {
         return this;
     }
 
+    @Nonnull
+    @Override
+    public AccountCreate setBlockUntil(@Nonnull Instant blockUntil) {
+        account.setBlockUntil(blockUntil.toEpochMilli());
+        return this;
+    }
 
-    private class SQLNameSpaceException extends Exception {
-
-        private String errorMessage = "Username has already existed";
-
-        public String toString() {
-            return "CustomException[" + errorMessage + "]";
-        }
+    @Nonnull
+    @Override
+    public AccountCreate setNthTrial(@Nonnull int nthTrial) {
+        account.setNthTrial(nthTrial);
+        return this;
     }
 
     @Nonnull
@@ -93,10 +98,8 @@ public class SqlAccountCreate implements AccountCreate {
                 mapper.insertAccount(account);
                 session.commit();
             } else {
-                throw new SQLNameSpaceException();
+                throw new BadRequestException("account already exists");
             }
-        } catch (SQLNameSpaceException e) {
-            System.out.println(e.toString());
         }
         return account.getUsername();
     }

@@ -12,6 +12,8 @@ public class AccountModel {
     private String description;
     private long createTs;
     private long updateTs;
+    private long blockUntil;
+    private int nthTrial;
 
     public String getUid() { return this.uid; }
 
@@ -34,7 +36,7 @@ public class AccountModel {
         this.verified = verified;
     }
 
-    public String getDescription() { return description; }
+    public String getDescription() { return this.description; }
 
     public void setDescription(String description) { this.description = description; }
 
@@ -42,11 +44,19 @@ public class AccountModel {
 
     public void setPassword(String password) { this.password = password; }
 
-    public long getCreateTs() { return createTs; }
+    public long getCreateTs() { return this.createTs; }
 
     public void setCreateTs(long createTs) { this.createTs = createTs; }
 
-    public long getUpdateTs() { return updateTs; }
+    public long getUpdateTs() { return this.updateTs; }
 
     public void setUpdateTs(long updateTs) { this.updateTs = updateTs; }
+
+    public long getBlockUntil() { return this.blockUntil; }
+
+    public void setBlockUntil(long blockUntil) { this.blockUntil = blockUntil; }
+
+    public int getNthTrial() { return this.nthTrial; }
+
+    public void setNthTrial(int nthTrial) { this.nthTrial = nthTrial; }
 }

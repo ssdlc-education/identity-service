@@ -9,7 +9,5 @@ public interface AccountMapper {
 
     int updateAccount(@Param("account") AccountModel account);
 
-    int verifySession(@Param("username") String username, @Param("password") String password);
-
     int verifyUsername(@Param("username") String username);
 }

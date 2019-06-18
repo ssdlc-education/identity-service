@@ -33,15 +33,11 @@ public class SqlStorage implements Storage {
 
     @Nonnull
     @Override
-    public SessionCreate newSessionCreate() {
-        return new SqlSessionCreate(sqlSessionFactory);
-    }
+    public SessionCreate newSessionCreate() { return new SqlSessionCreate(); }
 
     @Nonnull
     @Override
-    public Account getAccount(@Nonnull String username) {
-        return new SqlAccount(sqlSessionFactory, username);
-    }
+    public Account getAccount(@Nonnull String username) { return new SqlAccount(sqlSessionFactory, username); }
 
     @Nonnull
     @Override
@@ -49,7 +45,6 @@ public class SqlStorage implements Storage {
 
     @Nonnull
     private SqlSessionFactory createSessionFactory() {
-
         try {
             SqlSessionFactoryBuilder builder = new SqlSessionFactoryBuilder();
             InputStream inputStream = systemService.getResourceAsStream("mybatis-config.xml");
