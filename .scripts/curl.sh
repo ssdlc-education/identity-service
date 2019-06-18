@@ -6,7 +6,10 @@ curl http://localhost:8080/v1/accounts/Alice
 curl http://localhost:8080/v1/accounts/Bob
 
 # TEST PUT method for updateAccount
- curl -d'{"username":"Bob","email":"blablabla@gmail.com", "verified":true, "updateTime":"2018-01-01T17:32:28Z","description": "Changed!", "password":"abcdefg"}' -H "Content-Type: application/json" -X PUT http://localhost:8080/v1/accounts/@me
+ curl -d'{"username":"Bob","email":"blablabla@gmail.com", "verified":true, "updateTime":"2018-01-01T17:32:28Z", "description": "Changed!", "password":"abcdefg"}' -H "Content-Type: application/json" -X PUT http://localhost:8080/v1/accounts/@me
 
 # Test GET method after update
 curl http://localhost:8080/v1/accounts/Bob
+
+# Test POST method for login session
+curl -d'{"username":"Alice","password":"PASSWORD"}' -H "Content-Type: application/json" -X POST http://localhost:8080/v1/sessions/ -i

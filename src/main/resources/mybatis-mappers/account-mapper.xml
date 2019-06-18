@@ -35,6 +35,37 @@
         WHERE username = #{username}
     </select>
 
+    <select id="getSession" resultMap="sessionResultMap">
+        SELECT
+            username, password, credential FROM account
+        WHERE
+            username = #{username}
+    </select>
+
+    <resultMap id="sessionResultMap" type="SessionModel">
+        <result property="username" column="username" />
+        <result property="password" column="password"/>
+        <result property="credential" column="credential" />
+    </resultMap>
+
+    <select id="verifySession" parameterType="java.lang.String" resultType="int">
+        SELECT COUNT(username)
+        FROM
+            account
+        WHERE
+            username = #{username}
+        AND
+            password = #{password}
+    </select>
+
+    <select id="verifySession" parameterType="java.lang.String" resultType="int">
+        SELECT COUNT(username)
+        FROM
+        account
+        WHERE
+        username = #{username}
+    </select>
+
     <update id="updateAccount" parameterType="AccountModel" keyProperty="account.username" useGeneratedKeys="false">
         Update `account` SET
         <if test="account.email != null">

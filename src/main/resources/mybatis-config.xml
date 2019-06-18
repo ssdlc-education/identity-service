@@ -9,6 +9,7 @@
     </settings>
     <typeAliases>
         <typeAlias alias="AccountModel" type="com.yahoo.identity.services.storage.sql.AccountModel"/>
+        <typeAlias alias="SessionModel" type="com.yahoo.identity.services.storage.sql.SessionModel"/>
     </typeAliases>
     <environments default="development">
         <environment id="development">
