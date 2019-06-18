@@ -1,5 +1,10 @@
 package com.yahoo.identity.services.key;
 
-public interface KeyService {
+import javax.annotation.Nonnull;
 
+public interface KeyService {
+    @Nonnull
+    String getSecret();
+
+    void setSecret(@Nonnull String secret);
 }

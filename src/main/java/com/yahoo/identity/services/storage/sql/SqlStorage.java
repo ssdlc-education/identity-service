@@ -2,6 +2,8 @@ package com.yahoo.identity.services.storage.sql;
 
 import com.yahoo.identity.services.account.Account;
 import com.yahoo.identity.services.account.AccountCreate;
+import com.yahoo.identity.services.session.Session;
+import com.yahoo.identity.services.session.SessionCreate;
 import com.yahoo.identity.IdentityError;
 import com.yahoo.identity.IdentityException;
 import com.yahoo.identity.services.account.AccountUpdate;
@@ -31,9 +33,11 @@ public class SqlStorage implements Storage {
 
     @Nonnull
     @Override
-    public Account getAccount(@Nonnull String username) {
-        return new SqlAccount(sqlSessionFactory, username);
-    }
+    public SessionCreate newSessionCreate() { return new SqlSessionCreate(); }
+
+    @Nonnull
+    @Override
+    public Account getAccount(@Nonnull String username) { return new SqlAccount(sqlSessionFactory, username); }
 
     @Nonnull
     @Override
@@ -41,7 +45,6 @@ public class SqlStorage implements Storage {
 
     @Nonnull
     private SqlSessionFactory createSessionFactory() {
-
         try {
             SqlSessionFactoryBuilder builder = new SqlSessionFactoryBuilder();
             InputStream inputStream = systemService.getResourceAsStream("mybatis-config.xml");

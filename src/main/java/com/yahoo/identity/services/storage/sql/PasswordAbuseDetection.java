@@ -4,6 +4,7 @@ import com.yahoo.identity.services.account.AccountService;
 import com.yahoo.identity.services.session.AbuseDetection;
 
 import javax.annotation.Nonnull;
+import javax.ws.rs.BadRequestException;
 import java.time.Instant;
 import static java.time.temporal.ChronoUnit.SECONDS;
 import java.lang.Math;

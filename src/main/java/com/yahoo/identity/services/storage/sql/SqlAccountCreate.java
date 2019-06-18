@@ -6,6 +6,7 @@ import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 
 import javax.annotation.Nonnull;
+import javax.ws.rs.BadRequestException;
 import java.time.Instant;
 
 
@@ -93,8 +94,12 @@ public class SqlAccountCreate implements AccountCreate {
     public String create() throws IdentityException {
         try (SqlSession session = sqlSessionFactory.openSession()) {
             AccountMapper mapper = session.getMapper(AccountMapper.class);
-            mapper.insertAccount(account);
-            session.commit();
+            if (mapper.verifyUsername(account.getUsername()) == 0) {
+                mapper.insertAccount(account);
+                session.commit();
+            } else {
+                throw new BadRequestException("account already exists");
+            }
         }
         return account.getUsername();
     }

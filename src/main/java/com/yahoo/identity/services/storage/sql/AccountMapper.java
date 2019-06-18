@@ -8,4 +8,6 @@ public interface AccountMapper {
     AccountModel getAccount(@Param("username") String username);
 
     int updateAccount(@Param("account") AccountModel account);
+
+    int verifyUsername(@Param("username") String username);
 }
