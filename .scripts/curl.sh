@@ -15,8 +15,8 @@ curl -d'{"username":"Alice","password":"PASSWORD"}' -H "Content-Type: applicatio
 echo ""
 
 # TEST GET method for private profile
-curl -X GET http://localhost:8080/v1/accounts/@me?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJBbGljZSIsImV4cCI6MTU2MTUwMTExMCwiaWF0IjoxNTYwODk2MzEwfQ.h-TvCTMyN6LvDMwHGETcGDuYxp2E2GwURoUNDBSKi9o
-echo ""
+# curl -X GET http://localhost:8080/v1/accounts/@me?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJBbGljZSIsImV4cCI6MTU2MTUwMTExMCwiaWF0IjoxNTYwODk2MzEwfQ.h-TvCTMyN6LvDMwHGETcGDuYxp2E2GwURoUNDBSKi9o
+# echo ""
 
 # TEST PUT method for updateAccount
 # curl -d'{"username":"Alice","email":"notAlice@gmail.com", "verified":true, "updateTime":"2018-01-01T17:32:28Z","description": "Info changed for Alice", "password":"QWERTY", "blockUntil":"2018-01-01T17:54:28Z", "nthTrial":1}' -H "Content-Type: application/json" -X PUT http://localhost:8080/v1/accounts/@me
