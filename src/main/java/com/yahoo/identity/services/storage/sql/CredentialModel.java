@@ -47,7 +47,7 @@ public class CredentialModel{
         }
     }
 
-    public void fromString(@Nonnull String credStr) {
+    public String fromString(@Nonnull String credStr) {
         try {
             Algorithm algorithm = Algorithm.HMAC256(keyServiceImpl.getSecret());
 
@@ -62,6 +62,30 @@ public class CredentialModel{
             setIssueTime(jwt.getIssuedAt().toInstant());
             setExpireTime(jwt.getExpiresAt().toInstant());
 
+        } catch(JWTVerificationException e){
+            System.out.println(e.toString());
+        }
+        return getSubject();
+    }
+
+    public String fromStringLimit(@Nonnull String credStr) {
+        try {
+            Algorithm algorithm = Algorithm.HMAC256(keyServiceImpl.getSecret());
+
+            JWTVerifier verifier = JWT.require(algorithm)
+                    .acceptLeeway(1)   // 1 sec for nbf and iat
+                    .acceptExpiresAt(5)   // 5 secs for exp
+                    .build();
+
+            DecodedJWT jwt = verifier.verify(credStr);
+
+            setSubject(jwt.getSubject());
+            System.out.println(getSubject());
+            setIssueTime(jwt.getIssuedAt().toInstant());
+            System.out.println(getIssueTime().toString());
+            setExpireTime(jwt.getExpiresAt().toInstant());
+            System.out.println(getExpireTime().toString());
+
             if (getIssueTime().compareTo(Instant.now().plus(-5, ChronoUnit.MINUTES))<0){
                 throw new NotAuthorizedException("credential not issued in the past 5 minutes");
             }
@@ -69,5 +93,6 @@ public class CredentialModel{
         } catch(JWTVerificationException e){
             System.out.println(e.toString());
         }
+        return getSubject();
     }
 }

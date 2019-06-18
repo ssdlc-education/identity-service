@@ -17,9 +17,9 @@ public class SessionModel {
 
     public void setPassword(@Nonnull  String password) { this.password = password; }
 
-    public CredentialModel getCredential() { return this.credential; }
+    public String getCredentialString() { return this.credential.toString(); }
 
-    public void setCredential(@Nonnull String credStr) { this.credential.fromString(credStr); }
+    public void setCredential(@Nonnull String credStr) { this.username = this.credential.fromString(credStr); }
 
     public void initCredential(){
         credential.setIssueTime(Instant.now());

@@ -46,14 +46,18 @@ public class AccountsApiServiceImpl extends AccountsApiService {
         try {
             SessionCreate sessionCreate = identity.getSessionService().newSessionCreate();
             sessionCreate.setCredential(token);
+            System.out.println(token);
 
             String username = sessionCreate.getUsername();
+            System.out.println(username);
 
             AccountService accountService = identity.getAccountService();
             String firstName = accountService.getAccount(username).getFirstName();
             String lastName = accountService.getAccount(username).getLastName();
             String email = accountService.getAccount(username).getEmail();
             String description = accountService.getAccount(username).getDescription();
+
+            System.out.println("OK3");
 
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("username", username);

@@ -1,12 +1,9 @@
 package com.yahoo.identity.services.storage.sql;
 
 import com.yahoo.identity.services.session.SessionCreate;
-import org.apache.ibatis.session.SqlSession;
-import org.apache.ibatis.session.SqlSessionFactory;
+import org.joda.time.Instant;
 
 import javax.annotation.Nonnull;
-import javax.ws.rs.NotAuthorizedException;
-import java.util.NoSuchElementException;
 
 public class SqlSessionCreate implements SessionCreate {
     private final SessionModel session = new SessionModel();
@@ -25,7 +22,6 @@ public class SqlSessionCreate implements SessionCreate {
     @Override
     @Nonnull
     public String getPassword() { return session.getPassword(); }
-
 
     @Override
     @Nonnull
@@ -50,5 +46,5 @@ public class SqlSessionCreate implements SessionCreate {
 
     @Override
     @Nonnull
-    public String create(){ return this.session.getCredential().toString(); }
+    public String create(){ return this.session.getCredentialString(); }
 }
