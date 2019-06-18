@@ -15,6 +15,7 @@ import javax.ws.rs.BadRequestException;
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
+import org.json.*;
 
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJerseyServerCodegen", date = "2019-05-14T20:17:48.996+08:00[Asia/Taipei]")
 public class AccountsApiServiceImpl extends AccountsApiService {
@@ -30,8 +31,14 @@ public class AccountsApiServiceImpl extends AccountsApiService {
         String lastName = identity.getAccountService().getAccount(username).getLastName();
         String description = identity.getAccountService().getAccount(username).getDescription();
 
-        String msg = firstName;
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, msg)).build();
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("username", username);
+        jsonObject.put("firstname", firstName);
+        jsonObject.put("lastname",lastName);
+        jsonObject.put("description",description);
+        String data = jsonObject.toString();
+
+        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, data)).build();
     }
 
     @Override
@@ -48,8 +55,16 @@ public class AccountsApiServiceImpl extends AccountsApiService {
             String email = accountService.getAccount(username).getEmail();
             String description = accountService.getAccount(username).getDescription();
 
-            String msg = "username: " + username + ", firstname: " + firstName + ", lastname: " + lastName + ", email: " + email + ", description: " + description;
-            return Response.ok().entity(new ApiResponseMessage(Response.Status.OK.getStatusCode(), msg)).build();
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("username", username);
+            jsonObject.put("firstname", firstName);
+            jsonObject.put("lastname",lastName);
+            jsonObject.put("email", email);
+            jsonObject.put("description",description);
+            jsonObject.put("verified", "true");
+            String data = jsonObject.toString();
+
+            return Response.ok().entity(new ApiResponseMessage(Response.Status.OK.getStatusCode(), data)).build();
         } catch(NotAuthorizedException e) {
                 ApiResponseMessage errorMsg = new ApiResponseMessage(Response.Status.UNAUTHORIZED.getStatusCode(), "Invalid cookie credential is used: " + e.toString());
                 return Response.status(Response.Status.UNAUTHORIZED).entity(errorMsg).build();
