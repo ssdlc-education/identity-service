@@ -10,16 +10,17 @@ import java.time.Instant;
 
 public class SqlAccountUpdate implements AccountUpdate {
     private final SqlSessionFactory sqlSessionFactory;
-    private AccountModel account;
+    private AccountModel account = new AccountModel();
 
     public SqlAccountUpdate(@Nonnull SqlSessionFactory sqlSessionFactory, @Nonnull String id) {
         this.sqlSessionFactory = sqlSessionFactory;
+        this.account.setUsername(id);
     }
 
     @Override
     @Nonnull
-    public AccountUpdate setEmail(@Nonnull String email) {
-        account.setEmail(email);
+    public AccountUpdate setEmail(@Nonnull String email, @Nonnull Boolean verified) {
+        account.setEmail(email, verified);
         return this;
     }
 
@@ -41,6 +42,18 @@ public class SqlAccountUpdate implements AccountUpdate {
     @Override
     public AccountUpdate setDescription(@Nonnull String title) {
         account.setDescription(title);
+        return this;
+    }
+
+    @Nonnull
+    @Override
+    public AccountUpdate setBlockUntil(@Nonnull long blockUntil) {
+        return this;
+    }
+
+    @Nonnull
+    @Override
+    public AccountUpdate setNthTrial(@Nonnull int nthTrial) {
         return this;
     }
 

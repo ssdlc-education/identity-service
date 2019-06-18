@@ -4,6 +4,7 @@ import com.yahoo.identity.services.account.Account;
 import com.yahoo.identity.IdentityException;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
+import org.openapitools.model.Email;
 
 import javax.annotation.Nonnull;
 import java.time.Instant;
@@ -11,10 +12,10 @@ import java.time.Instant;
 public class SqlAccount implements Account {
     private AccountModel account;
 
-    public SqlAccount(@Nonnull SqlSessionFactory sqlSessionFactory, @Nonnull String id) throws IdentityException {
+    public SqlAccount(@Nonnull SqlSessionFactory sqlSessionFactory, @Nonnull String username) throws IdentityException {
         try (SqlSession session = sqlSessionFactory.openSession()) {
             AccountMapper mapper = session.getMapper(AccountMapper.class);
-            this.account = mapper.getAccount(id);
+            this.account = mapper.getAccount(username);
             session.commit();
         } catch (Exception e) {
             this.account = new AccountModel();
@@ -47,9 +48,7 @@ public class SqlAccount implements Account {
 
     @Override
     @Nonnull
-    public String getEmail() {
-        return this.account.getEmail();
-    }
+    public String getEmail() { return this.account.getEmail(); }
 
     @Override
     @Nonnull
@@ -60,13 +59,13 @@ public class SqlAccount implements Account {
     @Override
     @Nonnull
     public Instant getCreateTime() {
-        return Instant.ofEpochMilli(account.getCreateTs());
+        return Instant.ofEpochMilli(this.account.getCreateTs());
     }
 
     @Override
     @Nonnull
     public Instant getUpdateTime() {
-        return Instant.ofEpochMilli(account.getUpdateTs());
+        return Instant.ofEpochMilli(this.account.getUpdateTs());
     }
 
     @Override
@@ -75,4 +74,15 @@ public class SqlAccount implements Account {
         return this.account.getDescription();
     }
 
+    @Override
+    @Nonnull
+    public Instant getBlockUntil() {
+        return Instant.ofEpochMilli(this.account.getBlockUntil());
+    }
+
+    @Override
+    @Nonnull
+    public int getNthTrial() {
+        return this.account.getNthTrial();
+    }
 }

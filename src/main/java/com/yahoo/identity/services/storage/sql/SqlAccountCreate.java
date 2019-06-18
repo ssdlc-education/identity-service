@@ -1,5 +1,6 @@
 package com.yahoo.identity.services.storage.sql;
 
+import com.yahoo.identity.services.account.Account;
 import com.yahoo.identity.services.account.AccountCreate;
 import com.yahoo.identity.IdentityException;
 import org.apache.ibatis.session.SqlSession;
@@ -7,6 +8,7 @@ import org.apache.ibatis.session.SqlSessionFactory;
 
 import javax.annotation.Nonnull;
 import java.time.Instant;
+
 
 public class SqlAccountCreate implements AccountCreate {
 
@@ -40,8 +42,8 @@ public class SqlAccountCreate implements AccountCreate {
 
     @Override
     @Nonnull
-    public AccountCreate setEmail(@Nonnull String email) {
-        account.setEmail(email);
+    public AccountCreate setEmail(@Nonnull String email, @Nonnull Boolean verified) {
+        account.setEmail(email, verified);
         return this;
     }
 
@@ -70,6 +72,18 @@ public class SqlAccountCreate implements AccountCreate {
     @Override
     public AccountCreate setDescription(@Nonnull String title) {
         account.setDescription(title);
+        return this;
+    }
+
+    @Nonnull
+    @Override
+    public AccountCreate setBlockUntil(@Nonnull long blockUntil) {
+        return this;
+    }
+
+    @Nonnull
+    @Override
+    public AccountCreate setNthTrial(@Nonnull int nthTrial) {
         return this;
     }
 

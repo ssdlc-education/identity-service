@@ -31,4 +31,10 @@ public interface Account {
 
     @Nonnull
     String getDescription();
+
+    @Nonnull
+    Instant getBlockUntil();
+
+    @Nonnull
+    int getNthTrial();
 }
