@@ -23,14 +23,14 @@ paths:
         content:
           'application/json':
             schema:
-              $ref: '#/components/schemas/Account'
+              $ref: '#/components/schemas/AccountApi'
       responses:
         '201':
           description: The account is created successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Account'
+                $ref: '#/components/schemas/AccountApi'
         '400':
           description: Invalid request.
           content:
@@ -73,7 +73,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Account'
+                $ref: '#/components/schemas/AccountApi'
         '401':
           description: |
             Invalid cookie credential is used.
@@ -124,7 +124,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Account'
+                $ref: '#/components/schemas/AccountApi'
         '401':
           description: |
             Invalid cookie credential is used.
@@ -174,7 +174,7 @@ paths:
         content:
           'application/json':
             schema:
-              $ref: '#/components/schemas/Account'
+              $ref: '#/components/schemas/AccountApi'
       responses:
         '204':
           description: Successfully upate the account.
@@ -351,7 +351,7 @@ paths:
                 $ref: '#/components/schemas/Error'
 components:
   schemas:
-    Account:
+    AccountApi:
       type: "object"
       properties:
         username:
