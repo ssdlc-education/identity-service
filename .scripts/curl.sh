@@ -19,9 +19,9 @@ echo ""
 # echo ""
 
 # TEST PUT method for updateAccount
-# curl -d'{"username":"Alice","email":"notAlice@gmail.com", "verified":true, "description": "Info changed for Alice", "password":"QWERTY"}' -H "Content-Type: application/json" -X PUT http://localhost:8080/v1/accounts/@me
+# curl -d'{"username":"Alice", "email":"notAlice@gmail.com", "description": "Info changed for Alice"}' -H "Content-Type: application/json" -X PUT http://localhost:8080/v1/accounts/@me?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJBbGljZSIsImV4cCI6MTU2MTUwMTExMCwiaWF0IjoxNTYwODk2MzEwfQ.h-TvCTMyN6LvDMwHGETcGDuYxp2E2GwURoUNDBSKi9o
 # echo ""
 
-# Test GET method after update
-# curl http://localhost:8080/v1/accounts/Bob
+# Test GET method for private profile
+# curl http://localhost:8080/v1/accounts/@me?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJBbGljZSIsImV4cCI6MTU2MTUwMTExMCwiaWF0IjoxNTYwODk2MzEwfQ.h-TvCTMyN6LvDMwHGETcGDuYxp2E2GwURoUNDBSKi9o
 # echo ""
