@@ -17,6 +17,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import org.json.*;
 
+import java.time.Instant;
+
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJerseyServerCodegen", date = "2019-05-14T20:17:48.996+08:00[Asia/Taipei]")
 public class AccountsApiServiceImpl extends AccountsApiService {
     private final Identity identity;
@@ -46,18 +48,14 @@ public class AccountsApiServiceImpl extends AccountsApiService {
         try {
             SessionCreate sessionCreate = identity.getSessionService().newSessionCreate();
             sessionCreate.setCredential(token);
-            System.out.println(token);
 
             String username = sessionCreate.getUsername();
-            System.out.println(username);
 
             AccountService accountService = identity.getAccountService();
             String firstName = accountService.getAccount(username).getFirstName();
             String lastName = accountService.getAccount(username).getLastName();
             String email = accountService.getAccount(username).getEmail();
             String description = accountService.getAccount(username).getDescription();
-
-            System.out.println("OK3");
 
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("username", username);
@@ -89,9 +87,11 @@ public class AccountsApiServiceImpl extends AccountsApiService {
             accountCreate.setEmail(account.getEmail(), mockVerified);
 
             accountCreate.setPassword(account.getPassword());
-            accountCreate.setCreateTime(account.getCreateTime().toInstant());
-            accountCreate.setUpdateTime(account.getUpdateTime().toInstant());
+            accountCreate.setCreateTime(Instant.now());
+            accountCreate.setUpdateTime(Instant.now());
+            accountCreate.setBlockUntil(Instant.now());
             accountCreate.setDescription(account.getDescription());
+            accountCreate.setNthTrial(0);
             accountCreate.create();
 
             SessionCreate sessionCreate = identity.getSessionService().newSessionCreate();
@@ -121,7 +121,7 @@ public class AccountsApiServiceImpl extends AccountsApiService {
             accountUpdate.setEmail(account.getEmail(), mockVerified);
             accountUpdate.setPassword(account.getPassword());
             accountUpdate.setDescription(account.getDescription());
-            accountUpdate.setUpdateTime(account.getUpdateTime().toInstant());
+            accountUpdate.setUpdateTime(Instant.now());
             accountUpdate.update();
 
             ApiResponseMessage successMsg = new ApiResponseMessage(204, "Successfully upate the account.");
