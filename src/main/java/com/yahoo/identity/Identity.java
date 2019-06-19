@@ -1,11 +1,9 @@
 package com.yahoo.identity;
 
 import com.yahoo.identity.services.account.AccountService;
-import com.yahoo.identity.services.credential.Credential;
-import com.yahoo.identity.services.session.SessionService;
-import com.yahoo.identity.services.credential.CredentialService;
-import com.yahoo.identity.services.token.TokenService;
 import com.yahoo.identity.services.challenge.ChallengeService;
+import com.yahoo.identity.services.session.SessionService;
+import com.yahoo.identity.services.token.TokenService;
 
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.ThreadSafe;
@@ -27,7 +25,9 @@ public class Identity {
     }
 
     @Nonnull
-    public SessionService getSessionService() { return sessionService; }
+    public SessionService getSessionService() {
+        return sessionService;
+    }
 
     @Nonnull
     public TokenService getTokenService() {

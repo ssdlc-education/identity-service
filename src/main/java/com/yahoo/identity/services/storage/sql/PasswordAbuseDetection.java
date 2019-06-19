@@ -1,15 +1,17 @@
 package com.yahoo.identity.services.storage.sql;
+
+import static java.time.temporal.ChronoUnit.SECONDS;
+
 import com.yahoo.identity.Identity;
 import com.yahoo.identity.services.account.AccountService;
 import com.yahoo.identity.services.session.AbuseDetection;
 
-import javax.annotation.Nonnull;
-import javax.ws.rs.BadRequestException;
 import java.time.Instant;
-import static java.time.temporal.ChronoUnit.SECONDS;
-import java.lang.Math;
+
+import javax.annotation.Nonnull;
 
 public class PasswordAbuseDetection implements AbuseDetection {
+
     public static final int ABUSE_MAX_TRIES = 5;
     public static final long ABUSE_MIN_BLOCK = 300;
     public static final long ABUSE_MAX_BLOCK = 7200;
@@ -34,7 +36,8 @@ public class PasswordAbuseDetection implements AbuseDetection {
             if (blockTimeLeft > 0 && nthTrial >= ABUSE_MAX_TRIES) {
                 long blockTime = (long) (Math.pow(ABUSE_BLOCK_FACTOR, nthTrial - ABUSE_MAX_TRIES) * ABUSE_MIN_BLOCK);
                 accountService.newAccountUpdate(username).setNthTrial(nthTrial + 1);
-                accountService.newAccountUpdate(username).setBlockUntil(Instant.now().plusSeconds(Math.min(ABUSE_MAX_BLOCK, blockTime)));
+                accountService.newAccountUpdate(username)
+                    .setBlockUntil(Instant.now().plusSeconds(Math.min(ABUSE_MAX_BLOCK, blockTime)));
             } else if (blockTimeLeft == 0 && nthTrial < ABUSE_MAX_TRIES) {
                 accountService.newAccountUpdate(username).setNthTrial(nthTrial + 1);
             }

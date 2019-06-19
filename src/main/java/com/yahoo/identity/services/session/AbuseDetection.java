@@ -1,4 +1,5 @@
 package com.yahoo.identity.services.session;
+
 import javax.annotation.Nonnull;
 
 public interface AbuseDetection {

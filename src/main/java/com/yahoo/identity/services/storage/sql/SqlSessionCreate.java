@@ -1,11 +1,11 @@
 package com.yahoo.identity.services.storage.sql;
 
 import com.yahoo.identity.services.session.SessionCreate;
-import org.joda.time.Instant;
 
 import javax.annotation.Nonnull;
 
 public class SqlSessionCreate implements SessionCreate {
+
     private final SessionModel session = new SessionModel();
 
     @Override
@@ -17,34 +17,40 @@ public class SqlSessionCreate implements SessionCreate {
 
     @Override
     @Nonnull
-    public String getUsername() { return session.getUsername(); }
+    public String getUsername() {
+        return session.getUsername();
+    }
 
     @Override
     @Nonnull
-    public String getPassword() { return session.getPassword(); }
+    public String getPassword() {
+        return session.getPassword();
+    }
 
     @Override
     @Nonnull
-    public SessionCreate setPassword(@Nonnull String password){
+    public SessionCreate setPassword(@Nonnull String password) {
         session.setPassword(password);
         return this;
     }
 
     @Override
     @Nonnull
-    public SessionCreate setCredential(@Nonnull String credStr){
+    public SessionCreate setCredential(@Nonnull String credStr) {
         session.setCredential(credStr);
         return this;
     }
 
     @Override
     @Nonnull
-    public SessionCreate initCredential(){
+    public SessionCreate initCredential() {
         session.initCredential();
         return this;
     }
 
     @Override
     @Nonnull
-    public String create(){ return this.session.getCredentialString(); }
+    public String create() {
+        return this.session.getCredentialString();
+    }
 }

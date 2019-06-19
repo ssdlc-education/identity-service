@@ -11,7 +11,6 @@ import org.openapitools.model.Session;
 import javax.annotation.Nonnull;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.NotAuthorizedException;
-import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
@@ -34,7 +33,7 @@ public class SessionsApiServiceImpl extends SessionsApiService {
 
             PasswordAbuseDetection passwordAbuseDetection = new PasswordAbuseDetection(identity);
 
-            if (passwordAbuseDetection.abuseDetection(sessionCreate.getUsername(),sessionCreate.getPassword())) {
+            if (passwordAbuseDetection.abuseDetection(sessionCreate.getUsername(), sessionCreate.getPassword())) {
                 throw new NotAuthorizedException("Password abuse detected.");
             }
 
@@ -42,10 +41,10 @@ public class SessionsApiServiceImpl extends SessionsApiService {
             ApiResponseMessage successMsg = new ApiResponseMessage(201, "The session is created successfully");
             return Response.ok().entity(successMsg).header("Set-Cookie", token).build();
 
-        } catch (BadRequestException e){
+        } catch (BadRequestException e) {
             ApiResponseMessage errorMsg = new ApiResponseMessage(401, "Invalid request: " + e.toString());
             return Response.status(Response.Status.UNAUTHORIZED).entity(errorMsg).build();
-        } catch (Exception e){
+        } catch (Exception e) {
             ApiResponseMessage errorMsg = new ApiResponseMessage(500, "Unknown error occurs" + e.toString());
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorMsg).build();
         }
