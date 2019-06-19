@@ -15,10 +15,6 @@ public interface Credential {
     @Nonnull
     String getSubject();
 
-    @Override
     @Nonnull
     String toString();
-
-    @Nonnull
-    Boolean validate();
 }

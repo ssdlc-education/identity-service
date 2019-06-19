@@ -1,15 +1,18 @@
-package com.yahoo.identity.services.storage.sql;
+package com.yahoo.identity.services.session;
+
+import com.yahoo.identity.services.credential.Credential;
+import com.yahoo.identity.services.credential.CredentialImpl;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
 import javax.annotation.Nonnull;
 
-public class SessionModel {
+public class SessionImpl implements Session {
 
     private String username;
     private String password;
-    private CredentialModel credential = new CredentialModel();
+    private CredentialImpl credential = new CredentialImpl();
 
     public String getUsername() {
         return this.username;
@@ -27,8 +30,10 @@ public class SessionModel {
         this.password = password;
     }
 
-    public String getCredentialString() {
-        return this.credential.toString();
+    @Override
+    @Nonnull
+    public Credential getCredential() {
+        return this.credential;
     }
 
     public void setCredential(@Nonnull String credStr) {

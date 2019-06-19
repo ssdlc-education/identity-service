@@ -1,8 +1,8 @@
 package org.openapitools.api.impl;
 
 import com.yahoo.identity.Identity;
+import com.yahoo.identity.services.session.AbuseDetectionImpl;
 import com.yahoo.identity.services.session.SessionCreate;
-import com.yahoo.identity.services.storage.sql.PasswordAbuseDetection;
 import org.openapitools.api.ApiResponseMessage;
 import org.openapitools.api.NotFoundException;
 import org.openapitools.api.SessionsApiService;
@@ -31,9 +31,9 @@ public class SessionsApiServiceImpl extends SessionsApiService {
             sessionCreate.setPassword(session.getPassword());
             sessionCreate.initCredential();
 
-            PasswordAbuseDetection passwordAbuseDetection = new PasswordAbuseDetection(identity);
+            AbuseDetectionImpl abuseDetectionImpl = new AbuseDetectionImpl(identity);
 
-            if (passwordAbuseDetection.abuseDetection(sessionCreate.getUsername(), sessionCreate.getPassword())) {
+            if (abuseDetectionImpl.abuseDetection(sessionCreate.getUsername(), sessionCreate.getPassword())) {
                 throw new NotAuthorizedException("Password abuse detected.");
             }
 

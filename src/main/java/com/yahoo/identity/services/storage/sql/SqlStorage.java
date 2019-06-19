@@ -5,7 +5,6 @@ import com.yahoo.identity.IdentityException;
 import com.yahoo.identity.services.account.Account;
 import com.yahoo.identity.services.account.AccountCreate;
 import com.yahoo.identity.services.account.AccountUpdate;
-import com.yahoo.identity.services.session.SessionCreate;
 import com.yahoo.identity.services.storage.Storage;
 import com.yahoo.identity.services.system.SystemService;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -29,12 +28,6 @@ public class SqlStorage implements Storage {
     @Override
     public AccountCreate newAccountCreate() {
         return new SqlAccountCreate(sqlSessionFactory);
-    }
-
-    @Nonnull
-    @Override
-    public SessionCreate newSessionCreate() {
-        return new SqlSessionCreate();
     }
 
     @Nonnull

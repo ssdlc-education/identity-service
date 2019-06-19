@@ -1,12 +1,10 @@
-package com.yahoo.identity.services.storage.sql;
-
-import com.yahoo.identity.services.session.SessionCreate;
+package com.yahoo.identity.services.session;
 
 import javax.annotation.Nonnull;
 
-public class SqlSessionCreate implements SessionCreate {
+public class SessionCreateImpl implements SessionCreate {
 
-    private final SessionModel session = new SessionModel();
+    private final SessionImpl session = new SessionImpl();
 
     @Override
     @Nonnull
@@ -51,6 +49,6 @@ public class SqlSessionCreate implements SessionCreate {
     @Override
     @Nonnull
     public String create() {
-        return this.session.getCredentialString();
+        return this.session.getCredential().toString();
     }
 }
