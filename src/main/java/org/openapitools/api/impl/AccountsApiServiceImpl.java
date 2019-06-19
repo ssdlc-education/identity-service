@@ -1,15 +1,15 @@
 package org.openapitools.api.impl;
 
 import com.yahoo.identity.Identity;
+import com.yahoo.identity.services.account.Account;
 import com.yahoo.identity.services.account.AccountCreate;
-import com.yahoo.identity.services.account.AccountService;
 import com.yahoo.identity.services.account.AccountUpdate;
 import com.yahoo.identity.services.session.SessionCreate;
 import org.json.JSONObject;
 import org.openapitools.api.AccountsApiService;
 import org.openapitools.api.ApiResponseMessage;
 import org.openapitools.api.NotFoundException;
-import org.openapitools.model.Account;
+import org.openapitools.model.AccountApi;
 
 import java.time.Instant;
 
@@ -31,9 +31,10 @@ public class AccountsApiServiceImpl extends AccountsApiService {
 
     @Override
     public Response accountsIdGet(String username, SecurityContext securityContext) throws NotFoundException {
-        String firstName = identity.getAccountService().getAccount(username).getFirstName();
-        String lastName = identity.getAccountService().getAccount(username).getLastName();
-        String description = identity.getAccountService().getAccount(username).getDescription();
+        Account account = identity.getAccountService().getAccount(username);
+        String firstName = account.getFirstName();
+        String lastName = account.getLastName();
+        String description = account.getDescription();
 
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("username", username);
@@ -53,11 +54,11 @@ public class AccountsApiServiceImpl extends AccountsApiService {
 
             String username = sessionCreate.getUsername();
 
-            AccountService accountService = identity.getAccountService();
-            String firstName = accountService.getAccount(username).getFirstName();
-            String lastName = accountService.getAccount(username).getLastName();
-            String email = accountService.getAccount(username).getEmail();
-            String description = accountService.getAccount(username).getDescription();
+            Account account = identity.getAccountService().getAccount(username);
+            String firstName = account.getFirstName();
+            String lastName = account.getLastName();
+            String email = account.getEmail();
+            String description = account.getDescription();
 
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("username", username);
@@ -85,7 +86,7 @@ public class AccountsApiServiceImpl extends AccountsApiService {
     }
 
     @Override
-    public Response accountsPost(Account account, SecurityContext securityContext) throws NotFoundException {
+    public Response accountsPost(AccountApi account, SecurityContext securityContext) throws NotFoundException {
         Boolean mockVerified = true;
         try {
             AccountCreate accountCreate = identity.getAccountService().newAccountCreate();
@@ -119,7 +120,7 @@ public class AccountsApiServiceImpl extends AccountsApiService {
     }
 
     @Override
-    public Response accountsmePut(String token, Account account, SecurityContext securityContext)
+    public Response accountsmePut(String token, AccountApi account, SecurityContext securityContext)
         throws NotFoundException {
         Boolean mockVerified = true;
         try {
