@@ -27,11 +27,12 @@ public class AbuseDetectionImpl implements AbuseDetection {
     @Nonnull
     public Boolean abuseDetection(@Nonnull String username, @Nonnull String password) {
         try {
-            AccountService accountService = identity.getAccountService();
+            AccountService accountService = this.identity.getAccountService();
             String passwordDb = accountService.getAccount(username).getPassword();
             Instant blockUntil = accountService.getAccount(username).getBlockUntil();
             int nthTrial = accountService.getAccount(username).getNthTrial();
             long blockTimeLeft = Instant.now().until(blockUntil, SECONDS);
+
 
             if (!password.equals(passwordDb)) {
                 if (blockTimeLeft > 0 && nthTrial >= ABUSE_MAX_TRIES) {
@@ -41,7 +42,8 @@ public class AbuseDetectionImpl implements AbuseDetection {
                     accountService.newAccountUpdate(username).setNthTrial(nthTrial + 1);
                     accountService.newAccountUpdate(username)
                         .setBlockUntil(Instant.now().plusSeconds(Math.min(ABUSE_MAX_BLOCK, blockTime)));
-                } else if (blockTimeLeft == 0 && nthTrial < ABUSE_MAX_TRIES) {
+
+                } else if (blockTimeLeft <= 0 && nthTrial < ABUSE_MAX_TRIES) {
                     accountService.newAccountUpdate(username).setNthTrial(nthTrial + 1);
                 }
                 return true;
