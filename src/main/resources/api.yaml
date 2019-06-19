@@ -366,12 +366,6 @@ components:
         email:
           type: "string"
           pattern: '^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
-        createTime:
-          type: "string"
-          format: "date-time"
-        updateTime:
-          type: "string"
-          format: "date-time"
         password:
           type: "string"
           minLength: 6
@@ -379,12 +373,6 @@ components:
         description:
           type: "string"
           maxLength: 500
-        blockUntil:
-          type: "string"
-          format: "date-time"
-        nthTrial:
-          type: "integer"
-          minimum: 0
         emails:
           type: "array"
           items:

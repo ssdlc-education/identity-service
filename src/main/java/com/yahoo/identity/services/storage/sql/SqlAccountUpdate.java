@@ -2,14 +2,15 @@ package com.yahoo.identity.services.storage.sql;
 
 import com.yahoo.identity.IdentityException;
 import com.yahoo.identity.services.account.AccountUpdate;
-import io.swagger.models.auth.In;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 
-import javax.annotation.Nonnull;
 import java.time.Instant;
 
+import javax.annotation.Nonnull;
+
 public class SqlAccountUpdate implements AccountUpdate {
+
     private final SqlSessionFactory sqlSessionFactory;
     private AccountModel account = new AccountModel();
 

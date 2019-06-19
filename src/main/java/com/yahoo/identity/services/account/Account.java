@@ -1,7 +1,8 @@
 package com.yahoo.identity.services.account;
 
-import javax.annotation.Nonnull;
 import java.time.Instant;
+
+import javax.annotation.Nonnull;
 
 public interface Account {
 

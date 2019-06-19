@@ -1,7 +1,7 @@
 # Test POST method for createAccount
-curl -d'{"username":"Alice","firstName":"Alice","lastName":"Demo","email":"alice@gmail.com", "verified":true, "createTime":"2017-07-21T17:32:28Z","updateTime":"2017-07-21T17:32:28Z","description":"Test account for Alice", "password":"PASSWORD", "blockUntil":"2017-07-21T17:32:28Z", "nthTrial":0}' -H "Content-Type: application/json" -X POST http://localhost:8080/v1/accounts/ -i
+curl -d'{"username":"Alice","firstName":"Alice","lastName":"Demo","email":"alice@gmail.com", "verified":true, "description":"Test account for Alice", "password":"PASSWORD"}' -H "Content-Type: application/json" -X POST http://localhost:8080/v1/accounts/ -i
 echo ""
-curl -d'{"username":"Bob","firstName":"Bob","lastName":"Demo","email":"bob@gmail.com", "verified":true, "createTime":"2017-07-21T17:32:28Z","updateTime":"2017-07-21T17:32:28Z","description":"Test account for Bob", "password":"PASSWORD", "blockUntil":"2017-07-21T17:32:28Z", "nthTrial":0}' -H "Content-Type: application/json" -X POST http://localhost:8080/v1/accounts/ -i
+curl -d'{"username":"Bob","firstName":"Bob","lastName":"Demo","email":"bob@gmail.com", "verified":true, "description":"Test account for Bob", "password":"PASSWORD"}' -H "Content-Type: application/json" -X POST http://localhost:8080/v1/accounts/ -i
 echo ""
 
 # TEST GET method for getAccount
@@ -19,7 +19,7 @@ echo ""
 # echo ""
 
 # TEST PUT method for updateAccount
-# curl -d'{"username":"Alice","email":"notAlice@gmail.com", "verified":true, "updateTime":"2018-01-01T17:32:28Z","description": "Info changed for Alice", "password":"QWERTY", "blockUntil":"2018-01-01T17:54:28Z", "nthTrial":1}' -H "Content-Type: application/json" -X PUT http://localhost:8080/v1/accounts/@me
+# curl -d'{"username":"Alice","email":"notAlice@gmail.com", "verified":true, "description": "Info changed for Alice", "password":"QWERTY"}' -H "Content-Type: application/json" -X PUT http://localhost:8080/v1/accounts/@me
 # echo ""
 
 # Test GET method after update

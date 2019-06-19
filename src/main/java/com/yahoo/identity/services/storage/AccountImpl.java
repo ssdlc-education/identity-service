@@ -2,9 +2,10 @@ package com.yahoo.identity.services.storage;
 
 import com.yahoo.identity.services.account.Account;
 
-import javax.annotation.Nonnull;
 import java.time.Instant;
 import java.util.Map;
+
+import javax.annotation.Nonnull;
 
 public class AccountImpl implements Account {
 

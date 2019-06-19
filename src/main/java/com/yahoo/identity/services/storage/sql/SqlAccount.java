@@ -1,14 +1,16 @@
 package com.yahoo.identity.services.storage.sql;
 
-import com.yahoo.identity.services.account.Account;
 import com.yahoo.identity.IdentityException;
+import com.yahoo.identity.services.account.Account;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 
-import javax.annotation.Nonnull;
 import java.time.Instant;
 
+import javax.annotation.Nonnull;
+
 public class SqlAccount implements Account {
+
     private AccountModel account;
 
     public SqlAccount(@Nonnull SqlSessionFactory sqlSessionFactory, @Nonnull String username) throws IdentityException {
@@ -47,7 +49,9 @@ public class SqlAccount implements Account {
 
     @Override
     @Nonnull
-    public String getEmail() { return this.account.getEmail(); }
+    public String getEmail() {
+        return this.account.getEmail();
+    }
 
     @Override
     @Nonnull

@@ -2,10 +2,12 @@ package com.yahoo.identity.services.account;
 
 import com.yahoo.identity.IdentityException;
 
-import javax.annotation.Nonnull;
 import java.time.Instant;
 
+import javax.annotation.Nonnull;
+
 public interface AccountCreate {
+
     @Nonnull
     AccountCreate setFirstName(@Nonnull String firstName);
 

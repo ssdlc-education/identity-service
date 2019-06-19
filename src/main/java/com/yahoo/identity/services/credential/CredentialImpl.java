@@ -1,4 +1,4 @@
-package com.yahoo.identity.services.storage.sql;
+package com.yahoo.identity.services.credential;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
@@ -8,42 +8,63 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.yahoo.identity.services.key.KeyServiceImpl;
 
-import javax.annotation.Nonnull;
-import javax.ws.rs.NotAuthorizedException;
-import java.time.*;
+import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
-public class CredentialModel{
+import javax.annotation.Nonnull;
+import javax.ws.rs.BadRequestException;
+
+public class CredentialImpl implements Credential {
+
     private Instant issueTime;
     private Instant expireTime;
     private String subject;
     private KeyServiceImpl keyServiceImpl = new KeyServiceImpl();
 
-    public Instant getIssueTime() { return this.issueTime; }
+    @Override
+    @Nonnull
+    public Instant getIssueTime() {
+        return this.issueTime;
+    }
 
-    public void setIssueTime(@Nonnull Instant issueTime) { this.issueTime = issueTime; }
+    public void setIssueTime(@Nonnull Instant issueTime) {
+        this.issueTime = issueTime;
+    }
 
-    public Instant getExpireTime() { return this.expireTime; }
+    @Override
+    @Nonnull
+    public Instant getExpireTime() {
+        return this.expireTime;
+    }
 
-    public void setExpireTime(@Nonnull Instant expireTime) { this.expireTime = expireTime; }
+    public void setExpireTime(@Nonnull Instant expireTime) {
+        this.expireTime = expireTime;
+    }
 
-    public String getSubject() { return this.subject; }
+    @Override
+    @Nonnull
+    public String getSubject() {
+        return this.subject;
+    }
 
-    public void setSubject(@Nonnull String subject) { this.subject = subject; }
+    public void setSubject(@Nonnull String subject) {
+        this.subject = subject;
+    }
 
-    public String toString(){
+    @Override
+    @Nonnull
+    public String toString() {
         try {
             Algorithm algorithm = Algorithm.HMAC256(keyServiceImpl.getSecret());
             String token = JWT.create()
-                    .withExpiresAt(Date.from(expireTime))
-                    .withIssuedAt(Date.from(issueTime))
-                    .withSubject(subject)
-                    .sign(algorithm);
+                .withExpiresAt(Date.from(expireTime))
+                .withIssuedAt(Date.from(issueTime))
+                .withSubject(subject)
+                .sign(algorithm);
             return token;
         } catch (JWTCreationException exception) {
-            System.out.println("error: unable to create a token.");
-            return null;
+            throw new BadRequestException("JWT creation not succeeded.");
         }
     }
 
@@ -52,9 +73,9 @@ public class CredentialModel{
             Algorithm algorithm = Algorithm.HMAC256(keyServiceImpl.getSecret());
 
             JWTVerifier verifier = JWT.require(algorithm)
-                    .acceptLeeway(1)   // 1 sec for nbf and iat
-                    .acceptExpiresAt(5)   // 5 secs for exp
-                    .build();
+                .acceptLeeway(1)   // 1 sec for nbf and iat
+                .acceptExpiresAt(5)   // 5 secs for exp
+                .build();
 
             DecodedJWT jwt = verifier.verify(credStr);
 
@@ -62,8 +83,8 @@ public class CredentialModel{
             setIssueTime(jwt.getIssuedAt().toInstant());
             setExpireTime(jwt.getExpiresAt().toInstant());
 
-        } catch(JWTVerificationException e){
-            System.out.println(e.toString());
+        } catch (JWTVerificationException e) {
+            throw new BadRequestException("JWT verification not succeeded.");
         }
         return getSubject();
     }
@@ -73,9 +94,9 @@ public class CredentialModel{
             Algorithm algorithm = Algorithm.HMAC256(keyServiceImpl.getSecret());
 
             JWTVerifier verifier = JWT.require(algorithm)
-                    .acceptLeeway(1)   // 1 sec for nbf and iat
-                    .acceptExpiresAt(5)   // 5 secs for exp
-                    .build();
+                .acceptLeeway(1)   // 1 sec for nbf and iat
+                .acceptExpiresAt(5)   // 5 secs for exp
+                .build();
 
             DecodedJWT jwt = verifier.verify(credStr);
 
@@ -86,12 +107,11 @@ public class CredentialModel{
             setExpireTime(jwt.getExpiresAt().toInstant());
             System.out.println(getExpireTime().toString());
 
-            if (getIssueTime().compareTo(Instant.now().plus(-5, ChronoUnit.MINUTES))<0){
-                throw new NotAuthorizedException("credential not issued in the past 5 minutes");
+            if (getIssueTime().compareTo(Instant.now().plus(-5, ChronoUnit.MINUTES)) < 0) {
+                throw new BadRequestException("Credential not issued in the past 5 minutes.");
             }
-
-        } catch(JWTVerificationException e){
-            System.out.println(e.toString());
+        } catch (JWTVerificationException e) {
+            throw new BadRequestException("JWT verification not succeeded.");
         }
         return getSubject();
     }
