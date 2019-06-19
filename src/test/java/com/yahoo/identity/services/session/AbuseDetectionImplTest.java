@@ -41,31 +41,25 @@ public class AbuseDetectionImplTest {
     }
 
     @Test
-    public void testAbuseDetection1() throws Exception {
+    public void testAbuseDetectionUnblockedAndRight() throws Exception {
         new Expectations() {{
             account.getNthTrial();
             result = 0;
-            account.getBlockUntil();
-            result = Instant.now();
-        }};
-        Assert.assertFalse(abuseDetection.abuseDetection(username, password));
-    }
-
-    @Test
-    public void testAbuseDetection2() throws Exception {
-        new Expectations() {{
-            account.getNthTrial();
-            result = 1;
             account.getBlockUntil();
             result = Instant.now();
             accountService.newAccountUpdate(username);
             result = accountUpdate;
         }};
         Assert.assertFalse(abuseDetection.abuseDetection(username, password));
+        new Expectations() {{
+            account.getNthTrial();
+            result = 1;
+        }};
+        Assert.assertFalse(abuseDetection.abuseDetection(username, password));
     }
 
     @Test
-    public void testAbuseDetection3() throws Exception {
+    public void testAbuseDetectionUnblockedAndWrong() throws Exception {
         new Expectations() {{
             account.getNthTrial();
             result = 1;
@@ -75,18 +69,22 @@ public class AbuseDetectionImplTest {
             result = accountUpdate;
         }};
         Assert.assertTrue(abuseDetection.abuseDetection(username, "12345"));
+        new Expectations() {{
+           account.getNthTrial();
+           result = 6;
+        }};
+        Assert.assertTrue(abuseDetection.abuseDetection(username, "12345"));
     }
 
     @Test
-    public void testAbuseDetection4() throws Exception {
+    public void testAbuseDetectionBlocked() throws Exception {
         new Expectations() {{
             account.getNthTrial();
-            result = 6;
+            result = 0;
             account.getBlockUntil();
             result = Instant.now().plusSeconds(10000);
-            accountService.newAccountUpdate(username);
-            result = accountUpdate;
         }};
+        Assert.assertTrue(abuseDetection.abuseDetection(username, password));
         Assert.assertTrue(abuseDetection.abuseDetection(username, "12345"));
     }
 }

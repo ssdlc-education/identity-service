@@ -5,5 +5,5 @@ import javax.annotation.Nonnull;
 public interface AbuseDetection {
 
     @Nonnull
-    Boolean abuseDetection(@Nonnull String username, @Nonnull String password);
+    boolean abuseDetection(@Nonnull String username, @Nonnull String password);
 }
