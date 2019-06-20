@@ -1,5 +1,15 @@
 package com.yahoo.identity.services.storage.sql;
 
+import static com.kosprov.jargon2.api.Jargon2.Hasher;
+import static com.kosprov.jargon2.api.Jargon2.jargon2Hasher;
+import static com.kosprov.jargon2.api.Jargon2.jargon2Verifier;
+
+import com.kosprov.jargon2.api.Jargon2;
+
+import java.security.SecureRandom;
+import java.time.Instant;
+
+import javax.annotation.Nonnull;
 
 public class AccountModel {
 
@@ -8,23 +18,25 @@ public class AccountModel {
     private String firstName;
     private String lastName;
     private String email;
-    private Boolean verified;
-    private String password;
+    private int emailStatus;
+    private String passwordHash;
+    private String passwordSalt;
     private String description;
     private long createTs;
     private long updateTs;
-    private long blockUntil;
-    private int nthTrial;
+    private long blockUntilTs;
+    private int consecutiveFails;
 
     public String getUid() {
         return this.uid;
     }
 
+    @Nonnull
     public String getUsername() {
         return this.username;
     }
 
-    public void setUsername(String username) {
+    public void setUsername(@Nonnull String username) {
         this.username = username;
     }
 
@@ -32,7 +44,7 @@ public class AccountModel {
         return this.firstName;
     }
 
-    public void setFirstName(String firstName) {
+    public void setFirstName(@Nonnull String firstName) {
         this.firstName = firstName;
     }
 
@@ -40,7 +52,7 @@ public class AccountModel {
         return this.lastName;
     }
 
-    public void setLastName(String lastName) {
+    public void setLastName(@Nonnull String lastName) {
         this.lastName = lastName;
     }
 
@@ -48,25 +60,44 @@ public class AccountModel {
         return this.email;
     }
 
-    public void setEmail(String email, Boolean verified) {
+    public void setEmail(@Nonnull String email) {
         this.email = email;
-        this.verified = verified;
+    }
+
+    public int getEmailStatus() {
+        return this.emailStatus;
+    }
+
+    public void setEmailStatus(@Nonnull int emailStatus) {
+        this.emailStatus = emailStatus;
     }
 
     public String getDescription() {
         return this.description;
     }
 
-    public void setDescription(String description) {
+    public void setDescription(@Nonnull String description) {
         this.description = description;
     }
 
-    public String getPassword() {
-        return this.password;
+    public String getPasswordHash() {
+        return this.passwordHash;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public String getPasswordSalt() {
+        return this.passwordSalt;
+    }
+
+    public void setPassword(@Nonnull String password) {
+        SecureRandom secureRandom = new SecureRandom();
+        secureRandom.setSeed(Instant.now().toString().getBytes());
+
+        byte[] saltBytes = new byte[8];
+        secureRandom.nextBytes(saltBytes);
+        this.passwordSalt = saltBytes.toString();
+
+        Hasher hasher = jargon2Hasher();
+        this.passwordHash = hasher.salt(saltBytes).password(password.getBytes()).encodedHash();
     }
 
     public long getCreateTs() {
@@ -81,23 +112,30 @@ public class AccountModel {
         return this.updateTs;
     }
 
-    public void setUpdateTs(long updateTs) {
+    public void setUpdateTs(@Nonnull long updateTs) {
         this.updateTs = updateTs;
     }
 
-    public long getBlockUntil() {
-        return this.blockUntil;
+    public long getBlockUntilTs() {
+        return this.blockUntilTs;
     }
 
-    public void setBlockUntil(long blockUntil) {
-        this.blockUntil = blockUntil;
+    public void setBlockUntilTs(@Nonnull long blockUntilTs) {
+        this.blockUntilTs = blockUntilTs;
     }
 
-    public int getNthTrial() {
-        return this.nthTrial;
+    public int getConsecutiveFails() {
+        return this.consecutiveFails;
     }
 
-    public void setNthTrial(int nthTrial) {
-        this.nthTrial = nthTrial;
+    public void setConsecutiveFails(@Nonnull int consecutiveFails) {
+        this.consecutiveFails = consecutiveFails;
+    }
+
+    @Nonnull
+    public Boolean verify(@Nonnull String password) {
+        Jargon2.Verifier verifier = jargon2Verifier();
+        return verifier.salt(this.passwordSalt.getBytes()).hash(this.passwordHash).password(password.getBytes())
+            .verifyEncoded();
     }
 }

@@ -384,7 +384,7 @@ components:
           type: "string"
           maxLength: 256
         verified:
-          type: "boolean"
+          type: "integer"
       required:
         - "value"
     Session:

@@ -34,8 +34,11 @@ public interface Account {
     String getDescription();
 
     @Nonnull
-    Instant getBlockUntil();
+    Instant getBlockUntilTime();
 
     @Nonnull
-    int getNthTrial();
+    int getConsecutiveFails();
+
+    @Nonnull
+    Boolean verify(@Nonnull String password);
 }

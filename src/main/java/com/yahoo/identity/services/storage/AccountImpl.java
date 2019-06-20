@@ -65,12 +65,12 @@ public class AccountImpl implements Account {
 
     @Override
     @Nonnull
-    public Instant getBlockUntil() {
+    public Instant getBlockUntilTime() {
         return Instant.now();
     }
 
     @Override
-    public int getNthTrial() {
+    public int getConsecutiveFails() {
         return 0;
     }
 
@@ -80,5 +80,9 @@ public class AccountImpl implements Account {
         return "";
     }
 
-
+    @Override
+    @Nonnull
+    public Boolean verify(@Nonnull String password) {
+        return false;
+    }
 }

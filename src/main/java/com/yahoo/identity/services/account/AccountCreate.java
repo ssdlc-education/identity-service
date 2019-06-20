@@ -18,7 +18,10 @@ public interface AccountCreate {
     AccountCreate setUsername(@Nonnull String username);
 
     @Nonnull
-    AccountCreate setEmail(@Nonnull String email, @Nonnull Boolean verified);
+    AccountCreate setEmail(@Nonnull String email);
+
+    @Nonnull
+    AccountCreate setEmailStatus(@Nonnull int emailStatus);
 
     @Nonnull
     AccountCreate setPassword(@Nonnull String password);
@@ -33,10 +36,10 @@ public interface AccountCreate {
     AccountCreate setDescription(@Nonnull String description);
 
     @Nonnull
-    AccountCreate setBlockUntil(@Nonnull Instant blockUntil);
+    AccountCreate setBlockUntilTime(@Nonnull Instant blockUntil);
 
     @Nonnull
-    AccountCreate setNthTrial(@Nonnull int nthTrial);
+    AccountCreate setConsecutiveFails(@Nonnull int consecutiveFails);
 
     @Nonnull
     String create() throws IdentityException;

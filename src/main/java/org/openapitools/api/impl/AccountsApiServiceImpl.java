@@ -48,6 +48,7 @@ public class AccountsApiServiceImpl extends AccountsApiService {
 
     @Override
     public Response accountsmeGet(String token, SecurityContext securityContext) throws NotFoundException {
+        final byte emailStatus = 0x01;
         try {
             SessionCreate sessionCreate = identity.getSessionService().newSessionCreate();
             sessionCreate.setCredential(token);
@@ -66,7 +67,7 @@ public class AccountsApiServiceImpl extends AccountsApiService {
             jsonObject.put("lastname", lastName);
             jsonObject.put("email", email);
             jsonObject.put("description", description);
-            jsonObject.put("verified", "true");
+            jsonObject.put("emailStatus", emailStatus);
             String data = jsonObject.toString();
 
             return Response.ok().entity(new ApiResponseMessage(Response.Status.OK.getStatusCode(), data)).build();
@@ -87,20 +88,20 @@ public class AccountsApiServiceImpl extends AccountsApiService {
 
     @Override
     public Response accountsPost(AccountApi account, SecurityContext securityContext) throws NotFoundException {
-        Boolean mockVerified = true;
+        final int emailStatus = 0x01;
         try {
             AccountCreate accountCreate = identity.getAccountService().newAccountCreate();
             accountCreate.setUsername(account.getUsername());
             accountCreate.setFirstName(account.getFirstName());
             accountCreate.setLastName(account.getLastName());
-            accountCreate.setEmail(account.getEmail(), mockVerified);
+            accountCreate.setEmail(account.getEmail());
+            accountCreate.setEmailStatus(emailStatus);
 
             accountCreate.setPassword(account.getPassword());
             accountCreate.setCreateTime(Instant.now());
             accountCreate.setUpdateTime(Instant.now());
-            accountCreate.setBlockUntil(Instant.now());
+            accountCreate.setBlockUntilTime(Instant.now());
             accountCreate.setDescription(account.getDescription());
-            accountCreate.setNthTrial(0);
             accountCreate.create();
 
             SessionCreate sessionCreate = identity.getSessionService().newSessionCreate();
@@ -114,7 +115,7 @@ public class AccountsApiServiceImpl extends AccountsApiService {
             ApiResponseMessage errorMsg = new ApiResponseMessage(400, "Invalid request: " + e.toString());
             return Response.status(Response.Status.BAD_REQUEST).entity(errorMsg).build();
         } catch (Exception e) {
-            ApiResponseMessage errorMsg = new ApiResponseMessage(500, "Unknown error occurs:" + e.toString());
+            ApiResponseMessage errorMsg = new ApiResponseMessage(500, "Unknown error occurs: " + e.toString());
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorMsg).build();
         }
     }
@@ -122,13 +123,14 @@ public class AccountsApiServiceImpl extends AccountsApiService {
     @Override
     public Response accountsmePut(String token, AccountApi account, SecurityContext securityContext)
         throws NotFoundException {
-        Boolean mockVerified = true;
+        final byte emailStatus = 0x01;
         try {
             SessionCreate sessionCreate = identity.getSessionService().newSessionCreate();
             sessionCreate.setCredential(token);
 
             AccountUpdate accountUpdate = identity.getAccountService().newAccountUpdate(account.getUsername());
-            accountUpdate.setEmail(account.getEmail(), mockVerified);
+            accountUpdate.setEmail(account.getEmail());
+            accountUpdate.setEmailStatus(emailStatus);
             accountUpdate.setPassword(account.getPassword());
             accountUpdate.setDescription(account.getDescription());
             accountUpdate.setUpdateTime(Instant.now());

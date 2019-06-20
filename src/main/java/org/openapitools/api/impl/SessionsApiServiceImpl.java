@@ -1,7 +1,7 @@
 package org.openapitools.api.impl;
 
 import com.yahoo.identity.Identity;
-import com.yahoo.identity.services.session.AbuseDetectionImpl;
+import com.yahoo.identity.services.account.Account;
 import com.yahoo.identity.services.session.SessionCreate;
 import org.openapitools.api.ApiResponseMessage;
 import org.openapitools.api.NotFoundException;
@@ -9,7 +9,6 @@ import org.openapitools.api.SessionsApiService;
 import org.openapitools.model.Session;
 
 import javax.annotation.Nonnull;
-import javax.ws.rs.BadRequestException;
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
@@ -31,21 +30,19 @@ public class SessionsApiServiceImpl extends SessionsApiService {
             sessionCreate.setPassword(session.getPassword());
             sessionCreate.initCredential();
 
-            AbuseDetectionImpl abuseDetectionImpl = new AbuseDetectionImpl(identity);
-
-            if (abuseDetectionImpl.abuseDetection(sessionCreate.getUsername(), sessionCreate.getPassword())) {
-                throw new NotAuthorizedException("Password abuse detected.");
+            Account account = identity.getAccountService().getAccount(session.getUsername());
+            if (!account.verify(session.getPassword())) {
+                throw new NotAuthorizedException("Account is locked!");
             }
-
             String token = sessionCreate.create();
             ApiResponseMessage successMsg = new ApiResponseMessage(201, "The session is created successfully");
             return Response.ok().entity(successMsg).header("Set-Cookie", token).build();
 
-        } catch (BadRequestException e) {
-            ApiResponseMessage errorMsg = new ApiResponseMessage(401, "Invalid request: " + e.toString());
+        } catch (NotAuthorizedException e) {
+            ApiResponseMessage errorMsg = new ApiResponseMessage(401, "Invalid request: " + e.getMessage());
             return Response.status(Response.Status.UNAUTHORIZED).entity(errorMsg).build();
         } catch (Exception e) {
-            ApiResponseMessage errorMsg = new ApiResponseMessage(500, "Unknown error occurs" + e.toString());
+            ApiResponseMessage errorMsg = new ApiResponseMessage(500, "Unknown error occurs: " + e.getMessage());
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorMsg).build();
         }
     }

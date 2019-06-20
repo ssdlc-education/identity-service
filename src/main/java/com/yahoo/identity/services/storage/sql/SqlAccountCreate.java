@@ -43,8 +43,15 @@ public class SqlAccountCreate implements AccountCreate {
 
     @Override
     @Nonnull
-    public AccountCreate setEmail(@Nonnull String email, @Nonnull Boolean verified) {
-        account.setEmail(email, verified);
+    public AccountCreate setEmail(@Nonnull String email) {
+        account.setEmail(email);
+        return this;
+    }
+
+    @Override
+    @Nonnull
+    public AccountCreate setEmailStatus(@Nonnull int emailStatus) {
+        account.setEmailStatus(emailStatus);
         return this;
     }
 
@@ -78,15 +85,15 @@ public class SqlAccountCreate implements AccountCreate {
 
     @Nonnull
     @Override
-    public AccountCreate setBlockUntil(@Nonnull Instant blockUntil) {
-        account.setBlockUntil(blockUntil.toEpochMilli());
+    public AccountCreate setBlockUntilTime(@Nonnull Instant blockUntil) {
+        account.setBlockUntilTs(blockUntil.toEpochMilli());
         return this;
     }
 
     @Nonnull
     @Override
-    public AccountCreate setNthTrial(@Nonnull int nthTrial) {
-        account.setNthTrial(nthTrial);
+    public AccountCreate setConsecutiveFails(@Nonnull int consecutiveFails) {
+        account.setConsecutiveFails(consecutiveFails);
         return this;
     }
 

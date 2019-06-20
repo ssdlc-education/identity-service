@@ -14,15 +14,22 @@ public class SqlAccountUpdate implements AccountUpdate {
     private final SqlSessionFactory sqlSessionFactory;
     private AccountModel account = new AccountModel();
 
-    public SqlAccountUpdate(@Nonnull SqlSessionFactory sqlSessionFactory, @Nonnull String id) {
+    public SqlAccountUpdate(@Nonnull SqlSessionFactory sqlSessionFactory, @Nonnull String username) {
         this.sqlSessionFactory = sqlSessionFactory;
-        this.account.setUsername(id);
+        this.account.setUsername(username);
     }
 
     @Override
     @Nonnull
-    public AccountUpdate setEmail(@Nonnull String email, @Nonnull Boolean verified) {
-        account.setEmail(email, verified);
+    public AccountUpdate setEmail(@Nonnull String email) {
+        account.setEmail(email);
+        return this;
+    }
+
+    @Override
+    @Nonnull
+    public AccountUpdate setEmailStatus(@Nonnull int emailStatus) {
+        account.setEmailStatus(emailStatus);
         return this;
     }
 
@@ -49,15 +56,15 @@ public class SqlAccountUpdate implements AccountUpdate {
 
     @Nonnull
     @Override
-    public AccountUpdate setBlockUntil(@Nonnull Instant blockUntil) {
-        account.setBlockUntil(blockUntil.toEpochMilli());
+    public AccountUpdate setBlockUntilTime(@Nonnull Instant blockUntil) {
+        account.setBlockUntilTs(blockUntil.toEpochMilli());
         return this;
     }
 
     @Nonnull
     @Override
-    public AccountUpdate setNthTrial(@Nonnull int nthTrial) {
-        account.setNthTrial(nthTrial);
+    public AccountUpdate setConsecutiveFails(@Nonnull int consecutiveFails) {
+        account.setConsecutiveFails(consecutiveFails);
         return this;
     }
 
