@@ -9,7 +9,7 @@ import javax.annotation.Nonnull;
 public interface AccountUpdate {
 
     @Nonnull
-    AccountUpdate setEmail(@Nonnull String email);
+    AccountUpdate setEmail(@Nonnull String email, @Nonnull Boolean verified);
 
     @Nonnull
     AccountUpdate setEmailStatus(@Nonnull int emailStatus);
