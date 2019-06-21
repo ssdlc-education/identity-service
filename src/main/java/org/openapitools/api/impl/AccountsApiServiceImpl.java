@@ -1,22 +1,28 @@
 package org.openapitools.api.impl;
 
 import com.yahoo.identity.Identity;
+import com.yahoo.identity.services.account.Account;
 import com.yahoo.identity.services.account.AccountCreate;
-import com.yahoo.identity.services.account.AccountService;
 import com.yahoo.identity.services.account.AccountUpdate;
+import com.yahoo.identity.services.session.SessionCreate;
+import org.json.JSONObject;
 import org.openapitools.api.AccountsApiService;
 import org.openapitools.api.ApiResponseMessage;
 import org.openapitools.api.NotFoundException;
-import org.openapitools.model.Account;
+import org.openapitools.model.AccountApi;
 
 import java.time.Instant;
+
 import javax.annotation.Nonnull;
-import javax.ws.rs.core.NewCookie;
+import javax.ws.rs.BadRequestException;
+import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
+
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJerseyServerCodegen", date = "2019-05-14T20:17:48.996+08:00[Asia/Taipei]")
 public class AccountsApiServiceImpl extends AccountsApiService {
+
     private final Identity identity;
 
     public AccountsApiServiceImpl(@Nonnull Identity identity) {
@@ -25,108 +31,122 @@ public class AccountsApiServiceImpl extends AccountsApiService {
 
     @Override
     public Response accountsIdGet(String username, SecurityContext securityContext) throws NotFoundException {
-        String uid = identity.getAccountService().getAccount(username).getUid();
-        String firstName = identity.getAccountService().getAccount(username).getFirstName();
-        String lastName = identity.getAccountService().getAccount(username).getLastName();
-        String email = identity.getAccountService().getAccount(username).getEmail();
-        String password = identity.getAccountService().getAccount(username).getPassword();
-        Instant createTs = identity.getAccountService().getAccount(username).getCreateTime();
-        Instant updateTs = identity.getAccountService().getAccount(username).getUpdateTime();
-        String description = identity.getAccountService().getAccount(username).getDescription();
-        Instant blockUntil = identity.getAccountService().getAccount(username).getBlockUntil();
-        int nthTrial = identity.getAccountService().getAccount(username).getNthTrial();
+        Account account = identity.getAccountService().getAccount(username);
+        String firstName = account.getFirstName();
+        String lastName = account.getLastName();
+        String description = account.getDescription();
 
-        String msg = "username: " + username + ", description: " + description;
-        return Response.ok().entity(new ApiResponseMessage(Response.Status.OK.getStatusCode(), msg)).build();
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("username", username);
+        jsonObject.put("firstname", firstName);
+        jsonObject.put("lastname", lastName);
+        jsonObject.put("description", description);
+        String data = jsonObject.toString();
+
+        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, data)).build();
     }
 
     @Override
     public Response accountsmeGet(String token, SecurityContext securityContext) throws NotFoundException {
+        final byte emailStatus = 0x01;
         try {
-            // TODO: take username and cookie from token
-            String username = "Alice";
-            //TODO: get cookie by username and validate cookie
-            String cookie = "from token";
-            if (cookie.equals("from token")) {
-                AccountService accountService = identity.getAccountService();
-                String firstName = accountService.getAccount(username).getFirstName();
-                String lastName = accountService.getAccount(username).getLastName();
-                String email = accountService.getAccount(username).getEmail();
-                String description = accountService.getAccount(username).getDescription();
+            SessionCreate sessionCreate = identity.getSessionService().newSessionCreate();
+            sessionCreate.setCredential(token);
 
-                String msg = "username: " + username + ", firstname: " + firstName + ", lastname: " + lastName + ", email: " + email + ", description: " + description;
-                return Response.ok().entity(new ApiResponseMessage(Response.Status.OK.getStatusCode(), msg)).build();
-            } else {
-                ApiResponseMessage errorMsg = new ApiResponseMessage(Response.Status.UNAUTHORIZED.getStatusCode(), "Invalid cookie credential is used.");
-                return Response.status(Response.Status.UNAUTHORIZED).entity(errorMsg).build();
-            }
+            String username = sessionCreate.getUsername();
+
+            Account account = identity.getAccountService().getAccount(username);
+            String firstName = account.getFirstName();
+            String lastName = account.getLastName();
+            String email = account.getEmail();
+            String description = account.getDescription();
+
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("username", username);
+            jsonObject.put("firstname", firstName);
+            jsonObject.put("lastname", lastName);
+            jsonObject.put("email", email);
+            jsonObject.put("description", description);
+            jsonObject.put("emailStatus", emailStatus);
+            String data = jsonObject.toString();
+
+            return Response.ok().entity(new ApiResponseMessage(Response.Status.OK.getStatusCode(), data)).build();
+        } catch (NotAuthorizedException e) {
+            ApiResponseMessage
+                errorMsg =
+                new ApiResponseMessage(Response.Status.UNAUTHORIZED.getStatusCode(),
+                                       "Invalid cookie credential is used: " + e.toString());
+            return Response.status(Response.Status.UNAUTHORIZED).entity(errorMsg).build();
         } catch (Exception e) {
-            ApiResponseMessage errorMsg = new ApiResponseMessage(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Unknown error occurs.");
+            ApiResponseMessage
+                errorMsg =
+                new ApiResponseMessage(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
+                                       "Unknown error occurs: " + e.toString());
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorMsg).build();
         }
     }
 
     @Override
-    public Response accountsPost(Account account, SecurityContext securityContext) throws NotFoundException {
+    public Response accountsPost(AccountApi account, SecurityContext securityContext) throws NotFoundException {
+        final int emailStatus = 0x01;
         try {
-            Boolean mockVerified = true;
-
             AccountCreate accountCreate = identity.getAccountService().newAccountCreate();
             accountCreate.setUsername(account.getUsername());
             accountCreate.setFirstName(account.getFirstName());
             accountCreate.setLastName(account.getLastName());
-            accountCreate.setEmail(account.getEmail(), mockVerified);
+            accountCreate.setEmail(account.getEmail());
+            accountCreate.setEmailStatus(emailStatus);
 
             accountCreate.setPassword(account.getPassword());
-            accountCreate.setCreateTime(account.getCreateTime().toInstant());
-            accountCreate.setUpdateTime(account.getUpdateTime().toInstant());
+            accountCreate.setCreateTime(Instant.now());
+            accountCreate.setUpdateTime(Instant.now());
+            accountCreate.setBlockUntilTime(Instant.now());
             accountCreate.setDescription(account.getDescription());
-            accountCreate.setBlockUntil(account.getBlockUntil().toInstant());
-            accountCreate.setNthTrial(account.getNthTrial());
             accountCreate.create();
 
-            NewCookie cookie = new NewCookie("ButterCookie","123112131232");
+            SessionCreate sessionCreate = identity.getSessionService().newSessionCreate();
+            sessionCreate.initCredential();
 
-            ApiResponseMessage successMsg = new ApiResponseMessage(Response.Status.CREATED.getStatusCode(), "The account is created successfully");
-            return Response.ok().entity(successMsg).cookie(cookie).build();
+            String token = sessionCreate.create();
 
-        }catch (Exception e) {
-            ApiResponseMessage errorMsg = new ApiResponseMessage(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Unknown error occurs.");
+            ApiResponseMessage successMsg = new ApiResponseMessage(204, "The account is created successfully.");
+            return Response.ok().entity(successMsg).header("Set-Cookie", token).build();
+
+        } catch (BadRequestException e) {
+            ApiResponseMessage errorMsg = new ApiResponseMessage(400, "Invalid request: " + e.toString());
+            return Response.status(Response.Status.BAD_REQUEST).entity(errorMsg).build();
+        } catch (Exception e) {
+            ApiResponseMessage errorMsg = new ApiResponseMessage(500, "Unknown error occurs: " + e.toString());
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorMsg).build();
         }
     }
 
     @Override
-    public Response accountsmePut(String token, Account account, SecurityContext securityContext) throws NotFoundException {
-
+    public Response accountsmePut(String token, AccountApi account, SecurityContext securityContext)
+        throws NotFoundException {
+        final byte emailStatus = 0x01;
         try {
-            NewCookie mockCookie = new NewCookie("ButterCookie","123112131232");
-            if (mockCookie.getValue() == "123112131232") {
-                Boolean mockVerified = true;
+            SessionCreate sessionCreate = identity.getSessionService().newSessionCreate();
+            sessionCreate.setCredential(token);
 
-                if (mockVerified) {
-                    AccountUpdate accountUpdate = identity.getAccountService().newAccountUpdate(account.getUsername());
-                    accountUpdate.setEmail(account.getEmail(), mockVerified);
-                    accountUpdate.setPassword(account.getPassword());
-                    accountUpdate.setDescription(account.getDescription());
-                    accountUpdate.setUpdateTime(account.getUpdateTime().toInstant());
-                    accountUpdate.setBlockUntil(account.getBlockUntil().toInstant());
-                    accountUpdate.setNthTrial(account.getNthTrial());
-                    accountUpdate.update();
+            AccountUpdate accountUpdate = identity.getAccountService().newAccountUpdate(account.getUsername());
+            accountUpdate.setEmail(account.getEmail());
+            accountUpdate.setEmailStatus(emailStatus);
+            accountUpdate.setPassword(account.getPassword());
+            accountUpdate.setDescription(account.getDescription());
+            accountUpdate.setUpdateTime(Instant.now());
+            accountUpdate.update();
 
-                    ApiResponseMessage successMsg = new ApiResponseMessage(Response.Status.NO_CONTENT.getStatusCode(), "Successfully updated the account.");
-                    return Response.ok().entity(successMsg).build();
-                }
-                else{
-                    return null;
-                }
-            }
-            else{
-                ApiResponseMessage errorMsg = new ApiResponseMessage(Response.Status.UNAUTHORIZED.getStatusCode(), "Invalid cookie credential is used.");
-                return Response.status(Response.Status.UNAUTHORIZED).entity(errorMsg).build();
-            }
-        }catch (Exception e){
-            ApiResponseMessage errorMsg = new ApiResponseMessage(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Unknown error occurs.");
+            ApiResponseMessage successMsg = new ApiResponseMessage(204, "Successfully upate the account.");
+            return Response.ok().entity(successMsg).build();
+
+        } catch (NotAuthorizedException e) {
+            ApiResponseMessage
+                errorMsg =
+                new ApiResponseMessage(401, "Invalid cookie credential is used:" + e.toString());
+            return Response.status(Response.Status.UNAUTHORIZED).entity(errorMsg).build();
+        } catch (Exception e) {
+            ApiResponseMessage errorMsg = new ApiResponseMessage(500, "Unknown error occurs:" + e.toString());
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorMsg).build();
         }
     }
