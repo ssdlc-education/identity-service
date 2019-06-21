@@ -47,9 +47,7 @@ public class SqlAccount implements Account {
 
     @Override
     @Nonnull
-    public String getEmail() {
-        return this.account.getEmail();
-    }
+    public String getEmail() { return this.account.getEmail(); }
 
     @Override
     @Nonnull
