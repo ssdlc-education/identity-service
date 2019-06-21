@@ -33,7 +33,7 @@ public class LoggedInSessionImpl extends Session implements LoggedInSession {
     public void initCredential() {
         this.credential.setIssueTime(Instant.now());
         this.credential.setExpireTime(Instant.now().plus(7, ChronoUnit.DAYS));
-        this.credential.setSubject(getUsername());
+        this.credential.setSubject(this.username);
         this.credential.validate();
     }
 
@@ -45,7 +45,7 @@ public class LoggedInSessionImpl extends Session implements LoggedInSession {
 
     @Nonnull
     public Credential setCredential(@Nonnull String credStr) {
-        this.credential = this.credentialService.fromString(credStr, "token");
+        this.credential = this.credentialService.fromString(credStr);
         this.username = this.credential.getSubject();
         return this.credential;
     }

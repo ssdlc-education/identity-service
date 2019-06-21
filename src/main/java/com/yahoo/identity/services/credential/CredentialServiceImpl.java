@@ -18,7 +18,7 @@ public class CredentialServiceImpl implements CredentialService {
 
     @Override
     @Nonnull
-    public Credential fromString(@Nonnull String credStr, @Nonnull String username) {
+    public Credential fromString(@Nonnull String credStr) {
         try {
 
             Algorithm algorithm = Algorithm.HMAC256(this.keyService.getSecret("cookie"));
