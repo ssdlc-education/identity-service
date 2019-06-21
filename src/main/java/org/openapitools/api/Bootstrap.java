@@ -12,21 +12,23 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 
 public class Bootstrap extends HttpServlet {
-  @Override
-  public void init(ServletConfig config) throws ServletException {
-    Info info = new Info()
-      .title("OpenAPI Server")
-      .description("It's a music service for managing your favorite tracks. It references the design of [Spotify API](https://developer.spotify.com/documentation/web-api/reference/) ")
-      .termsOfService("")
-      .contact(new Contact()
-        .email(""))
-      .license(new License()
-        .name("")
-        .url("http://unlicense.org"));
 
-    ServletContext context = config.getServletContext();
-    Swagger swagger = new Swagger().info(info);
+    @Override
+    public void init(ServletConfig config) throws ServletException {
+        Info info = new Info()
+            .title("OpenAPI Server")
+            .description(
+                "It's a music service for managing your favorite tracks. It references the design of [Spotify API](https://developer.spotify.com/documentation/web-api/reference/) ")
+            .termsOfService("")
+            .contact(new Contact()
+                         .email(""))
+            .license(new License()
+                         .name("")
+                         .url("http://unlicense.org"));
 
-    new SwaggerContextService().withServletConfig(config).updateSwagger(swagger);
-  }
+        ServletContext context = config.getServletContext();
+        Swagger swagger = new Swagger().info(info);
+
+        new SwaggerContextService().withServletConfig(config).updateSwagger(swagger);
+    }
 }

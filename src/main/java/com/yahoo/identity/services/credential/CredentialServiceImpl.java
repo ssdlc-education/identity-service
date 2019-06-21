@@ -11,13 +11,14 @@ import com.yahoo.identity.services.key.KeyServiceImpl;
 import javax.annotation.Nonnull;
 import javax.ws.rs.BadRequestException;
 
-public class CredentialServiceImpl implements CredentialService{
+public class CredentialServiceImpl implements CredentialService {
+
     private KeyService keyService = new KeyServiceImpl();
     private CredentialImpl credential = new CredentialImpl();
 
     @Override
     @Nonnull
-    public Credential fromString(@Nonnull String credStr){
+    public Credential fromString(@Nonnull String credStr) {
         try {
             Algorithm algorithm = Algorithm.HMAC256(keyService.getSecret());
 
