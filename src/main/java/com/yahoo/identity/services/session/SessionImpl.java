@@ -42,11 +42,13 @@ public class SessionImpl implements Session {
         CredentialService credentialService = new CredentialServiceImpl();
         this.credential = credentialService.fromString(credStr);
         this.username = this.credential.getSubject();
+        credential.validate();
     }
 
     public void initCredential() {
         credential.setIssueTime(Instant.now());
         credential.setExpireTime(Instant.now().plus(7, ChronoUnit.DAYS));
         credential.setSubject(getUsername());
+        credential.validate();
     }
 }

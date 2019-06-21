@@ -1,12 +1,5 @@
 package com.yahoo.identity.services.storage.sql;
 
-import static com.kosprov.jargon2.api.Jargon2.Hasher;
-import static com.kosprov.jargon2.api.Jargon2.Type;
-import static com.kosprov.jargon2.api.Jargon2.jargon2Hasher;
-
-import com.kosprov.jargon2.api.Jargon2;
-import com.yahoo.identity.services.account.Account;
-import com.yahoo.identity.services.account.AccountUpdate;
 import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Tested;
@@ -21,6 +14,7 @@ import java.time.Instant;
 import javax.ws.rs.NotAuthorizedException;
 
 public class SqlAccountTest {
+
     @Tested
     SqlAccount account;
     @Injectable
@@ -31,6 +25,11 @@ public class SqlAccountTest {
     AccountModel accountModel;
 
     String password;
+
+    @DataProvider(name = "Fails")
+    public static Object[][] fails() {
+        return new Object[][]{{1}, {6}};
+    }
 
     @BeforeMethod
     public void setAccountUpdate() {
@@ -50,15 +49,10 @@ public class SqlAccountTest {
         Assert.assertTrue(account.verify(password));
 
         new Expectations() {{
-           account.getConsecutiveFails();
-           result = 1;
+            account.getConsecutiveFails();
+            result = 1;
         }};
         Assert.assertTrue(account.verify(password));
-    }
-
-    @DataProvider(name = "Fails")
-    public static Object[][] fails() {
-        return new Object[][] {{1}, {6}};
     }
 
     @Test(expectedExceptions = NotAuthorizedException.class, dataProvider = "Fails")
@@ -77,10 +71,10 @@ public class SqlAccountTest {
     @Test
     public void testVerifyBlocked() throws Exception {
         new Expectations() {{
-           account.getConsecutiveFails();
-           result = 0;
-           account.getBlockUntilTime();
-           result = Instant.now().plusSeconds(10000).toEpochMilli();
+            account.getConsecutiveFails();
+            result = 0;
+            account.getBlockUntilTime();
+            result = Instant.now().plusSeconds(10000).toEpochMilli();
         }};
         Assert.assertFalse(account.verify(password));
         Assert.assertFalse(account.verify(password));

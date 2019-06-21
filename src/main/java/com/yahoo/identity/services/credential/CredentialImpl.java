@@ -10,6 +10,7 @@ import java.util.Date;
 
 import javax.annotation.Nonnull;
 import javax.ws.rs.BadRequestException;
+import javax.ws.rs.NotAuthorizedException;
 
 public class CredentialImpl implements Credential {
 
@@ -64,6 +65,13 @@ public class CredentialImpl implements Credential {
             return token;
         } catch (JWTCreationException exception) {
             throw new BadRequestException("JWT creation does not succeed.");
+        }
+    }
+
+    @Override
+    public void validate(){
+        if(getExpireTime().compareTo(Instant.now())<0){
+            throw new NotAuthorizedException("token is not valid.");
         }
     }
 }
