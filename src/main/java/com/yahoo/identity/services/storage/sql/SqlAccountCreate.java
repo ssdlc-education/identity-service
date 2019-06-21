@@ -1,12 +1,14 @@
 package com.yahoo.identity.services.storage.sql;
 
-import com.yahoo.identity.services.account.AccountCreate;
 import com.yahoo.identity.IdentityException;
+import com.yahoo.identity.services.account.AccountCreate;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 
-import javax.annotation.Nonnull;
 import java.time.Instant;
+
+import javax.annotation.Nonnull;
+import javax.ws.rs.BadRequestException;
 
 
 public class SqlAccountCreate implements AccountCreate {
@@ -41,8 +43,15 @@ public class SqlAccountCreate implements AccountCreate {
 
     @Override
     @Nonnull
-    public AccountCreate setEmail(@Nonnull String email, @Nonnull Boolean verified) {
-        account.setEmail(email, verified);
+    public AccountCreate setEmail(@Nonnull String email) {
+        account.setEmail(email);
+        return this;
+    }
+
+    @Override
+    @Nonnull
+    public AccountCreate setEmailStatus(@Nonnull int emailStatus) {
+        account.setEmailStatus(emailStatus);
         return this;
     }
 
@@ -74,14 +83,18 @@ public class SqlAccountCreate implements AccountCreate {
         return this;
     }
 
+    @Nonnull
+    @Override
+    public AccountCreate setBlockUntilTime(@Nonnull Instant blockUntil) {
+        account.setBlockUntilTs(blockUntil.toEpochMilli());
+        return this;
+    }
 
-    private class SQLNameSpaceException extends Exception {
-
-        private String errorMessage = "Username has already existed";
-
-        public String toString() {
-            return "CustomException[" + errorMessage + "]";
-        }
+    @Nonnull
+    @Override
+    public AccountCreate setConsecutiveFails(@Nonnull int consecutiveFails) {
+        account.setConsecutiveFails(consecutiveFails);
+        return this;
     }
 
     @Nonnull
@@ -93,10 +106,8 @@ public class SqlAccountCreate implements AccountCreate {
                 mapper.insertAccount(account);
                 session.commit();
             } else {
-                throw new SQLNameSpaceException();
+                throw new BadRequestException("account already exists");
             }
-        } catch (SQLNameSpaceException e) {
-            System.out.println(e.toString());
         }
         return account.getUsername();
     }
