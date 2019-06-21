@@ -111,6 +111,7 @@ public class AccountsApiServiceImpl extends AccountsApiService {
 
             ApiResponseMessage successMsg = new ApiResponseMessage(204, "The account is created successfully.");
             return Response.ok().entity(successMsg).header("Set-Cookie", token).build();
+
         } catch (BadRequestException e) {
             ApiResponseMessage errorMsg = new ApiResponseMessage(400, "Invalid request: " + e.toString());
             return Response.status(Response.Status.BAD_REQUEST).entity(errorMsg).build();

@@ -6,9 +6,7 @@ public class KeyServiceImpl implements KeyService {
 
     private String secret;
 
-    public KeyServiceImpl() {
-        secret = "toySecret";
-    }
+    public KeyServiceImpl() { secret = "toySecret"; }
 
     @Override
     @Nonnull

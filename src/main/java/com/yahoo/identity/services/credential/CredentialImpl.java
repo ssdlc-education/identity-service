@@ -64,7 +64,7 @@ public class CredentialImpl implements Credential {
                 .sign(algorithm);
             return token;
         } catch (JWTCreationException exception) {
-            throw new BadRequestException("JWT creation not succeeded.");
+            throw new BadRequestException("JWT creation does not succeed.");
         }
     }
 
@@ -84,34 +84,7 @@ public class CredentialImpl implements Credential {
             setExpireTime(jwt.getExpiresAt().toInstant());
 
         } catch (JWTVerificationException e) {
-            throw new BadRequestException("JWT verification not succeeded.");
-        }
-        return getSubject();
-    }
-
-    public String fromStringLimit(@Nonnull String credStr) {
-        try {
-            Algorithm algorithm = Algorithm.HMAC256(keyServiceImpl.getSecret());
-
-            JWTVerifier verifier = JWT.require(algorithm)
-                .acceptLeeway(1)   // 1 sec for nbf and iat
-                .acceptExpiresAt(5)   // 5 secs for exp
-                .build();
-
-            DecodedJWT jwt = verifier.verify(credStr);
-
-            setSubject(jwt.getSubject());
-            System.out.println(getSubject());
-            setIssueTime(jwt.getIssuedAt().toInstant());
-            System.out.println(getIssueTime().toString());
-            setExpireTime(jwt.getExpiresAt().toInstant());
-            System.out.println(getExpireTime().toString());
-
-            if (getIssueTime().compareTo(Instant.now().plus(-5, ChronoUnit.MINUTES)) < 0) {
-                throw new BadRequestException("Credential not issued in the past 5 minutes.");
-            }
-        } catch (JWTVerificationException e) {
-            throw new BadRequestException("JWT verification not succeeded.");
+            throw new BadRequestException("JWT verification does not succeed.");
         }
         return getSubject();
     }
