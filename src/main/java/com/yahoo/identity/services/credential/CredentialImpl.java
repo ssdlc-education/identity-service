@@ -28,6 +28,7 @@ public class CredentialImpl implements Credential {
         return this.issueTime;
     }
 
+    @Override
     public void setIssueTime(@Nonnull Instant issueTime) {
         this.issueTime = issueTime;
     }
@@ -38,6 +39,7 @@ public class CredentialImpl implements Credential {
         return this.expireTime;
     }
 
+    @Override
     public void setExpireTime(@Nonnull Instant expireTime) {
         this.expireTime = expireTime;
     }
@@ -48,6 +50,7 @@ public class CredentialImpl implements Credential {
         return this.subject;
     }
 
+    @Override
     public void setSubject(@Nonnull String subject) {
         this.subject = subject;
     }
@@ -66,26 +69,5 @@ public class CredentialImpl implements Credential {
         } catch (JWTCreationException exception) {
             throw new BadRequestException("JWT creation does not succeed.");
         }
-    }
-
-    public String fromString(@Nonnull String credStr) {
-        try {
-            Algorithm algorithm = Algorithm.HMAC256(keyServiceImpl.getSecret());
-
-            JWTVerifier verifier = JWT.require(algorithm)
-                .acceptLeeway(1)   // 1 sec for nbf and iat
-                .acceptExpiresAt(5)   // 5 secs for exp
-                .build();
-
-            DecodedJWT jwt = verifier.verify(credStr);
-
-            setSubject(jwt.getSubject());
-            setIssueTime(jwt.getIssuedAt().toInstant());
-            setExpireTime(jwt.getExpiresAt().toInstant());
-
-        } catch (JWTVerificationException e) {
-            throw new BadRequestException("JWT verification does not succeed.");
-        }
-        return getSubject();
     }
 }
