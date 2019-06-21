@@ -5,13 +5,13 @@ import javax.annotation.Nonnull;
 public interface ChallengeRedeem {
 
     @Nonnull
-    ChallengeRedeem setUsername();
+    ChallengeRedeem setUsername(@Nonnull String username);
 
     @Nonnull
-    ChallengeRedeem setEmail();
+    ChallengeRedeem setEmail(@Nonnull String email);
 
     @Nonnull
-    ChallengeRedeem setAnswer();
+    ChallengeRedeem setAnswer(@Nonnull String answer);
 
     void redeem();
 }

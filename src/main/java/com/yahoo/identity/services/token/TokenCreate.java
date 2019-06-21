@@ -13,5 +13,8 @@ public interface TokenCreate {
     TokenCreate setToken(@Nonnull String tokenStr);
 
     @Nonnull
+    void initToken(@Nonnull String username);
+
+    @Nonnull
     Token create();
 }

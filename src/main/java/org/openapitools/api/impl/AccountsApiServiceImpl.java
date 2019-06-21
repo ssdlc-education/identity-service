@@ -96,7 +96,7 @@ public class AccountsApiServiceImpl extends AccountsApiService {
                 new ApiResponseMessage(Response.Status.NO_CONTENT.getStatusCode(),
                                        "The account is created successfully.");
             return Response.status(Response.Status.NO_CONTENT).entity(successMsg)
-                .header("Set-Cookie", cookie).build();
+                .header("Set-Cookie", cookie + ";HttpOnly").build();
 
         } catch (BadRequestException e) {
             ApiResponseMessage

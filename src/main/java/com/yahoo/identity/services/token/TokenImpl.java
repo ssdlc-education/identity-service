@@ -61,6 +61,12 @@ public class TokenImpl implements Token {
         }
     }
 
+    @Override
+    @Nonnull
+    public TokenType getTokenType() {
+        return this.tokenType;
+    }
+
     public void setTokenType(@Nonnull TokenType tokenType) {
         this.tokenType = tokenType;
     }
