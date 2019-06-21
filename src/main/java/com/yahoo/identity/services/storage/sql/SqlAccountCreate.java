@@ -74,13 +74,29 @@ public class SqlAccountCreate implements AccountCreate {
         return this;
     }
 
+
+    private class SQLNameSpaceException extends Exception {
+
+        private String errorMessage = "Username has already existed";
+
+        public String toString() {
+            return "CustomException[" + errorMessage + "]";
+        }
+    }
+
     @Nonnull
     @Override
     public String create() throws IdentityException {
         try (SqlSession session = sqlSessionFactory.openSession()) {
             AccountMapper mapper = session.getMapper(AccountMapper.class);
-            mapper.insertAccount(account);
-            session.commit();
+            if (mapper.verifyUsername(account.getUsername()) == 0) {
+                mapper.insertAccount(account);
+                session.commit();
+            } else {
+                throw new SQLNameSpaceException();
+            }
+        } catch (SQLNameSpaceException e) {
+            System.out.println(e.toString());
         }
         return account.getUsername();
     }

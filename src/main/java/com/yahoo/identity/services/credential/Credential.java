@@ -18,5 +18,6 @@ public interface Credential {
     @Nonnull
     String toString();
 
-    void validate();
+    @Nonnull
+    Boolean validate();
 }

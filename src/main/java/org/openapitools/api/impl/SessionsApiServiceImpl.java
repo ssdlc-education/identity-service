@@ -1,14 +1,15 @@
 package org.openapitools.api.impl;
 
-import com.yahoo.identity.DefaultIdentityFactory;
 import com.yahoo.identity.Identity;
-import com.yahoo.identity.IdentityFactory;
+import com.yahoo.identity.services.session.SessionCreate;
 import org.openapitools.api.ApiResponseMessage;
 import org.openapitools.api.NotFoundException;
 import org.openapitools.api.SessionsApiService;
 import org.openapitools.model.Session;
 
 import javax.annotation.Nonnull;
+import javax.ws.rs.BadRequestException;
+import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
@@ -23,6 +24,26 @@ public class SessionsApiServiceImpl extends SessionsApiService {
 
     @Override
     public Response sessionsPost(Session session, SecurityContext securityContext) throws NotFoundException {
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+
+        try {
+            SessionCreate sessionCreate = identity.getSessionService().newSessionCreate();
+            sessionCreate.setUsername(session.getUsername());
+            sessionCreate.setPassword(session.getPassword());
+            sessionCreate.initCredential();
+
+            String token = sessionCreate.create();
+
+            ApiResponseMessage successMsg = new ApiResponseMessage(201, "The session is created successfully");
+            return Response.ok().entity(successMsg).header("Set-Cookie", token).build();
+
+        } catch (BadRequestException e){
+            ApiResponseMessage errorMsg = new ApiResponseMessage(401, "Invalid request");
+            return Response.status(Response.Status.UNAUTHORIZED).entity(errorMsg).build();
+        } catch (Exception e){
+            ApiResponseMessage errorMsg = new ApiResponseMessage(500, "Unknown error occurs");
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorMsg).build();
+        }
     }
+
+
 }

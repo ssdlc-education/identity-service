@@ -3,6 +3,7 @@ package org.openapitools.api.impl;
 import com.yahoo.identity.Identity;
 import com.yahoo.identity.services.account.AccountCreate;
 import com.yahoo.identity.services.account.AccountUpdate;
+import com.yahoo.identity.services.session.SessionCreate;
 import org.openapitools.api.AccountsApiService;
 import org.openapitools.api.ApiResponseMessage;
 import org.openapitools.api.NotFoundException;
@@ -10,6 +11,8 @@ import org.openapitools.model.Account;
 
 import java.time.Instant;
 import javax.annotation.Nonnull;
+import javax.ws.rs.BadRequestException;
+import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
@@ -54,11 +57,16 @@ public class AccountsApiServiceImpl extends AccountsApiService {
             accountCreate.setDescription(account.getDescription());
             accountCreate.create();
 
-            NewCookie cookie = new NewCookie("ButterCookie","123112131232");
+            SessionCreate sessionCreate = identity.getSessionService().newSessionCreate();
+            sessionCreate.initCredential();
 
-            ApiResponseMessage successMsg = new ApiResponseMessage(204, "The account is created successfully");
-            return Response.ok().entity(successMsg).cookie(cookie).build();
+            String token = sessionCreate.create();
 
+            ApiResponseMessage successMsg = new ApiResponseMessage(204, "The account is created successfully.");
+            return Response.ok().entity(successMsg).header("Set-Cookie", token).build();
+        }catch (BadRequestException e) {
+            ApiResponseMessage errorMsg = new ApiResponseMessage(400, "Invalid request.");
+            return Response.status(Response.Status.BAD_REQUEST).entity(errorMsg).build();
         }catch (Exception e) {
             ApiResponseMessage errorMsg = new ApiResponseMessage(500, "Unknown error occurs.");
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorMsg).build();
@@ -67,32 +75,25 @@ public class AccountsApiServiceImpl extends AccountsApiService {
 
     @Override
     public Response accountsmePut(String token, Account account, SecurityContext securityContext) throws NotFoundException {
-
+        Boolean mockVerified = true;
         try {
-            NewCookie mockCookie = new NewCookie("ButterCookie","123112131232");
-            if (mockCookie.getValue() == "123112131232") {
-                Boolean mockVerified = true;
+            SessionCreate sessionCreate = identity.getSessionService().newSessionCreate();
+            sessionCreate.setCredential(token);
 
-                if (mockVerified) {
-                    AccountUpdate accountUpdate = identity.getAccountService().newAccountUpdate(account.getUsername());
-                    accountUpdate.setEmail(account.getEmail(), mockVerified);
-                    accountUpdate.setPassword(account.getPassword());
-                    accountUpdate.setDescription(account.getDescription());
-                    accountUpdate.setUpdateTime(account.getUpdateTime().toInstant());
-                    accountUpdate.update();
+            AccountUpdate accountUpdate = identity.getAccountService().newAccountUpdate(account.getUsername());
+            accountUpdate.setEmail(account.getEmail(), mockVerified);
+            accountUpdate.setPassword(account.getPassword());
+            accountUpdate.setDescription(account.getDescription());
+            accountUpdate.setUpdateTime(account.getUpdateTime().toInstant());
+            accountUpdate.update();
 
-                    ApiResponseMessage successMsg = new ApiResponseMessage(204, "Successfully upate the account.");
-                    return Response.ok().entity(successMsg).build();
-                }
-                else{
-                    return null;
-                }
-            }
-            else{
-                ApiResponseMessage errorMsg = new ApiResponseMessage(401, "Invalid cookie credential is used.");
-                return Response.status(Response.Status.UNAUTHORIZED).entity(errorMsg).build();
-            }
-        }catch (Exception e){
+            ApiResponseMessage successMsg = new ApiResponseMessage(204, "Successfully upate the account.");
+            return Response.ok().entity(successMsg).build();
+
+        }catch (NotAuthorizedException e){
+            ApiResponseMessage errorMsg = new ApiResponseMessage(401, "Invalid cookie credential is used.");
+            return Response.status(Response.Status.UNAUTHORIZED).entity(errorMsg).build();
+        } catch (Exception e){
             ApiResponseMessage errorMsg = new ApiResponseMessage(500, "Unknown error occurs.");
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorMsg).build();
         }

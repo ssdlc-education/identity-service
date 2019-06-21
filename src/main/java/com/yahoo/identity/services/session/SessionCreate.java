@@ -11,5 +11,11 @@ public interface SessionCreate {
     SessionCreate setPassword(@Nonnull String password);
 
     @Nonnull
-    Session create();
+    SessionCreate setCredential(@Nonnull String credStr);
+
+    @Nonnull
+    SessionCreate initCredential();
+
+    @Nonnull
+    String create();
 }
