@@ -1,15 +1,8 @@
 language: go
 
+go:
+  - "1.12.5"
+
 script:
   - go run request_handler.go &
   - sleep 30
-
-go:
-- 1.x
-- "1.10"
-- 1.11.x
-- master
-
-
-
-
