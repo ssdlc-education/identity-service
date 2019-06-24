@@ -4,6 +4,8 @@ import com.yahoo.identity.services.account.Account;
 import com.yahoo.identity.services.account.AccountCreate;
 import com.yahoo.identity.services.account.AccountService;
 import com.yahoo.identity.services.account.AccountUpdate;
+import com.yahoo.identity.services.storage.AccountImpl;
+import com.yahoo.identity.services.storage.AccountModel;
 import com.yahoo.identity.services.storage.Storage;
 
 import javax.annotation.Nonnull;
@@ -24,7 +26,14 @@ public class SqlAccountService implements AccountService {
 
     @Override
     public Account getAccount(@Nonnull String username) {
-        return this.storage.getAccount(username);
+        AccountModel accountModel = this.storage.getAccount(username);
+        return new AccountImpl(accountModel);
+    }
+
+    @Nonnull
+    @Override
+    public Account getPublicAccount(@Nonnull String id) {
+        return null;
     }
 
     @Override

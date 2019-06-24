@@ -2,6 +2,7 @@ package com.yahoo.identity.services.storage.sql;
 
 import com.yahoo.identity.IdentityException;
 import com.yahoo.identity.services.account.AccountCreate;
+import com.yahoo.identity.services.storage.AccountModel;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 

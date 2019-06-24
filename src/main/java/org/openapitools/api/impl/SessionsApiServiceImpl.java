@@ -2,6 +2,7 @@ package org.openapitools.api.impl;
 
 import com.yahoo.identity.Identity;
 import com.yahoo.identity.services.account.Account;
+import com.yahoo.identity.services.session.LoggedInSession;
 import com.yahoo.identity.services.session.SessionCreate;
 import org.openapitools.api.ApiResponseMessage;
 import org.openapitools.api.NotFoundException;
@@ -25,18 +26,16 @@ public class SessionsApiServiceImpl extends SessionsApiService {
     @Override
     public Response sessionsPost(Session session, SecurityContext securityContext) throws NotFoundException {
         try {
-            SessionCreate sessionCreate = identity.getSessionService().newSessionCreate();
-            sessionCreate.setUsername(session.getUsername());
-            sessionCreate.setPassword(session.getPassword());
-            sessionCreate.initCredential();
+            LoggedInSession loggedInSession = identity.getSessionService()
+                .newSessionWithPassword(session.getUsername(), session.getPassword());
 
             Account account = identity.getAccountService().getAccount(session.getUsername());
             if (!account.verify(session.getPassword())) {
                 throw new NotAuthorizedException("Account is locked!");
             }
-            String token = sessionCreate.create();
+            String credential = loggedInSession.getCredential();
             ApiResponseMessage successMsg = new ApiResponseMessage(201, "The session is created successfully");
-            return Response.ok().entity(successMsg).header("Set-Cookie", token).build();
+            return Response.ok().entity(successMsg).header("Set-Cookie", credential).build();
 
         } catch (NotAuthorizedException e) {
             ApiResponseMessage errorMsg = new ApiResponseMessage(401, "Invalid request: " + e.getMessage());

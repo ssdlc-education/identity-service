@@ -18,7 +18,7 @@ public class DefaultIdentityFactory implements IdentityFactory {
         SystemService systemService = new SystemService();
         Storage sqlStorage = new SqlStorage(systemService);
         AccountService accountService = new SqlAccountService(sqlStorage);
-        SessionService sessionService = new SessionServiceImpl();
+        SessionService sessionService = new SessionServiceImpl(sqlStorage);
 
         return new Identity(accountService, sessionService);
     }

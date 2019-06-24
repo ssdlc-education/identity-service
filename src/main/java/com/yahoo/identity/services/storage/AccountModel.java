@@ -1,4 +1,4 @@
-package com.yahoo.identity.services.storage.sql;
+package com.yahoo.identity.services.storage;
 
 import static com.kosprov.jargon2.api.Jargon2.Hasher;
 import static com.kosprov.jargon2.api.Jargon2.jargon2Hasher;

@@ -1,6 +1,5 @@
 package com.yahoo.identity.services.storage;
 
-import com.yahoo.identity.services.account.Account;
 import com.yahoo.identity.services.account.AccountCreate;
 import com.yahoo.identity.services.account.AccountUpdate;
 
@@ -12,7 +11,7 @@ public interface Storage {
     AccountCreate newAccountCreate();
 
     @Nonnull
-    Account getAccount(@Nonnull String id);
+    AccountModel getAccount(@Nonnull String id);
 
     @Nonnull
     AccountUpdate newAccountUpdate(@Nonnull String id);

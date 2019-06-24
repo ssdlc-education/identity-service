@@ -4,6 +4,8 @@ import com.yahoo.identity.Identity;
 import com.yahoo.identity.services.account.Account;
 import com.yahoo.identity.services.account.AccountCreate;
 import com.yahoo.identity.services.account.AccountUpdate;
+import com.yahoo.identity.services.session.AnonymousSession;
+import com.yahoo.identity.services.session.LoggedInSession;
 import com.yahoo.identity.services.session.SessionCreate;
 import org.json.JSONObject;
 import org.openapitools.api.AccountsApiService;
@@ -31,7 +33,8 @@ public class AccountsApiServiceImpl extends AccountsApiService {
 
     @Override
     public Response accountsIdGet(String username, SecurityContext securityContext) throws NotFoundException {
-        Account account = identity.getAccountService().getAccount(username);
+        AnonymousSession session = identity.getSessionService().newAnonymousSession();
+        Account account = session.getAccount(username);
         String firstName = account.getFirstName();
         String lastName = account.getLastName();
         String description = account.getDescription();
@@ -50,10 +53,11 @@ public class AccountsApiServiceImpl extends AccountsApiService {
     public Response accountsmeGet(String token, SecurityContext securityContext) throws NotFoundException {
         final byte emailStatus = 0x01;
         try {
-            SessionCreate sessionCreate = identity.getSessionService().newSessionCreate();
-            sessionCreate.setCredential(token);
+            // TODO Get credential from cookie header
+            String credential = "";
+            LoggedInSession session = identity.getSessionService().newSessionWithCredential(credential);
 
-            String username = sessionCreate.getUsername();
+            String username = session.getUsername();
 
             Account account = identity.getAccountService().getAccount(username);
             String firstName = account.getFirstName();
@@ -104,13 +108,13 @@ public class AccountsApiServiceImpl extends AccountsApiService {
             accountCreate.setDescription(account.getDescription());
             accountCreate.create();
 
-            SessionCreate sessionCreate = identity.getSessionService().newSessionCreate();
-            sessionCreate.initCredential();
+            LoggedInSession session = identity.getSessionService()
+                .newSessionWithPassword(account.getUsername(), account.getPassword());
 
-            String token = sessionCreate.create();
+            String credential = session.getCredential();
 
             ApiResponseMessage successMsg = new ApiResponseMessage(204, "The account is created successfully.");
-            return Response.ok().entity(successMsg).header("Set-Cookie", token).build();
+            return Response.ok().entity(successMsg).header("Set-Cookie", credential).build();
 
         } catch (BadRequestException e) {
             ApiResponseMessage errorMsg = new ApiResponseMessage(400, "Invalid request: " + e.toString());
@@ -126,8 +130,9 @@ public class AccountsApiServiceImpl extends AccountsApiService {
         throws NotFoundException {
         final byte emailStatus = 0x01;
         try {
-            SessionCreate sessionCreate = identity.getSessionService().newSessionCreate();
-            sessionCreate.setCredential(token);
+            // TODO Get credential from cookie header
+            String credential = "";
+            LoggedInSession session = identity.getSessionService().newSessionWithCredential(credential);
 
             AccountUpdate accountUpdate = identity.getAccountService().newAccountUpdate(account.getUsername());
             accountUpdate.setEmail(account.getEmail());

@@ -9,9 +9,9 @@ import javax.annotation.Nonnull;
 
 public class AccountImpl implements Account {
 
-    private final Map<String, Object> data;
+    private final AccountModel data;
 
-    public AccountImpl(@Nonnull Map<String, Object> data) {
+    public AccountImpl(@Nonnull AccountModel data) {
         this.data = data;
     }
 
@@ -24,7 +24,7 @@ public class AccountImpl implements Account {
     @Nonnull
     @Override
     public String getUsername() {
-        return data.get("id").toString();
+        return data.getUsername();
     }
 
     @Nonnull
@@ -54,13 +54,13 @@ public class AccountImpl implements Account {
     @Nonnull
     @Override
     public Instant getCreateTime() {
-        return Instant.ofEpochMilli(Long.valueOf(data.get("create_ts").toString()));
+        return Instant.ofEpochMilli(data.getCreateTs());
     }
 
     @Nonnull
     @Override
     public Instant getUpdateTime() {
-        return Instant.ofEpochMilli(Long.valueOf(data.get("update_ts").toString()));
+        return Instant.ofEpochMilli(data.getUpdateTs());
     }
 
     @Override

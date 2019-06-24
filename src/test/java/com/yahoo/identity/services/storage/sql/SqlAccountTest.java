@@ -1,5 +1,6 @@
 package com.yahoo.identity.services.storage.sql;
 
+import com.yahoo.identity.services.storage.AccountModel;
 import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Tested;

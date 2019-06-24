@@ -2,11 +2,12 @@ package com.yahoo.identity.services.storage.sql;
 
 import com.yahoo.identity.IdentityError;
 import com.yahoo.identity.IdentityException;
-import com.yahoo.identity.services.account.Account;
 import com.yahoo.identity.services.account.AccountCreate;
 import com.yahoo.identity.services.account.AccountUpdate;
+import com.yahoo.identity.services.storage.AccountModel;
 import com.yahoo.identity.services.storage.Storage;
 import com.yahoo.identity.services.system.SystemService;
+import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 
@@ -32,8 +33,11 @@ public class SqlStorage implements Storage {
 
     @Nonnull
     @Override
-    public Account getAccount(@Nonnull String username) {
-        return new SqlAccount(sqlSessionFactory, username);
+    public AccountModel getAccount(@Nonnull String username) {
+        try (SqlSession session = sqlSessionFactory.openSession()) {
+            AccountMapper mapper = session.getMapper(AccountMapper.class);
+            return mapper.getAccount(username);
+        }
     }
 
     @Nonnull

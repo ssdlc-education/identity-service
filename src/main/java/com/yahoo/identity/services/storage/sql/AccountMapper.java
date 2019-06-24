@@ -1,5 +1,6 @@
 package com.yahoo.identity.services.storage.sql;
 
+import com.yahoo.identity.services.storage.AccountModel;
 import org.apache.ibatis.annotations.Param;
 
 public interface AccountMapper {
