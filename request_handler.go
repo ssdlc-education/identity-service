@@ -1,7 +1,3 @@
-
-
-
-
 // Copyright 2010 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
@@ -9,101 +5,183 @@
 package main
 
 import (
-"bufio"
-"html/template"
-"io/ioutil"
-"log"
-"net/http"
-"os"
-"regexp"
-"strings"
+	"encoding/json"
+	"html/template"
+	"io/ioutil"
+	"log"
+	"net/http"
+	"regexp"
+	"strings"
 )
 
-type Page struct {
-	Username    string
-	Firstname   string
-	Lastname    string
-	Email       string
-	CreateTs    string
-	UpdateTs    string
-	Description string
+type Profile struct {
+	Username    string `json:"username"`
+	Firstname   string `json:"firstName"`
+	Lastname    string `json:"lastName"`
+	Email       string `json:"email"`
+	Description string `json:"description"`
+	Password    string `json:"password"`
+	Verified    string `json:"verified"`
+}
+// Struct to contain page information
+
+type Response struct {
+	Code    int    `json:"code"`
+	Type    string `json:"type"`
+	Message string `json:"message"`
 }
 
-func readLines(path string) ([]string, error) {
-	file, err := os.Open(path)
+// Struct to store http response
 
+type UpdateInfo struct {
+	Username    string `json:"username"`
+	Email       string `json:"email"`
+	Description string `json:"description"`
+}
+
+// Struct to store updated information
+
+type PublicInfo struct {
+	Username    string `json:"username"`
+	Description string `json:"description"`
+}
+
+// Struct to store public page information
+
+type LogInfo struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+// Struct to store login information
+var token = ""
+
+// initialize the token with an empty string at first
+
+// Save the edited information to backend
+func (p *Profile) saveToBackend() error {
+	link := "http://localhost:8080/v1/accounts/@me?token=" + token
+	client := &http.Client{}
+	updateInfo := UpdateInfo{}
+	updateInfo.Username = p.Username
+	updateInfo.Email = p.Email
+	updateInfo.Description = p.Description
+	jsonData, err := json.Marshal(updateInfo)
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer file.Close()
-	var lines []string
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		lines = append(lines, scanner.Text())
-	}
-	return lines, scanner.Err()
-}
-
-func (p *Page) save() error {
-	filename := "fakedb/" + p.Username + ".txt"
-	values := []string{p.Username, p.Firstname, p.Lastname, p.Email, p.CreateTs, p.UpdateTs, p.Description}
-	buffer := []byte(strings.Join(values, "\n"))
-	return ioutil.WriteFile(filename, buffer, 0600)
-}
-
-func loadPage(title string) (*Page, error) {
-	filename := "fakedb/" + title + ".txt"
-	lines, err := readLines(filename)
+	Data := string(jsonData)
+	// Encode the information to byte payload
+	payload := strings.NewReader(Data)
+	request, err := http.NewRequest("PUT", link, payload)
+	request.Header.Add("Content-Type", "application/json")
+	_, err = client.Do(request)
+	client.CloseIdleConnections()
 	if err != nil {
 		log.Fatal(err)
 	}
-	username, firstname, lastname, email, createTs, updateTs, description := lines[0], lines[1], lines[2], lines[3], lines[4], lines[5], lines[6]
-	return &Page{Username: username, Firstname: firstname, Lastname: lastname, Email: email, CreateTs: createTs, UpdateTs: updateTs, Description: description}, nil
+	return err
+}
+
+// Preload the information by fetching data from backend
+func readFromBackend(userid string) (*Profile, error) {
+	apiUrl := "http://localhost:8080/v1/accounts/@me?token=" + token
+	res, err := http.Get(apiUrl)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer res.Body.Close()
+	bodyBytes, err := ioutil.ReadAll(res.Body)
+	var responseInfo Response
+	err = json.Unmarshal(bodyBytes, &responseInfo)
+	if err != nil {
+		log.Fatal(err)
+	}
+	// Extract the data from http response and generate data to render backend pages
+	data := responseInfo.Message
+	var pageInfo Profile
+	err = json.Unmarshal([]byte(data), &pageInfo)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return &pageInfo, err
+}
+
+//Function to read public information without login and render the web pages
+func readFromPublic(username string) (*PublicInfo, error) {
+	link := "http://localhost:8080/v1/accounts/" + username
+	resp, err := http.Get(link)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer resp.Body.Close()
+	bodyBytes, err := ioutil.ReadAll(resp.Body)
+	var responseInfo Response
+	err = json.Unmarshal(bodyBytes, &responseInfo)
+	if err != nil {
+		log.Fatal(err)
+	}
+	data := responseInfo.Message
+	var pageData PublicInfo
+	err = json.Unmarshal([]byte(data), &pageData)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return &pageData, err
 }
 
 func accountsHandler(w http.ResponseWriter, r *http.Request, title string) {
-	p, err := loadPage(title)
+	p, err := readFromPublic(title)
 	if err != nil {
 		http.Redirect(w, r, "/accounts/oscarwilde", http.StatusFound)
 		return
 	}
-	renderTemplate(w, "accounts", p)
+	page := Profile{}
+	page.Username = p.Username
+	page.Description = p.Description
+	renderTemplate(w, "public_profile", &page)
 }
 
+// Render the edit information page
+
 func editHandler(w http.ResponseWriter, r *http.Request, title string) {
-	p, err := loadPage(title)
+	p, err := readFromBackend(title)
 	if err != nil {
 		log.Fatal(err)
 	}
 	renderTemplate(w, "edit", p)
 }
 
+// The Function to save the edited information
+
 func saveHandler(w http.ResponseWriter, r *http.Request, title string) {
-	username := r.FormValue("username")
-	firstname := r.FormValue("firstname")
-	lastname := r.FormValue("lastname")
 	email := r.FormValue("email")
-	createTs := r.FormValue("createTs")
-	updateTs := r.FormValue("updateTs")
 	description := r.FormValue("description")
-	p := &Page{Username: username, Firstname: firstname, Lastname: lastname, Email: email, CreateTs: createTs, UpdateTs: updateTs, Description: description}
-	err := p.save()
+	originalPage, err := readFromBackend(title)
 	if err != nil {
 		log.Fatal(err)
 	}
-	http.Redirect(w, r, "/accounts/"+username, http.StatusFound)
+	// Change the information from preloaded information
+	originalPage.Email = email
+	originalPage.Description = description
+	err = originalPage.saveToBackend()
+	if err != nil {
+		log.Fatal(err)
+	}
+	// After edited it redirect to the private information page
+	http.Redirect(w, r, "/privatePage/", http.StatusFound)
 }
 
-var templates = template.Must(template.ParseFiles("template/edit.html", "template/accounts.html"))
+var templates = template.Must(template.ParseFiles("template/edit.html", "template/accounts.html", "template/register.html", "template/login.html", "template/public_profile.html", "template/profile.html"))
 
-func renderTemplate(w http.ResponseWriter, tmpl string, p *Page) {
+func renderTemplate(w http.ResponseWriter, tmpl string, p *Profile) {
 	err := templates.ExecuteTemplate(w, tmpl+".html", p)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
-
-var validPath = regexp.MustCompile("^/(edit|save|accounts)/([a-zA-Z0-9]+)$")
+// Regular expression to avoid illegal request
+var validPath = regexp.MustCompile("^(/(edit|save|accounts|home)/([a-zA-Z0-9]+))|(/(login|home|create|privatePage|register)/)$")
 
 func makeHandler(fn func(http.ResponseWriter, *http.Request, string)) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -112,14 +190,106 @@ func makeHandler(fn func(http.ResponseWriter, *http.Request, string)) http.Handl
 			http.NotFound(w, r)
 			return
 		}
-		fn(w, r, m[2])
+		fn(w, r, m[3])
 	}
+}
+
+func createHandler(w http.ResponseWriter, r *http.Request, title string){
+	var pageinfo Profile
+	pageinfo.Username = r.FormValue("username")
+	pageinfo.Firstname = r.FormValue("firstname")
+	pageinfo.Lastname = r.FormValue("lastname")
+	pageinfo.Description = r.FormValue("description")
+	pageinfo.Password = r.FormValue("password")
+	pageinfo.Email = r.FormValue("email")
+	pageinfo.Verified = "true"
+	newUser, err := json.Marshal(pageinfo)
+	if err != nil {
+		log.Fatal()
+	}
+	Data := string(newUser)
+	payload := strings.NewReader(Data)
+	_, err = http.Post("http://localhost:8080/v1/accounts/", "application/json", payload)
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = login(pageinfo.Username, pageinfo.Password)
+	if err != nil {
+		log.Fatal(err)
+	}
+	http.Redirect(w, r, "/privatePage/", http.StatusFound)
+}
+
+// Handle the login page
+
+func homeHandler(w http.ResponseWriter, r *http.Request, title string) {
+	p := Profile{}
+	renderTemplate(w, "login", &p)
+}
+
+// Do the login job and set the token
+
+func login(username string, password string) error {
+	user := LogInfo{}
+	user.Username = username
+	user.Password = password
+	userData, err := json.Marshal(user)
+	userString := string(userData)
+	payload := strings.NewReader(userString)
+	response, err := http.Post("http://localhost:8080/v1/sessions/", "application/json", payload)
+	if err != nil {
+		log.Fatal(err)
+	}
+	// Get token from login response from backend
+	token = response.Header.Get("Set-Cookie")
+	return err
+}
+
+func loginHandler(w http.ResponseWriter, r *http.Request, title string) {
+	// Get user login in information
+	username := r.FormValue("username")
+	password := r.FormValue("password")
+	//User information struct
+	err := login(username, password)
+	if err != nil {
+		log.Fatal(err)
+	}
+	// After login, redirect to private page
+	http.Redirect(w, r, "/privatePage/", http.StatusFound)
+}
+
+func registerHandler(w http.ResponseWriter, r *http.Request, title string) {
+	p := Profile{}
+	renderTemplate(w, "register", &p)
+}
+
+func privateHandler(w http.ResponseWriter, r *http.Request, title string) {
+	link := "http://localhost:8080/v1/accounts/@me?token=" + token
+	resp, err := http.Get(link)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer resp.Body.Close()
+	bodyBytes, err := ioutil.ReadAll(resp.Body)
+	var responseInfo Response
+	err = json.Unmarshal(bodyBytes, &responseInfo)
+	if err != nil {
+		log.Fatal(err)
+	}
+	data := responseInfo.Message
+	var pageInfo Profile
+	err = json.Unmarshal([]byte(data), &pageInfo)
+	renderTemplate(w, "profile", &pageInfo)
 }
 
 func main() {
 	http.HandleFunc("/accounts/", makeHandler(accountsHandler))
 	http.HandleFunc("/edit/", makeHandler(editHandler))
 	http.HandleFunc("/save/", makeHandler(saveHandler))
+	http.HandleFunc("/register/", makeHandler(registerHandler))
+	http.HandleFunc("/create/", makeHandler(createHandler))
+	http.HandleFunc("/login/", makeHandler(loginHandler))
+	http.HandleFunc("/home/", makeHandler(homeHandler))
+	http.HandleFunc("/privatePage/", makeHandler(privateHandler))
 	log.Fatal(http.ListenAndServe(":5000", nil))
 }
-

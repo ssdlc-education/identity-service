@@ -4,60 +4,43 @@ import (
 	"net/http"
 	"net/url"
 	"testing"
-	"fmt"
-	//"html/template"
 )
 
 
-func TestUnitStart(t *testing.T){
-	fmt.Println("Unit Test Here")
-	t.Log("Unit Test Running")
-}
 
-func TestReadFiles(t *testing.T){
-	_, err := readLines("fakedb/oscarwilde.txt")
-	if err != nil {
-		t.Fail()
-	}
-	t.Log("Read File successed")
-}
-
-func TestAccountHandler(t *testing.T){
-	http.HandleFunc("/accounts/", makeHandler(accountsHandler))
-	_, err := http.Get("http://localhost:5000/accounts/oscarwilde1")
-	if err != nil {
-		fmt.Println("here some trouble")
-		t.Fail()
-	}
-	//if accountResponse == nil {
-	//	t.Fail()
-	//}gi
-
-}
-
-func TestSendHandler(t *testing.T){
-	http.HandleFunc("/edit/",makeHandler(editHandler))
-	_, err := http.PostForm("http://localhost:5000/Send", url.Values{"username":{"XimingC"},"firstname":{"Ximing"},"lastname":{"Chen"},"email":{" cxm@gmail.com"},"createTs":{"sjjoajo"},"updateTs":{"ashihf"}, "description":{"this is fine"}})
-	if err != nil {
-		fmt.Println("some trouble on send request")
-		t.Fail()
-	}
-
-}
-
-
-func TestEditHandler(t *testing.T){
-	http.HandleFunc("/save/",makeHandler(saveHandler))
-	_,err := http.PostForm("http://localhost:5000/Send", url.Values{"username":{"XimingC"},"firstname":{"Ximing"},"lastname":{"Chen"},"email":{" cxm@gmail.com"},"createTs":{"sjjoajo"},"updateTs":{"ashihf"}, "description":{"this is fine"}})
-	if err != nil {
-		fmt.Println("some trouble on save request")
+func TestCreateAccount(t *testing.T) {
+	resp, err := http.PostForm("http://localhost:5000/create/", url.Values{"username":{"Henry123"},"firstname":{"Henry"},"lastname":{"Zhang"},"email":{"henryzhang@gmail.com"},"description":{"this is a new account"},"verified":{"true"},"password":{"PASSWORD"}})
+	if err != nil && resp.StatusCode% 100 != 2{
 		t.Fail()
 	}
 }
-func TestLoadPage(t *testing.T){
-	_, err := loadPage("oscarwilde1")
-	if err != nil{
+func TestLogin(t *testing.T) {
+	resp, err := http.PostForm("http://localhost:5000/login/", url.Values{"username":{"Henry123"},"password":{"PASSWORD"}})
+	if err != nil && resp.StatusCode% 100 != 2{
 		t.Fail()
 	}
 }
+
+func TestAccessProfile(t *testing.T) {
+	link := "http://localhost:5000/privatePage/"
+	resp, err := http.Get(link)
+	if err != nil && resp.StatusCode% 100 != 2{
+		t.Fail()
+	}
+}
+func TestEdit(t *testing.T) {
+	resp, err := http.PostForm("http://localhost:5000/save/Henry123", url.Values{"email": {"henry123@yahoo.com"}, "description": {"Hello from your new Email"}})
+	if err != nil && resp.StatusCode% 100 != 2{
+		t.Fail()
+	}
+}
+
+func TestGetPublicProfile(t *testing.T) {
+	resp, err := http.Get("http://localhost:5000/accounts/Henry123")
+	if err != nil && resp.StatusCode% 100 != 2{
+		t.Fail()
+	}
+}
+
+
 
