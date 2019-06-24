@@ -2,10 +2,12 @@ package com.yahoo.identity.services.account;
 
 import com.yahoo.identity.IdentityException;
 
-import javax.annotation.Nonnull;
 import java.time.Instant;
 
+import javax.annotation.Nonnull;
+
 public interface AccountCreate {
+
     @Nonnull
     AccountCreate setFirstName(@Nonnull String firstName);
 
@@ -16,7 +18,10 @@ public interface AccountCreate {
     AccountCreate setUsername(@Nonnull String username);
 
     @Nonnull
-    AccountCreate setEmail(@Nonnull String email, @Nonnull Boolean verified);
+    AccountCreate setEmail(@Nonnull String email);
+
+    @Nonnull
+    AccountCreate setEmailStatus(@Nonnull boolean emailStatus);
 
     @Nonnull
     AccountCreate setPassword(@Nonnull String password);
@@ -29,6 +34,12 @@ public interface AccountCreate {
 
     @Nonnull
     AccountCreate setDescription(@Nonnull String description);
+
+    @Nonnull
+    AccountCreate setBlockUntilTime(@Nonnull Instant blockUntil);
+
+    @Nonnull
+    AccountCreate setConsecutiveFails(@Nonnull int consecutiveFails);
 
     @Nonnull
     String create() throws IdentityException;

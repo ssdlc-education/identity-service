@@ -1,18 +1,26 @@
 package com.yahoo.identity.services.storage.sql;
 
-import com.yahoo.identity.services.account.AccountCreate;
+import static com.kosprov.jargon2.api.Jargon2.jargon2Hasher;
+
+import com.kosprov.jargon2.api.Jargon2;
 import com.yahoo.identity.IdentityException;
+import com.yahoo.identity.services.account.AccountCreate;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 
-import javax.annotation.Nonnull;
+import java.security.SecureRandom;
 import java.time.Instant;
+import java.util.Base64;
+
+import javax.annotation.Nonnull;
+import javax.ws.rs.BadRequestException;
 
 
 public class SqlAccountCreate implements AccountCreate {
 
     private final SqlSessionFactory sqlSessionFactory;
     private final AccountModel account = new AccountModel();
+    private final SecureRandom secureRandom = new SecureRandom();
 
     public SqlAccountCreate(@Nonnull SqlSessionFactory sqlSessionFactory) {
         this.sqlSessionFactory = sqlSessionFactory;
@@ -41,15 +49,30 @@ public class SqlAccountCreate implements AccountCreate {
 
     @Override
     @Nonnull
-    public AccountCreate setEmail(@Nonnull String email, @Nonnull Boolean verified) {
-        account.setEmail(email, verified);
+    public AccountCreate setEmail(@Nonnull String email) {
+        account.setEmail(email);
+        return this;
+    }
+
+    @Override
+    @Nonnull
+    public AccountCreate setEmailStatus(@Nonnull boolean emailStatus) {
+        account.setEmailStatus(emailStatus);
         return this;
     }
 
     @Override
     @Nonnull
     public AccountCreate setPassword(@Nonnull String password) {
-        account.setPassword(password);
+        secureRandom.setSeed(Instant.now().toString().getBytes());
+
+        byte[] saltBytes = new byte[64];
+        secureRandom.nextBytes(saltBytes);
+
+        account.setPasswordSalt(Base64.getEncoder().encodeToString(saltBytes));
+
+        Jargon2.Hasher hasher = jargon2Hasher();
+        account.setPasswordHash(hasher.salt(saltBytes).password(password.getBytes()).encodedHash());
         return this;
     }
 
@@ -76,11 +99,29 @@ public class SqlAccountCreate implements AccountCreate {
 
     @Nonnull
     @Override
+    public AccountCreate setBlockUntilTime(@Nonnull Instant blockUntil) {
+        account.setBlockUntilTs(blockUntil.toEpochMilli());
+        return this;
+    }
+
+    @Nonnull
+    @Override
+    public AccountCreate setConsecutiveFails(@Nonnull int consecutiveFails) {
+        account.setConsecutiveFails(consecutiveFails);
+        return this;
+    }
+
+    @Nonnull
+    @Override
     public String create() throws IdentityException {
         try (SqlSession session = sqlSessionFactory.openSession()) {
             AccountMapper mapper = session.getMapper(AccountMapper.class);
-            mapper.insertAccount(account);
-            session.commit();
+            try {
+                mapper.insertAccount(account);
+                session.commit();
+            } catch (Exception e) {
+                throw new BadRequestException("account already exists");
+            }
         }
         return account.getUsername();
     }

@@ -2,9 +2,11 @@ language: java
 jdk:
   - openjdk8
 script:
-  - mvn test -B
-  - mvn clean package jetty:run &
+  # make path to locally store JWT secret
+  - mkdir .secret
+  - bash .scripts/buildDB.sh
+  # code needs reformat, skip test
+  - mvn clean package -DskipTests jetty:run &
   # sleep to wait for jetty service to be ready
   - sleep 30
-  - bash .scripts/buildDB.sh
   - bash .scripts/curl.sh

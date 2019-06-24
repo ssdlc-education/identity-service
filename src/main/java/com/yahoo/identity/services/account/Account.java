@@ -1,7 +1,8 @@
 package com.yahoo.identity.services.account;
 
-import javax.annotation.Nonnull;
 import java.time.Instant;
+
+import javax.annotation.Nonnull;
 
 public interface Account {
 
@@ -31,4 +32,13 @@ public interface Account {
 
     @Nonnull
     String getDescription();
+
+    @Nonnull
+    Instant getBlockUntilTime();
+
+    @Nonnull
+    int getConsecutiveFails();
+
+    @Nonnull
+    boolean verify(@Nonnull String password);
 }

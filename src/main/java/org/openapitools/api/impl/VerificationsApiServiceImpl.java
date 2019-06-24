@@ -20,12 +20,14 @@ public class VerificationsApiServiceImpl extends VerificationsApiService {
     }
 
     @Override
-    public Response verificationsPost(Verification verification, SecurityContext securityContext) throws NotFoundException {
+    public Response verificationsPost(Verification verification, SecurityContext securityContext)
+        throws NotFoundException {
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
 
     @Override
-    public Response verificationsPut(Verification verification, SecurityContext securityContext) throws NotFoundException {
+    public Response verificationsPut(Verification verification, SecurityContext securityContext)
+        throws NotFoundException {
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
 }

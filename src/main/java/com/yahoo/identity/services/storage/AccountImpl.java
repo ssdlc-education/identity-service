@@ -2,9 +2,10 @@ package com.yahoo.identity.services.storage;
 
 import com.yahoo.identity.services.account.Account;
 
-import javax.annotation.Nonnull;
 import java.time.Instant;
 import java.util.Map;
+
+import javax.annotation.Nonnull;
 
 public class AccountImpl implements Account {
 
@@ -17,7 +18,7 @@ public class AccountImpl implements Account {
     @Nonnull
     @Override
     public String getUid() {
-        return null;
+        return "";
     }
 
     @Nonnull
@@ -29,25 +30,25 @@ public class AccountImpl implements Account {
     @Nonnull
     @Override
     public String getFirstName() {
-        return null;
+        return "";
     }
 
     @Nonnull
     @Override
     public String getLastName() {
-        return null;
+        return "";
     }
 
     @Nonnull
     @Override
     public String getEmail() {
-        return null;
+        return "";
     }
 
     @Nonnull
     @Override
     public String getPassword() {
-        return null;
+        return "";
     }
 
     @Nonnull
@@ -62,11 +63,26 @@ public class AccountImpl implements Account {
         return Instant.ofEpochMilli(Long.valueOf(data.get("update_ts").toString()));
     }
 
+    @Override
+    @Nonnull
+    public Instant getBlockUntilTime() {
+        return Instant.now();
+    }
+
+    @Override
+    public int getConsecutiveFails() {
+        return 0;
+    }
+
     @Nonnull
     @Override
     public String getDescription() {
-        return null;
+        return "";
     }
 
-
+    @Override
+    @Nonnull
+    public boolean verify(@Nonnull String password) {
+        return false;
+    }
 }

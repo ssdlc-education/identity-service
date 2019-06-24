@@ -5,7 +5,7 @@
 <configuration>
     <settings>
         <!-- Turn off auto mapping to prevent incorrectly mapping columns -->
-        <setting name="autoMappingBehavior" value="NONE" />
+        <setting name="autoMappingBehavior" value="NONE"/>
     </settings>
     <typeAliases>
         <typeAlias alias="AccountModel" type="com.yahoo.identity.services.storage.sql.AccountModel"/>
