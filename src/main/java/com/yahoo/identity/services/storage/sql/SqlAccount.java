@@ -1,7 +1,9 @@
 package com.yahoo.identity.services.storage.sql;
 
+import static com.kosprov.jargon2.api.Jargon2.jargon2Verifier;
 import static java.time.temporal.ChronoUnit.SECONDS;
 
+import com.kosprov.jargon2.api.Jargon2;
 import com.yahoo.identity.IdentityException;
 import com.yahoo.identity.services.account.Account;
 import com.yahoo.identity.services.account.AccountUpdate;
@@ -113,7 +115,14 @@ public class SqlAccount implements Account {
             return false;
         }
 
-        if (!account.verify(password)) {
+        Jargon2.Verifier verifier = jargon2Verifier();
+        boolean isVerified = verifier
+            .salt(account.getPasswordSalt().getBytes())
+            .hash(account.getPasswordHash())
+            .password(password.getBytes())
+            .verifyEncoded();
+
+        if (!isVerified) {
             if (consecutiveFails >= ABUSE_MAX_TRIES) {
                 long blockTime =
                     (long) (Math.pow(ABUSE_BLOCK_FACTOR, consecutiveFails - ABUSE_MAX_TRIES) * ABUSE_MIN_BLOCK);

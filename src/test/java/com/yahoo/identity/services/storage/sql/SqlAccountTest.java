@@ -1,5 +1,6 @@
 package com.yahoo.identity.services.storage.sql;
 
+import com.kosprov.jargon2.api.Jargon2;
 import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Tested;
@@ -22,7 +23,7 @@ public class SqlAccountTest {
     @Injectable
     String username;
     @Injectable
-    AccountModel accountModel;
+    Jargon2.Verifier verifier;
 
     String password;
 
@@ -43,7 +44,6 @@ public class SqlAccountTest {
             result = Instant.now().toEpochMilli();
             account.getConsecutiveFails();
             result = 0;
-            accountModel.verify(anyString);
             result = true;
         }};
         Assert.assertTrue(account.verify(password));
@@ -62,7 +62,6 @@ public class SqlAccountTest {
             result = Instant.now().toEpochMilli();
             account.getConsecutiveFails();
             result = fails;
-            accountModel.verify(anyString);
             result = false;
         }};
         account.verify(password);

@@ -1,9 +1,5 @@
 package com.yahoo.identity.services.storage.sql;
 
-import static com.kosprov.jargon2.api.Jargon2.jargon2Verifier;
-
-import com.kosprov.jargon2.api.Jargon2;
-
 import javax.annotation.Nonnull;
 
 public class AccountModel {
@@ -121,12 +117,5 @@ public class AccountModel {
 
     public void setConsecutiveFails(@Nonnull int consecutiveFails) {
         this.consecutiveFails = consecutiveFails;
-    }
-
-    @Nonnull
-    public boolean verify(@Nonnull String password) {
-        Jargon2.Verifier verifier = jargon2Verifier();
-        return verifier.salt(this.passwordSalt.getBytes()).hash(this.passwordHash).password(password.getBytes())
-            .verifyEncoded();
     }
 }
