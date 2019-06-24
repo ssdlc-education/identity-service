@@ -5,7 +5,5 @@ import javax.annotation.Nonnull;
 public interface KeyService {
 
     @Nonnull
-    String getSecret();
-
-    void setSecret(@Nonnull String secret);
+    String getSecret(@Nonnull String username);
 }

@@ -1,11 +1,16 @@
 package com.yahoo.identity.services.storage.sql;
 
+import static com.kosprov.jargon2.api.Jargon2.jargon2Hasher;
+
+import com.kosprov.jargon2.api.Jargon2;
 import com.yahoo.identity.IdentityException;
 import com.yahoo.identity.services.account.AccountCreate;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 
+import java.security.SecureRandom;
 import java.time.Instant;
+import java.util.Base64;
 
 import javax.annotation.Nonnull;
 import javax.ws.rs.BadRequestException;
@@ -15,6 +20,7 @@ public class SqlAccountCreate implements AccountCreate {
 
     private final SqlSessionFactory sqlSessionFactory;
     private final AccountModel account = new AccountModel();
+    private final SecureRandom secureRandom = new SecureRandom();
 
     public SqlAccountCreate(@Nonnull SqlSessionFactory sqlSessionFactory) {
         this.sqlSessionFactory = sqlSessionFactory;
@@ -50,7 +56,7 @@ public class SqlAccountCreate implements AccountCreate {
 
     @Override
     @Nonnull
-    public AccountCreate setEmailStatus(@Nonnull int emailStatus) {
+    public AccountCreate setEmailStatus(@Nonnull boolean emailStatus) {
         account.setEmailStatus(emailStatus);
         return this;
     }
@@ -58,7 +64,15 @@ public class SqlAccountCreate implements AccountCreate {
     @Override
     @Nonnull
     public AccountCreate setPassword(@Nonnull String password) {
-        account.setPassword(password);
+        secureRandom.setSeed(Instant.now().toString().getBytes());
+
+        byte[] saltBytes = new byte[64];
+        secureRandom.nextBytes(saltBytes);
+
+        account.setPasswordSalt(Base64.getEncoder().encodeToString(saltBytes));
+
+        Jargon2.Hasher hasher = jargon2Hasher();
+        account.setPasswordHash(hasher.salt(saltBytes).password(password.getBytes()).encodedHash());
         return this;
     }
 
@@ -102,10 +116,10 @@ public class SqlAccountCreate implements AccountCreate {
     public String create() throws IdentityException {
         try (SqlSession session = sqlSessionFactory.openSession()) {
             AccountMapper mapper = session.getMapper(AccountMapper.class);
-            if (mapper.verifyUsername(account.getUsername()) == 0) {
+            try {
                 mapper.insertAccount(account);
                 session.commit();
-            } else {
+            } catch (Exception e) {
                 throw new BadRequestException("account already exists");
             }
         }

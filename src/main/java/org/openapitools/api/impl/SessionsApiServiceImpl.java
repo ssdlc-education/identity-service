@@ -35,6 +35,7 @@ public class SessionsApiServiceImpl extends SessionsApiService {
                 throw new NotAuthorizedException("Account is locked!");
             }
             String token = sessionCreate.create();
+
             ApiResponseMessage successMsg = new ApiResponseMessage(201, "The session is created successfully");
             return Response.ok().entity(successMsg).header("Set-Cookie", token).build();
 

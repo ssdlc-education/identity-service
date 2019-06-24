@@ -5,11 +5,12 @@ import com.yahoo.identity.services.account.Account;
 import com.yahoo.identity.services.account.AccountCreate;
 import com.yahoo.identity.services.account.AccountUpdate;
 import com.yahoo.identity.services.session.SessionCreate;
-import org.json.JSONObject;
+import com.yahoo.identity.services.token.TokenCreate;
 import org.openapitools.api.AccountsApiService;
 import org.openapitools.api.ApiResponseMessage;
 import org.openapitools.api.NotFoundException;
 import org.openapitools.model.AccountApi;
+import org.openapitools.model.Token;
 
 import java.time.Instant;
 
@@ -32,45 +33,34 @@ public class AccountsApiServiceImpl extends AccountsApiService {
     @Override
     public Response accountsIdGet(String username, SecurityContext securityContext) throws NotFoundException {
         Account account = identity.getAccountService().getAccount(username);
-        String firstName = account.getFirstName();
-        String lastName = account.getLastName();
-        String description = account.getDescription();
+        AccountApi accountApi = new AccountApi();
+        accountApi.setUsername(username);
+        accountApi.setFirstName(account.getFirstName());
+        accountApi.setLastName(account.getLastName());
+        accountApi.setDescription(account.getDescription());
 
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("username", username);
-        jsonObject.put("firstname", firstName);
-        jsonObject.put("lastname", lastName);
-        jsonObject.put("description", description);
-        String data = jsonObject.toString();
-
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, data)).build();
+        return Response.ok().entity(accountApi).build();
     }
 
     @Override
     public Response accountsmeGet(String token, SecurityContext securityContext) throws NotFoundException {
-        final byte emailStatus = 0x01;
+        final boolean emailStatus = true;
         try {
             SessionCreate sessionCreate = identity.getSessionService().newSessionCreate();
-            sessionCreate.setCredential(token);
+            sessionCreate.create();
 
             String username = sessionCreate.getUsername();
 
             Account account = identity.getAccountService().getAccount(username);
-            String firstName = account.getFirstName();
-            String lastName = account.getLastName();
-            String email = account.getEmail();
-            String description = account.getDescription();
+            AccountApi accountApi = new AccountApi();
+            accountApi.setUsername(username);
+            accountApi.setFirstName(account.getFirstName());
+            accountApi.setLastName(account.getLastName());
+            accountApi.setEmail(account.getEmail());
+            accountApi.setDescription(account.getDescription());
 
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("username", username);
-            jsonObject.put("firstname", firstName);
-            jsonObject.put("lastname", lastName);
-            jsonObject.put("email", email);
-            jsonObject.put("description", description);
-            jsonObject.put("emailStatus", emailStatus);
-            String data = jsonObject.toString();
+            return Response.ok().entity(accountApi).build();
 
-            return Response.ok().entity(new ApiResponseMessage(Response.Status.OK.getStatusCode(), data)).build();
         } catch (NotAuthorizedException e) {
             ApiResponseMessage
                 errorMsg =
@@ -88,7 +78,7 @@ public class AccountsApiServiceImpl extends AccountsApiService {
 
     @Override
     public Response accountsPost(AccountApi account, SecurityContext securityContext) throws NotFoundException {
-        final int emailStatus = 0x01;
+        final boolean emailStatus = true;
         try {
             AccountCreate accountCreate = identity.getAccountService().newAccountCreate();
             accountCreate.setUsername(account.getUsername());
@@ -105,8 +95,9 @@ public class AccountsApiServiceImpl extends AccountsApiService {
             accountCreate.create();
 
             SessionCreate sessionCreate = identity.getSessionService().newSessionCreate();
+            sessionCreate.setUsername(account.getUsername());
+            sessionCreate.setPassword(account.getPassword());
             sessionCreate.initCredential();
-
             String token = sessionCreate.create();
 
             ApiResponseMessage successMsg = new ApiResponseMessage(204, "The account is created successfully.");
@@ -124,10 +115,12 @@ public class AccountsApiServiceImpl extends AccountsApiService {
     @Override
     public Response accountsmePut(String token, AccountApi account, SecurityContext securityContext)
         throws NotFoundException {
-        final byte emailStatus = 0x01;
+        final boolean emailStatus = true;
         try {
-            SessionCreate sessionCreate = identity.getSessionService().newSessionCreate();
-            sessionCreate.setCredential(token);
+            TokenCreate tokenCreate = identity.getTokenService().newTokenCreate();
+            tokenCreate.setToken(token);
+            tokenCreate.setType(Token.TypeEnum.CRITICAL);
+            tokenCreate.create();
 
             AccountUpdate accountUpdate = identity.getAccountService().newAccountUpdate(account.getUsername());
             accountUpdate.setEmail(account.getEmail());

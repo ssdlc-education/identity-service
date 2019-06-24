@@ -13,10 +13,13 @@ public class Identity {
 
     private final AccountService accountService;
     private final SessionService sessionService;
+    private final TokenService tokenService;
 
-    public Identity(@Nonnull AccountService accountService, @Nonnull SessionService sessionService) {
+    public Identity(@Nonnull AccountService accountService, @Nonnull SessionService sessionService,
+                    @Nonnull TokenService tokenService) {
         this.accountService = accountService;
         this.sessionService = sessionService;
+        this.tokenService = tokenService;
     }
 
     @Nonnull
@@ -26,13 +29,12 @@ public class Identity {
 
     @Nonnull
     public SessionService getSessionService() {
-        return sessionService;
+        return this.sessionService;
     }
 
     @Nonnull
     public TokenService getTokenService() {
-        //TODO
-        return null;
+        return this.tokenService;
     }
 
     @Nonnull

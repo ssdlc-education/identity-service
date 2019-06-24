@@ -5,5 +5,5 @@ import javax.annotation.Nonnull;
 public interface CredentialService {
 
     @Nonnull
-    Credential fromString(@Nonnull String credStr);
+    Credential fromString(@Nonnull String credStr, @Nonnull String username);
 }

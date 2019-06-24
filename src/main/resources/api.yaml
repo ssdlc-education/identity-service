@@ -378,7 +378,7 @@ components:
           type: "string"
           maxLength: 256
         verified:
-          type: "integer"
+          type: "boolean"
       required:
         - "value"
     Session:

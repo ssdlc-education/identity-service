@@ -2,8 +2,6 @@ package com.yahoo.identity.services.session;
 
 import com.yahoo.identity.services.credential.Credential;
 import com.yahoo.identity.services.credential.CredentialImpl;
-import com.yahoo.identity.services.credential.CredentialService;
-import com.yahoo.identity.services.credential.CredentialServiceImpl;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -38,17 +36,10 @@ public class SessionImpl implements Session {
         return this.credential;
     }
 
-    public void setCredential(@Nonnull String credStr) {
-        CredentialService credentialService = new CredentialServiceImpl();
-        this.credential = credentialService.fromString(credStr);
-        this.username = this.credential.getSubject();
-        credential.validate();
-    }
-
     public void initCredential() {
-        credential.setIssueTime(Instant.now());
-        credential.setExpireTime(Instant.now().plus(7, ChronoUnit.DAYS));
-        credential.setSubject(getUsername());
-        credential.validate();
+        this.credential.setIssueTime(Instant.now());
+        this.credential.setExpireTime(Instant.now().plus(7, ChronoUnit.DAYS));
+        this.credential.setSubject(getUsername());
+        this.credential.validate();
     }
 }
