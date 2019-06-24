@@ -13,7 +13,7 @@ curl -d'{"username":"Bob","firstName":"Bob","lastName":"Demo","email":"bob@gmail
 echo ""
 
 # Write JWT secret for Anonymous
-dd if=/dev/random of=.secret/Anonymous.key bs=8 count=1
+openssl rand -hex 16 > .secret/Anonymous.key
 
 # TEST GET method for getAccount
 curl http://localhost:8080/v1/accounts/Alice
