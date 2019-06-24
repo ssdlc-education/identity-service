@@ -22,14 +22,12 @@ public class SqlAccount implements Account {
     private static final int ABUSE_RESET_ZERO = 0;
     private AccountModel account;
     private SqlSessionFactory sqlSessionFactory;
-    private AccountUpdate accountUpdate;
 
     public SqlAccount(@Nonnull SqlSessionFactory sqlSessionFactory, @Nonnull String username) throws IdentityException {
         try (SqlSession session = sqlSessionFactory.openSession()) {
             AccountMapper mapper = session.getMapper(AccountMapper.class);
             this.sqlSessionFactory = sqlSessionFactory;
             this.account = mapper.getAccount(username);
-            this.accountUpdate = new SqlAccountUpdate(this.sqlSessionFactory, username);
             session.commit();
         } catch (Exception e) {
             this.account = new AccountModel();
@@ -104,10 +102,12 @@ public class SqlAccount implements Account {
 
     @Override
     @Nonnull
-    public Boolean verify(@Nonnull String password) {
+    public boolean verify(@Nonnull String password) {
         Instant blockUntil = this.getBlockUntilTime();
         int consecutiveFails = this.getConsecutiveFails();
         long blockTimeLeft = Instant.now().until(blockUntil, SECONDS);
+
+        AccountUpdate accountUpdate = new SqlAccountUpdate(this.sqlSessionFactory, getUsername());
 
         if (blockTimeLeft > 0) {
             return false;
@@ -117,20 +117,20 @@ public class SqlAccount implements Account {
             if (consecutiveFails >= ABUSE_MAX_TRIES) {
                 long blockTime =
                     (long) (Math.pow(ABUSE_BLOCK_FACTOR, consecutiveFails - ABUSE_MAX_TRIES) * ABUSE_MIN_BLOCK);
-                this.accountUpdate.setConsecutiveFails(consecutiveFails + 1);
-                this.accountUpdate.setBlockUntilTime(Instant.now().plusSeconds(Math.min(ABUSE_MAX_BLOCK, blockTime)));
+                accountUpdate.setConsecutiveFails(consecutiveFails + 1);
+                accountUpdate.setBlockUntilTime(Instant.now().plusSeconds(Math.min(ABUSE_MAX_BLOCK, blockTime)));
             } else {
-                this.accountUpdate.setConsecutiveFails(consecutiveFails + 1);
-                this.accountUpdate.setBlockUntilTime(Instant.now());
+                accountUpdate.setConsecutiveFails(consecutiveFails + 1);
+                accountUpdate.setBlockUntilTime(Instant.now());
             }
-            this.accountUpdate.update();
+            accountUpdate.update();
             throw new NotAuthorizedException("Username and password are not matched!");
         }
 
         if (consecutiveFails > 0) {
-            this.accountUpdate.setConsecutiveFails(ABUSE_RESET_ZERO);
-            this.accountUpdate.setBlockUntilTime(Instant.now());
-            this.accountUpdate.update();
+            accountUpdate.setConsecutiveFails(ABUSE_RESET_ZERO);
+            accountUpdate.setBlockUntilTime(Instant.now());
+            accountUpdate.update();
         }
         return true;
     }

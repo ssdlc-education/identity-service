@@ -14,13 +14,14 @@ import javax.ws.rs.BadRequestException;
 public class CredentialServiceImpl implements CredentialService {
 
     private KeyService keyService = new KeyServiceImpl();
-    private CredentialImpl credential = new CredentialImpl();
+    private Credential credential = new CredentialImpl();
 
     @Override
     @Nonnull
-    public Credential fromString(@Nonnull String credStr) {
+    public Credential fromString(@Nonnull String credStr, @Nonnull String username) {
         try {
-            Algorithm algorithm = Algorithm.HMAC256(keyService.getSecret());
+
+            Algorithm algorithm = Algorithm.HMAC256(keyService.getSecret(username));
 
             JWTVerifier verifier = JWT.require(algorithm)
                 .acceptLeeway(1)   // 1 sec for nbf and iat

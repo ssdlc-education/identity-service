@@ -1,13 +1,8 @@
 package com.yahoo.identity.services.storage.sql;
 
-import static com.kosprov.jargon2.api.Jargon2.Hasher;
-import static com.kosprov.jargon2.api.Jargon2.jargon2Hasher;
 import static com.kosprov.jargon2.api.Jargon2.jargon2Verifier;
 
 import com.kosprov.jargon2.api.Jargon2;
-
-import java.security.SecureRandom;
-import java.time.Instant;
 
 import javax.annotation.Nonnull;
 
@@ -18,7 +13,7 @@ public class AccountModel {
     private String firstName;
     private String lastName;
     private String email;
-    private int emailStatus;
+    private boolean emailStatus;
     private String passwordHash;
     private String passwordSalt;
     private String description;
@@ -64,11 +59,11 @@ public class AccountModel {
         this.email = email;
     }
 
-    public int getEmailStatus() {
+    public boolean getEmailStatus() {
         return this.emailStatus;
     }
 
-    public void setEmailStatus(@Nonnull int emailStatus) {
+    public void setEmailStatus(@Nonnull boolean emailStatus) {
         this.emailStatus = emailStatus;
     }
 
@@ -84,20 +79,16 @@ public class AccountModel {
         return this.passwordHash;
     }
 
+    public void setPasswordHash(@Nonnull String passwordHash) {
+        this.passwordHash = passwordHash;
+    }
+
     public String getPasswordSalt() {
         return this.passwordSalt;
     }
 
-    public void setPassword(@Nonnull String password) {
-        SecureRandom secureRandom = new SecureRandom();
-        secureRandom.setSeed(Instant.now().toString().getBytes());
-
-        byte[] saltBytes = new byte[8];
-        secureRandom.nextBytes(saltBytes);
-        this.passwordSalt = saltBytes.toString();
-
-        Hasher hasher = jargon2Hasher();
-        this.passwordHash = hasher.salt(saltBytes).password(password.getBytes()).encodedHash();
+    public void setPasswordSalt(@Nonnull String passwordSalt) {
+        this.passwordSalt = passwordSalt;
     }
 
     public long getCreateTs() {
@@ -133,7 +124,7 @@ public class AccountModel {
     }
 
     @Nonnull
-    public Boolean verify(@Nonnull String password) {
+    public boolean verify(@Nonnull String password) {
         Jargon2.Verifier verifier = jargon2Verifier();
         return verifier.salt(this.passwordSalt.getBytes()).hash(this.passwordHash).password(password.getBytes())
             .verifyEncoded();

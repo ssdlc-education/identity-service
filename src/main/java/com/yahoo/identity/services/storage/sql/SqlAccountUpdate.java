@@ -1,10 +1,14 @@
 package com.yahoo.identity.services.storage.sql;
 
+import static com.kosprov.jargon2.api.Jargon2.jargon2Hasher;
+
+import com.kosprov.jargon2.api.Jargon2;
 import com.yahoo.identity.IdentityException;
 import com.yahoo.identity.services.account.AccountUpdate;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 
+import java.security.SecureRandom;
 import java.time.Instant;
 
 import javax.annotation.Nonnull;
@@ -12,6 +16,7 @@ import javax.annotation.Nonnull;
 public class SqlAccountUpdate implements AccountUpdate {
 
     private final SqlSessionFactory sqlSessionFactory;
+    private final SecureRandom secureRandom = new SecureRandom();
     private AccountModel account = new AccountModel();
 
     public SqlAccountUpdate(@Nonnull SqlSessionFactory sqlSessionFactory, @Nonnull String username) {
@@ -28,7 +33,7 @@ public class SqlAccountUpdate implements AccountUpdate {
 
     @Override
     @Nonnull
-    public AccountUpdate setEmailStatus(@Nonnull int emailStatus) {
+    public AccountUpdate setEmailStatus(@Nonnull boolean emailStatus) {
         account.setEmailStatus(emailStatus);
         return this;
     }
@@ -36,7 +41,14 @@ public class SqlAccountUpdate implements AccountUpdate {
     @Override
     @Nonnull
     public AccountUpdate setPassword(@Nonnull String password) {
-        account.setPassword(password);
+        secureRandom.setSeed(Instant.now().toString().getBytes());
+
+        byte[] saltBytes = new byte[64];
+        secureRandom.nextBytes(saltBytes);
+        account.setPasswordSalt(saltBytes.toString());
+
+        Jargon2.Hasher hasher = jargon2Hasher();
+        account.setPasswordHash(hasher.salt(saltBytes).password(password.getBytes()).encodedHash());
         return this;
     }
 

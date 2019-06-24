@@ -82,7 +82,7 @@ public class AccountImpl implements Account {
 
     @Override
     @Nonnull
-    public Boolean verify(@Nonnull String password) {
+    public boolean verify(@Nonnull String password) {
         return false;
     }
 }

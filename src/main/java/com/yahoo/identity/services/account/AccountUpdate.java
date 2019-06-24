@@ -12,7 +12,7 @@ public interface AccountUpdate {
     AccountUpdate setEmail(@Nonnull String email);
 
     @Nonnull
-    AccountUpdate setEmailStatus(@Nonnull int emailStatus);
+    AccountUpdate setEmailStatus(@Nonnull boolean emailStatus);
 
     @Nonnull
     AccountUpdate setPassword(@Nonnull String password);

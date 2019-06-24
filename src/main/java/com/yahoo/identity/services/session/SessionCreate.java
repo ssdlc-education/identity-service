@@ -17,9 +17,6 @@ public interface SessionCreate {
     SessionCreate setPassword(@Nonnull String password);
 
     @Nonnull
-    SessionCreate setCredential(@Nonnull String credStr);
-
-    @Nonnull
     SessionCreate initCredential();
 
     @Nonnull

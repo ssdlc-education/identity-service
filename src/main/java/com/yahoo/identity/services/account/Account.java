@@ -40,5 +40,5 @@ public interface Account {
     int getConsecutiveFails();
 
     @Nonnull
-    Boolean verify(@Nonnull String password);
+    boolean verify(@Nonnull String password);
 }

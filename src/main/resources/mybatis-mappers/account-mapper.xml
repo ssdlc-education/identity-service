@@ -3,30 +3,31 @@
 
 <mapper namespace="com.yahoo.identity.services.storage.sql.AccountMapper">
     <insert id="insertAccount" parameterType="AccountModel" keyProperty="account.username" useGeneratedKeys="false">
-        INSERT INTO `account` (`username`, `first_name`, `last_name`, `email`, `email_status`, `password_hash`, `password_salt`, `create_ts`, `update_ts`, `description`, `block_until_ts`, `consecutive_fails`)
+        INSERT INTO `account` (`username`, `first_name`, `last_name`, `email`, `email_status`, `password_hash`,
+        `password_salt`, `create_ts`, `update_ts`, `description`, `block_until_ts`, `consecutive_fails`)
         VALUES (
-            #{account.username, jdbcType=VARCHAR},
-            #{account.firstName, jdbcType=VARCHAR},
-            #{account.lastName, jdbcType=VARCHAR},
-            #{account.email, jdbcType=VARCHAR},
-            #{account.emailStatus, jdbcType=TINYINT},
-            #{account.passwordHash, jdbcType=VARBINARY},
-            #{account.passwordSalt, jdbcType=VARBINARY},
-            #{account.createTs, jdbcType=BIGINT},
-            #{account.updateTs, jdbcType=BIGINT},
-            #{account.description, jdbcType=VARCHAR},
-            #{account.blockUntilTs, jdbcType=BIGINT},
-            #{account.consecutiveFails, jdbcType=INTEGER}
+        #{account.username, jdbcType=VARCHAR},
+        #{account.firstName, jdbcType=VARCHAR},
+        #{account.lastName, jdbcType=VARCHAR},
+        #{account.email, jdbcType=VARCHAR},
+        #{account.emailStatus, jdbcType=TINYINT},
+        #{account.passwordHash, jdbcType=VARBINARY},
+        #{account.passwordSalt, jdbcType=VARBINARY},
+        #{account.createTs, jdbcType=BIGINT},
+        #{account.updateTs, jdbcType=BIGINT},
+        #{account.description, jdbcType=VARCHAR},
+        #{account.blockUntilTs, jdbcType=BIGINT},
+        #{account.consecutiveFails, jdbcType=INTEGER}
         )
     </insert>
 
     <resultMap id="accountResultMap" type="AccountModel">
-        <id property="uid" column="uid" />
-        <result property="username" column="username" />
-        <result property="firstName" column="first_name" />
-        <result property="lastName" column="last_name" />
-        <result property="email" column="email" />
-        <result property="emailStatus" column="email_status" />
+        <id property="uid" column="uid"/>
+        <result property="username" column="username"/>
+        <result property="firstName" column="first_name"/>
+        <result property="lastName" column="last_name"/>
+        <result property="email" column="email"/>
+        <result property="emailStatus" column="email_status"/>
         <result property="passwordHash" column="password_hash"/>
         <result property="passwordSalt" column="password_salt"/>
         <result property="createTs" column="create_ts"/>
@@ -37,16 +38,9 @@
     </resultMap>
 
     <select id="getAccount" resultMap="accountResultMap">
-        SELECT uid, username, first_name, last_name, email, email_status, password_hash, password_salt, create_ts, update_ts, description, block_until_ts, consecutive_fails FROM account
+        SELECT uid, username, first_name, last_name, email, email_status, password_hash, password_salt, create_ts,
+        update_ts, description, block_until_ts, consecutive_fails FROM account
         WHERE username = #{username}
-    </select>
-
-    <select id="verifyUsername" parameterType="java.lang.String" resultType="int">
-        SELECT COUNT(username)
-        FROM
-        account
-        WHERE
-        username = #{username}
     </select>
 
     <update id="updateAccount" parameterType="AccountModel" keyProperty="account.username" useGeneratedKeys="false">
@@ -76,6 +70,6 @@
             `consecutive_fails` = #{account.consecutiveFails, jdbcType=INTEGER}
         </if>
         WHERE
-            `username` = #{account.username, jdbcType=VARCHAR}
+        `username` = #{account.username, jdbcType=VARCHAR}
     </update>
 </mapper>

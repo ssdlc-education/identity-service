@@ -21,7 +21,7 @@ public interface AccountCreate {
     AccountCreate setEmail(@Nonnull String email);
 
     @Nonnull
-    AccountCreate setEmailStatus(@Nonnull int emailStatus);
+    AccountCreate setEmailStatus(@Nonnull boolean emailStatus);
 
     @Nonnull
     AccountCreate setPassword(@Nonnull String password);

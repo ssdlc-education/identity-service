@@ -34,13 +34,6 @@ public class SessionCreateImpl implements SessionCreate {
 
     @Override
     @Nonnull
-    public SessionCreate setCredential(@Nonnull String credStr) {
-        session.setCredential(credStr);
-        return this;
-    }
-
-    @Override
-    @Nonnull
     public SessionCreate initCredential() {
         session.initCredential();
         return this;
