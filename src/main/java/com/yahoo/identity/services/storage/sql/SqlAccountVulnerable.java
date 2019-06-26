@@ -2,6 +2,7 @@ package com.yahoo.identity.services.storage.sql;
 
 import static java.time.temporal.ChronoUnit.SECONDS;
 
+import com.yahoo.identity.IdentityError;
 import com.yahoo.identity.IdentityException;
 import com.yahoo.identity.services.account.Account;
 import com.yahoo.identity.services.account.AccountUpdate;
@@ -126,8 +127,6 @@ public class SqlAccountVulnerable implements Account {
         int consecutiveFails = this.getConsecutiveFails();
         long blockTimeLeft = Instant.now().until(blockUntil, SECONDS);
 
-        AccountUpdate accountUpdateVulnerable = new SqlAccountUpdateVulnerable(this.sqlSessionFactory, getUsername());
-
         if (blockTimeLeft > 0) {
             return false;
         }
@@ -136,22 +135,33 @@ public class SqlAccountVulnerable implements Account {
             if (consecutiveFails >= ABUSE_MAX_TRIES) {
                 long blockTime =
                     (long) (Math.pow(ABUSE_BLOCK_FACTOR, consecutiveFails - ABUSE_MAX_TRIES) * ABUSE_MIN_BLOCK);
-                accountUpdateVulnerable
-                    .setBlockUntilTime(Instant.now().plusSeconds(Math.min(ABUSE_MAX_BLOCK, blockTime)));
+                this.account
+                    .setBlockUntilTs(Instant.now().plusSeconds(Math.min(ABUSE_MAX_BLOCK, blockTime)).toEpochMilli());
             } else {
-                accountUpdateVulnerable.setBlockUntilTime(Instant.now());
+                this.account.setBlockUntilTs(Instant.now().toEpochMilli());
             }
-            accountUpdateVulnerable.setConsecutiveFails(consecutiveFails + 1);
-            accountUpdateVulnerable.update();
+            this.account.setConsecutiveFails(consecutiveFails + 1);
+            this.update();
+
             throw new NotAuthorizedException("Username and password are not matched!");
         }
 
         if (consecutiveFails > 0) {
-            accountUpdateVulnerable.setConsecutiveFails(ABUSE_RESET_ZERO);
-            accountUpdateVulnerable.setBlockUntilTime(Instant.now());
-            accountUpdateVulnerable.update();
+            this.account.setConsecutiveFails(ABUSE_RESET_ZERO);
+            this.account.setBlockUntilTs(Instant.now().toEpochMilli());
+            this.update();
         }
         return true;
+    }
+
+    private void update() {
+        try (SqlSession session = sqlSessionFactory.openSession()) {
+            AccountMapper mapper = session.getMapper(AccountMapper.class);
+            mapper.updateAccount(this.account);
+            session.commit();
+        } catch(Exception e) {
+            throw new IdentityException(IdentityError.INTERNAL_SERVER_ERROR, "Sql Session failed to open");
+        }
     }
 }
 

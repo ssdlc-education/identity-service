@@ -81,20 +81,6 @@ public class SqlAccountUpdate implements AccountUpdate {
 
     @Nonnull
     @Override
-    public AccountUpdate setBlockUntilTime(@Nonnull Instant blockUntil) {
-        account.setBlockUntilTs(blockUntil.toEpochMilli());
-        return this;
-    }
-
-    @Nonnull
-    @Override
-    public AccountUpdate setConsecutiveFails(@Nonnull int consecutiveFails) {
-        account.setConsecutiveFails(consecutiveFails);
-        return this;
-    }
-
-    @Nonnull
-    @Override
     public String update() throws IdentityException {
         try (SqlSession session = sqlSessionFactory.openSession()) {
             AccountMapper mapper = session.getMapper(AccountMapper.class);

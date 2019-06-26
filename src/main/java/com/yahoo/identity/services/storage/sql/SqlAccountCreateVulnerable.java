@@ -88,20 +88,6 @@ public class SqlAccountCreateVulnerable implements AccountCreate {
 
     @Nonnull
     @Override
-    public AccountCreate setBlockUntilTime(@Nonnull Instant blockUntil) {
-        account.setBlockUntilTs(blockUntil.toEpochMilli());
-        return this;
-    }
-
-    @Nonnull
-    @Override
-    public AccountCreate setConsecutiveFails(@Nonnull int consecutiveFails) {
-        account.setConsecutiveFails(consecutiveFails);
-        return this;
-    }
-
-    @Nonnull
-    @Override
     public String create() throws IdentityException {
         try (SqlSession session = sqlSessionFactory.openSession()) {
             AccountMapper mapper = session.getMapper(AccountMapper.class);
