@@ -1,8 +1,7 @@
 package org.openapitools.api.impl;
 
 import com.yahoo.identity.Identity;
-import com.yahoo.identity.services.account.Account;
-import com.yahoo.identity.services.session.SessionCreate;
+import com.yahoo.identity.services.session.LoggedInSession;
 import org.openapitools.api.ApiResponseMessage;
 import org.openapitools.api.NotFoundException;
 import org.openapitools.api.SessionsApiService;
@@ -25,25 +24,27 @@ public class SessionsApiServiceImpl extends SessionsApiService {
     @Override
     public Response sessionsPost(Session session, SecurityContext securityContext) throws NotFoundException {
         try {
-            SessionCreate sessionCreate = identity.getSessionService().newSessionCreate();
-            sessionCreate.setUsername(session.getUsername());
-            sessionCreate.setPassword(session.getPassword());
-            sessionCreate.initCredential();
+            LoggedInSession
+                loggedInSession =
+                identity.getSessionService().newSessionWithPassword(session.getUsername(), session.getPassword());
+            String token = loggedInSession.getCredential().toString();
 
-            Account account = identity.getAccountService().getAccount(session.getUsername());
-            if (!account.verify(session.getPassword())) {
-                throw new NotAuthorizedException("Account is locked!");
-            }
-            String token = sessionCreate.create();
-
-            ApiResponseMessage successMsg = new ApiResponseMessage(201, "The session is created successfully");
-            return Response.ok().entity(successMsg).header("Set-Cookie", token).build();
+            ApiResponseMessage
+                successMsg =
+                new ApiResponseMessage(Response.Status.CREATED.getStatusCode(), "The session is created successfully");
+            return Response.status(Response.Status.CREATED).entity(successMsg).header("Set-Cookie", token).build();
 
         } catch (NotAuthorizedException e) {
-            ApiResponseMessage errorMsg = new ApiResponseMessage(401, "Invalid request: " + e.getMessage());
+            ApiResponseMessage
+                errorMsg =
+                new ApiResponseMessage(Response.Status.UNAUTHORIZED.getStatusCode(),
+                                       "Invalid request: " + e.getMessage());
             return Response.status(Response.Status.UNAUTHORIZED).entity(errorMsg).build();
         } catch (Exception e) {
-            ApiResponseMessage errorMsg = new ApiResponseMessage(500, "Unknown error occurs: " + e.getMessage());
+            ApiResponseMessage
+                errorMsg =
+                new ApiResponseMessage(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
+                                       "Unknown error occurs: " + e.getMessage());
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorMsg).build();
         }
     }

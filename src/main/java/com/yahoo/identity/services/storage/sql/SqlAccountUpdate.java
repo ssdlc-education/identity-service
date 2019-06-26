@@ -5,6 +5,7 @@ import static com.kosprov.jargon2.api.Jargon2.jargon2Hasher;
 import com.kosprov.jargon2.api.Jargon2;
 import com.yahoo.identity.IdentityException;
 import com.yahoo.identity.services.account.AccountUpdate;
+import com.yahoo.identity.services.storage.AccountModel;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 

@@ -22,6 +22,11 @@ public interface Credential {
     void setSubject(@Nonnull String subject);
 
     @Nonnull
+    int getStatus();
+
+    void setStatus(int status);
+
+    @Nonnull
     String toString();
 
     void validate();

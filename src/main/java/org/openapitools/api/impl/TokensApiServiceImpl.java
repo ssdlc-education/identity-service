@@ -34,25 +34,25 @@ public class TokensApiServiceImpl extends TokensApiService {
 
             ApiResponseMessage
                 successMsg =
-                new ApiResponseMessage(201, "The session is created successfully");
+                new ApiResponseMessage(Response.Status.CREATED.getStatusCode(), "The session is created successfully");
             return Response.status(Response.Status.CREATED).entity(successMsg).header("Set-Cookie", token).build();
 
         } catch (BadRequestException e) {
             ApiResponseMessage
                 errorMsg =
-                new ApiResponseMessage(400,
+                new ApiResponseMessage(Response.Status.BAD_REQUEST.getStatusCode(),
                                        "Invalid request or credential too old: " + e.toString());
             return Response.status(Response.Status.BAD_REQUEST).entity(errorMsg).build();
         } catch (NotAuthorizedException e) {
             ApiResponseMessage
                 errorMsg =
-                new ApiResponseMessage(401,
+                new ApiResponseMessage(Response.Status.UNAUTHORIZED.getStatusCode(),
                                        "Invalid credential: " + e.toString());
             return Response.status(Response.Status.UNAUTHORIZED).entity(errorMsg).build();
         } catch (Exception e) {
             ApiResponseMessage
                 errorMsg =
-                new ApiResponseMessage(500,
+                new ApiResponseMessage(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
                                        "Unknown error occurs: " + e.toString());
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorMsg).build();
         }

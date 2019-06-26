@@ -33,7 +33,17 @@ public class SqlStorage implements Storage {
     @Nonnull
     @Override
     public Account getAccount(@Nonnull String username) {
-        return new SqlAccount(sqlSessionFactory, username);
+        SqlAccount sqlAccount = new SqlAccount(sqlSessionFactory);
+        sqlAccount.getAccount(username);
+        return sqlAccount;
+    }
+
+    @Nonnull
+    @Override
+    public Account getPublicAccount(@Nonnull String username) {
+        SqlAccount sqlAccount = new SqlAccount(sqlSessionFactory);
+        sqlAccount.getPublicAccount(username);
+        return sqlAccount;
     }
 
     @Nonnull

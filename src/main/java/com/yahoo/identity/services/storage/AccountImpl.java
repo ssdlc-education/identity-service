@@ -18,49 +18,54 @@ public class AccountImpl implements Account {
     @Nonnull
     @Override
     public String getUid() {
-        return "";
+        return data.get("uid").toString();
     }
 
     @Nonnull
     @Override
     public String getUsername() {
-        return data.get("id").toString();
+        return data.get("username").toString();
     }
 
     @Nonnull
     @Override
     public String getFirstName() {
-        return "";
+        return data.get("firstName").toString();
     }
 
     @Nonnull
     @Override
     public String getLastName() {
-        return "";
+        return data.get("lastName").toString();
     }
 
     @Nonnull
     @Override
     public String getEmail() {
-        return "";
+        return data.get("email").toString();
+    }
+
+    @Override
+    public boolean getEmailStatus() {
+        return (Boolean) data.get("emailStatus");
     }
 
     @Nonnull
     @Override
     public String getPassword() {
-        return "";
+        return data.get("password").toString();
     }
 
     @Nonnull
     @Override
     public Instant getCreateTime() {
-        return Instant.ofEpochMilli(Long.valueOf(data.get("create_ts").toString()));
+        return Instant.now();
     }
 
     @Nonnull
     @Override
     public Instant getUpdateTime() {
-        return Instant.ofEpochMilli(Long.valueOf(data.get("update_ts").toString()));
+        return Instant.now();
     }
 
     @Override
@@ -77,7 +82,7 @@ public class AccountImpl implements Account {
     @Nonnull
     @Override
     public String getDescription() {
-        return "";
+        return data.get("description").toString();
     }
 
     @Override

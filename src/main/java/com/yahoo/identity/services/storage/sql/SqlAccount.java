@@ -7,6 +7,7 @@ import com.kosprov.jargon2.api.Jargon2;
 import com.yahoo.identity.IdentityException;
 import com.yahoo.identity.services.account.Account;
 import com.yahoo.identity.services.account.AccountUpdate;
+import com.yahoo.identity.services.storage.AccountModel;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 
@@ -25,11 +26,26 @@ public class SqlAccount implements Account {
     private AccountModel account;
     private SqlSessionFactory sqlSessionFactory;
 
-    public SqlAccount(@Nonnull SqlSessionFactory sqlSessionFactory, @Nonnull String username) throws IdentityException {
+    public SqlAccount(@Nonnull SqlSessionFactory sqlSessionFactory) throws IdentityException {
+        this.sqlSessionFactory = sqlSessionFactory;
+    }
+
+    @Nonnull
+    public void getAccount(@Nonnull String username) {
         try (SqlSession session = sqlSessionFactory.openSession()) {
             AccountMapper mapper = session.getMapper(AccountMapper.class);
-            this.sqlSessionFactory = sqlSessionFactory;
             this.account = mapper.getAccount(username);
+            session.commit();
+        } catch (Exception e) {
+            this.account = new AccountModel();
+        }
+    }
+
+    @Nonnull
+    public void getPublicAccount(@Nonnull String username) {
+        try (SqlSession session = sqlSessionFactory.openSession()) {
+            AccountMapper mapper = session.getMapper(AccountMapper.class);
+            this.account = mapper.getPublicAccount(username);
             session.commit();
         } catch (Exception e) {
             this.account = new AccountModel();
@@ -67,6 +83,11 @@ public class SqlAccount implements Account {
     }
 
     @Override
+    public boolean getEmailStatus() {
+        return this.account.getEmailStatus();
+    }
+
+    @Override
     @Nonnull
     public String getPassword() {
         return this.account.getPasswordHash();
@@ -97,13 +118,11 @@ public class SqlAccount implements Account {
     }
 
     @Override
-    @Nonnull
     public int getConsecutiveFails() {
         return this.account.getConsecutiveFails();
     }
 
     @Override
-    @Nonnull
     public boolean verify(@Nonnull String password) {
         Instant blockUntil = this.getBlockUntilTime();
         int consecutiveFails = this.getConsecutiveFails();
@@ -117,8 +136,8 @@ public class SqlAccount implements Account {
 
         Jargon2.Verifier verifier = jargon2Verifier();
         boolean isVerified = verifier
-            .salt(account.getPasswordSalt().getBytes())
-            .hash(account.getPasswordHash())
+            .salt(this.account.getPasswordSalt().getBytes())
+            .hash(this.account.getPasswordHash())
             .password(password.getBytes())
             .verifyEncoded();
 
