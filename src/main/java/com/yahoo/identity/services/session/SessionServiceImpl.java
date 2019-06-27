@@ -1,10 +1,8 @@
 package com.yahoo.identity.services.session;
 
-import com.yahoo.identity.services.account.Account;
 import com.yahoo.identity.services.storage.Storage;
 
 import javax.annotation.Nonnull;
-import javax.ws.rs.NotAuthorizedException;
 
 public class SessionServiceImpl implements SessionService {
 
@@ -18,15 +16,7 @@ public class SessionServiceImpl implements SessionService {
     @Nonnull
     public LoggedInSession newSessionWithPassword(@Nonnull String username, @Nonnull String password) {
         LoggedInSessionImpl loggedInSession = new LoggedInSessionImpl(this.storage);
-        loggedInSession.setUsername(username);
-        loggedInSession.setPassword(password);
-        loggedInSession.initCredential();
-
-        Account account = loggedInSession.getAccount();
-        if (!account.verify(password)) {
-            throw new NotAuthorizedException("Account is locked!");
-        }
-        loggedInSession.setVerified(account.getEmailStatus());
+        loggedInSession.verifyPassword(username, password);
 
         return loggedInSession;
     }

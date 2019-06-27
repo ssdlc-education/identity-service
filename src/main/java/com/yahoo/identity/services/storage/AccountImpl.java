@@ -46,7 +46,7 @@ public class AccountImpl implements Account {
     }
 
     @Override
-    public boolean getEmailStatus() {
+    public boolean isEmailVerified() {
         return (Boolean) data.get("emailStatus");
     }
 

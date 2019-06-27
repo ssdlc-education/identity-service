@@ -83,7 +83,7 @@ public class SqlAccount implements Account {
     }
 
     @Override
-    public boolean getEmailStatus() {
+    public boolean isEmailVerified() {
         return this.account.getEmailStatus();
     }
 

@@ -8,9 +8,6 @@ import javax.annotation.Nonnull;
 public interface LoggedInSession {
 
     @Nonnull
-    String getUsername();
-
-    @Nonnull
     Credential getCredential();
 
     @Nonnull

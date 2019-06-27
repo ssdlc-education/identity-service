@@ -24,7 +24,7 @@ public interface Credential {
     @Nonnull
     int getStatus();
 
-    void setStatus(int status);
+    void setStatus(boolean status);
 
     @Nonnull
     String toString();

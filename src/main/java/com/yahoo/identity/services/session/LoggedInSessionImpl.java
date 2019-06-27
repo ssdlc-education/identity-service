@@ -9,43 +9,25 @@ import com.yahoo.identity.services.credential.CredentialService;
 import com.yahoo.identity.services.credential.CredentialServiceImpl;
 import com.yahoo.identity.services.storage.Storage;
 import com.yahoo.identity.services.storage.sql.SqlAccountService;
+import org.openapitools.model.Session;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
 import javax.annotation.Nonnull;
+import javax.ws.rs.NotAuthorizedException;
 
-public class LoggedInSessionImpl implements LoggedInSession {
+public class LoggedInSessionImpl extends Session implements LoggedInSession {
 
     private CredentialService credentialService;
     private AccountService accountService;
     private Credential credential;
-    private boolean verified;
     private String username;
-    private String password;
 
     public LoggedInSessionImpl(@Nonnull Storage storage) {
         this.accountService = new SqlAccountService(storage);
         this.credentialService = new CredentialServiceImpl();
         this.credential = new CredentialImpl();
-    }
-
-    @Override
-    @Nonnull
-    public String getUsername() {
-        return this.username;
-    }
-
-    public void setUsername(@Nonnull String username) {
-        this.username = username;
-    }
-
-    public void setPassword(@Nonnull String password) {
-        this.password = password;
-    }
-
-    public void setVerified(boolean verified) {
-        this.verified = verified;
     }
 
     public void initCredential() {
@@ -64,13 +46,24 @@ public class LoggedInSessionImpl implements LoggedInSession {
     @Nonnull
     public Credential setCredential(@Nonnull String credStr) {
         this.credential = this.credentialService.fromString(credStr, "token");
+        this.username = this.credential.getSubject();
+        return this.credential;
+    }
+
+    @Nonnull
+    public Credential verifyPassword(@Nonnull String username, @Nonnull String password) {
+        this.username = username;
+        if (!getAccount().verify(password)) {
+            throw new NotAuthorizedException("Account is locked!");
+        }
+        initCredential();
         return this.credential;
     }
 
     @Override
     @Nonnull
     public Account getAccount() {
-        return this.accountService.getAccount(getUsername());
+        return this.accountService.getAccount(this.username);
     }
 
     @Override

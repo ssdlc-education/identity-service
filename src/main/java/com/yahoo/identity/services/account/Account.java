@@ -21,7 +21,7 @@ public interface Account {
     @Nonnull
     String getEmail();
 
-    boolean getEmailStatus();
+    boolean isEmailVerified();
 
     @Nonnull
     String getPassword();

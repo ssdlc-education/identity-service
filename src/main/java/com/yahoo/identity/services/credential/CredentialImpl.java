@@ -59,8 +59,8 @@ public class CredentialImpl implements Credential {
     }
 
     @Override
-    public void setStatus(int status) {
-        this.status = status;
+    public void setStatus(boolean status) {
+        this.status = status ? 1 : 0;
     }
 
     @Override
