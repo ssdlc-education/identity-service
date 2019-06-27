@@ -1,10 +1,11 @@
 package org.openapitools.api.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yahoo.identity.Identity;
 import com.yahoo.identity.services.account.Account;
-import com.yahoo.identity.services.account.AccountCreate;
-import com.yahoo.identity.services.account.AccountUpdate;
-import com.yahoo.identity.services.session.SessionCreate;
+import com.yahoo.identity.services.session.LoggedInSession;
+import com.yahoo.identity.services.session.Session;
+import com.yahoo.identity.services.storage.AccountImpl;
 import com.yahoo.identity.services.token.TokenCreate;
 import org.openapitools.api.AccountsApiService;
 import org.openapitools.api.ApiResponseMessage;
@@ -12,7 +13,7 @@ import org.openapitools.api.NotFoundException;
 import org.openapitools.model.AccountApi;
 import org.openapitools.model.Token;
 
-import java.time.Instant;
+import java.util.Map;
 
 import javax.annotation.Nonnull;
 import javax.ws.rs.BadRequestException;
@@ -32,11 +33,11 @@ public class AccountsApiServiceImpl extends AccountsApiService {
 
     @Override
     public Response accountsIdGet(String username, SecurityContext securityContext) throws NotFoundException {
-        Account account = identity.getAccountService().getAccount(username);
+        Session session = identity.getSessionService().newAnonymousSession();
+        Account account = session.getAccount(username);
+
         AccountApi accountApi = new AccountApi();
         accountApi.setUsername(username);
-        accountApi.setFirstName(account.getFirstName());
-        accountApi.setLastName(account.getLastName());
         accountApi.setDescription(account.getDescription());
 
         return Response.ok().entity(accountApi).build();
@@ -46,14 +47,11 @@ public class AccountsApiServiceImpl extends AccountsApiService {
     public Response accountsmeGet(String token, SecurityContext securityContext) throws NotFoundException {
         final boolean emailStatus = true;
         try {
-            SessionCreate sessionCreate = identity.getSessionService().newSessionCreate();
-            sessionCreate.create();
+            LoggedInSession loggedInSession = identity.getSessionService().newSessionWithCredential(token);
+            Account account = loggedInSession.getAccount();
 
-            String username = sessionCreate.getUsername();
-
-            Account account = identity.getAccountService().getAccount(username);
             AccountApi accountApi = new AccountApi();
-            accountApi.setUsername(username);
+            accountApi.setUsername(account.getUsername());
             accountApi.setFirstName(account.getFirstName());
             accountApi.setLastName(account.getLastName());
             accountApi.setEmail(account.getEmail());
@@ -77,69 +75,76 @@ public class AccountsApiServiceImpl extends AccountsApiService {
     }
 
     @Override
-    public Response accountsPost(AccountApi account, SecurityContext securityContext) throws NotFoundException {
+    public Response accountsPost(AccountApi accountApi, SecurityContext securityContext) throws NotFoundException {
         final boolean emailStatus = true;
         try {
-            AccountCreate accountCreate = identity.getAccountService().newAccountCreate();
-            accountCreate.setUsername(account.getUsername());
-            accountCreate.setFirstName(account.getFirstName());
-            accountCreate.setLastName(account.getLastName());
-            accountCreate.setEmail(account.getEmail());
-            accountCreate.setEmailStatus(emailStatus);
+            Session session = identity.getSessionService().newAnonymousSession();
 
-            accountCreate.setPassword(account.getPassword());
-            accountCreate.setCreateTime(Instant.now());
-            accountCreate.setUpdateTime(Instant.now());
-            accountCreate.setBlockUntilTime(Instant.now());
-            accountCreate.setDescription(account.getDescription());
-            accountCreate.create();
+            ObjectMapper objectMapper = new ObjectMapper();
+            Map<String, Object> accountMap = objectMapper.convertValue(accountApi, Map.class);
+            Account account = new AccountImpl(accountMap);
 
-            SessionCreate sessionCreate = identity.getSessionService().newSessionCreate();
-            sessionCreate.setUsername(account.getUsername());
-            sessionCreate.setPassword(account.getPassword());
-            sessionCreate.initCredential();
-            String token = sessionCreate.create();
+            session.sessionAccountCreate(account);
 
-            ApiResponseMessage successMsg = new ApiResponseMessage(204, "The account is created successfully.");
-            return Response.ok().entity(successMsg).header("Set-Cookie", token).build();
+            LoggedInSession
+                loggedInSession =
+                identity.getSessionService().newSessionWithPassword(account.getUsername(), account.getPassword());
+            String cookie = loggedInSession.getCredential().toString();
+
+            ApiResponseMessage
+                successMsg =
+                new ApiResponseMessage(Response.Status.NO_CONTENT.getStatusCode(),
+                                       "The account is created successfully.");
+            return Response.status(Response.Status.NO_CONTENT).entity(successMsg)
+                .header("Set-Cookie", cookie + ";HttpOnly").build();
 
         } catch (BadRequestException e) {
-            ApiResponseMessage errorMsg = new ApiResponseMessage(400, "Invalid request: " + e.toString());
+            ApiResponseMessage
+                errorMsg =
+                new ApiResponseMessage(Response.Status.BAD_REQUEST.getStatusCode(), "Invalid request: " + e.toString());
             return Response.status(Response.Status.BAD_REQUEST).entity(errorMsg).build();
         } catch (Exception e) {
-            ApiResponseMessage errorMsg = new ApiResponseMessage(500, "Unknown error occurs: " + e.toString());
+            ApiResponseMessage
+                errorMsg =
+                new ApiResponseMessage(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
+                                       "Unknown error occurs: " + e.toString());
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorMsg).build();
         }
     }
 
     @Override
-    public Response accountsmePut(String token, AccountApi account, SecurityContext securityContext)
+    public Response accountsmePut(String token, AccountApi accountApi, SecurityContext securityContext)
         throws NotFoundException {
         final boolean emailStatus = true;
         try {
             TokenCreate tokenCreate = identity.getTokenService().newTokenCreate();
-            tokenCreate.setToken(token);
-            tokenCreate.setType(Token.TypeEnum.CRITICAL);
+            tokenCreate.setToken(token).setType(Token.TypeEnum.CRITICAL);
             tokenCreate.create();
 
-            AccountUpdate accountUpdate = identity.getAccountService().newAccountUpdate(account.getUsername());
-            accountUpdate.setEmail(account.getEmail());
-            accountUpdate.setEmailStatus(emailStatus);
-            accountUpdate.setPassword(account.getPassword());
-            accountUpdate.setDescription(account.getDescription());
-            accountUpdate.setUpdateTime(Instant.now());
-            accountUpdate.update();
+            LoggedInSession loggedInSession = identity.getSessionService().newSessionWithCredential(token);
 
-            ApiResponseMessage successMsg = new ApiResponseMessage(204, "Successfully upate the account.");
+            ObjectMapper objectMapper = new ObjectMapper();
+            Map<String, Object> accountMap = objectMapper.convertValue(accountApi, Map.class);
+            Account account = new AccountImpl(accountMap);
+
+            loggedInSession.sessionAccountUpdate(account);
+
+            ApiResponseMessage
+                successMsg =
+                new ApiResponseMessage(Response.Status.NO_CONTENT.getStatusCode(), "Successfully upate the account.");
             return Response.ok().entity(successMsg).build();
 
         } catch (NotAuthorizedException e) {
             ApiResponseMessage
                 errorMsg =
-                new ApiResponseMessage(401, "Invalid cookie credential is used:" + e.toString());
+                new ApiResponseMessage(Response.Status.UNAUTHORIZED.getStatusCode(),
+                                       "Invalid cookie credential is used:" + e.toString());
             return Response.status(Response.Status.UNAUTHORIZED).entity(errorMsg).build();
         } catch (Exception e) {
-            ApiResponseMessage errorMsg = new ApiResponseMessage(500, "Unknown error occurs:" + e.toString());
+            ApiResponseMessage
+                errorMsg =
+                new ApiResponseMessage(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
+                                       "Unknown error occurs:" + e.toString());
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorMsg).build();
         }
     }

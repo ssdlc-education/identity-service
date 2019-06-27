@@ -1,10 +1,12 @@
 package com.yahoo.identity.services.storage.sql;
 
 import static com.kosprov.jargon2.api.Jargon2.jargon2Hasher;
+import static org.apache.commons.text.StringEscapeUtils.escapeHtml4;
 
 import com.kosprov.jargon2.api.Jargon2;
 import com.yahoo.identity.IdentityException;
 import com.yahoo.identity.services.account.AccountCreate;
+import com.yahoo.identity.services.storage.AccountModel;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 
@@ -29,28 +31,28 @@ public class SqlAccountCreate implements AccountCreate {
     @Override
     @Nonnull
     public AccountCreate setUsername(@Nonnull String username) {
-        account.setUsername(username);
+        account.setUsername(escapeHtml4(username));
         return this;
     }
 
     @Override
     @Nonnull
     public AccountCreate setFirstName(@Nonnull String firstName) {
-        account.setFirstName(firstName);
+        account.setFirstName(escapeHtml4(firstName));
         return this;
     }
 
     @Override
     @Nonnull
     public AccountCreate setLastName(@Nonnull String lastName) {
-        account.setLastName(lastName);
+        account.setLastName(escapeHtml4(lastName));
         return this;
     }
 
     @Override
     @Nonnull
     public AccountCreate setEmail(@Nonnull String email) {
-        account.setEmail(email);
+        account.setEmail(escapeHtml4(email));
         return this;
     }
 
@@ -93,7 +95,7 @@ public class SqlAccountCreate implements AccountCreate {
     @Nonnull
     @Override
     public AccountCreate setDescription(@Nonnull String title) {
-        account.setDescription(title);
+        account.setDescription(escapeHtml4(title));
         return this;
     }
 

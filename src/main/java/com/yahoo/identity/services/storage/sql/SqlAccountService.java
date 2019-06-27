@@ -23,8 +23,15 @@ public class SqlAccountService implements AccountService {
     }
 
     @Override
+    @Nonnull
     public Account getAccount(@Nonnull String username) {
         return this.storage.getAccount(username);
+    }
+
+    @Override
+    @Nonnull
+    public Account getPublicAccount(@Nonnull String username) {
+        return this.storage.getPublicAccount(username);
     }
 
     @Override

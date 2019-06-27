@@ -6,4 +6,5 @@ public interface CredentialService {
 
     @Nonnull
     Credential fromString(@Nonnull String credStr, @Nonnull String username);
+
 }

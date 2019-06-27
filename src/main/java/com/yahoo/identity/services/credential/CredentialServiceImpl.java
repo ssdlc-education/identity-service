@@ -21,7 +21,7 @@ public class CredentialServiceImpl implements CredentialService {
     public Credential fromString(@Nonnull String credStr, @Nonnull String username) {
         try {
 
-            Algorithm algorithm = Algorithm.HMAC256(keyService.getSecret(username));
+            Algorithm algorithm = Algorithm.HMAC256(this.keyService.getSecret("cookie"));
 
             JWTVerifier verifier = JWT.require(algorithm)
                 .acceptLeeway(1)   // 1 sec for nbf and iat

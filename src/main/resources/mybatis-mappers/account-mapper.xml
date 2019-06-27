@@ -37,9 +37,22 @@
         <result property="consecutiveFails" column="consecutive_fails"/>
     </resultMap>
 
+
+    <resultMap id="publicAccountResultMap" type="AccountModel">
+        <id property="uid" column="uid"/>
+        <result property="username" column="username"/>
+        <result property="description" column="description"/>
+    </resultMap>
+
+
     <select id="getAccount" resultMap="accountResultMap">
         SELECT uid, username, first_name, last_name, email, email_status, password_hash, password_salt, create_ts,
         update_ts, description, block_until_ts, consecutive_fails FROM account
+        WHERE username = #{username}
+    </select>
+
+    <select id="getPublicAccount" resultMap="publicAccountResultMap">
+        SELECT uid, username, description FROM account
         WHERE username = #{username}
     </select>
 

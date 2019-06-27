@@ -37,12 +37,9 @@ public class TokenCreateImpl implements TokenCreate {
     @Nonnull
     public TokenCreate setToken(@Nonnull String tokenStr) {
         try {
-            Algorithm algorithm = Algorithm.HMAC256(keyService.getSecret("Anonymous"));
+            Algorithm algorithm = Algorithm.HMAC256(keyService.getSecret("token"));
 
-            JWTVerifier verifier = JWT.require(algorithm)
-                .acceptLeeway(1)   // 1 sec for nbf and iat
-                .acceptExpiresAt(5)   // 5 secs for exp
-                .build();
+            JWTVerifier verifier = JWT.require(algorithm).build();
 
             DecodedJWT jwt = verifier.verify(tokenStr);
 

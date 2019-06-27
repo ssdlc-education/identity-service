@@ -1,45 +1,48 @@
 package com.yahoo.identity.services.session;
 
-import com.yahoo.identity.services.credential.Credential;
-import com.yahoo.identity.services.credential.CredentialImpl;
+import com.yahoo.identity.services.account.Account;
+import com.yahoo.identity.services.account.AccountCreate;
+import com.yahoo.identity.services.account.AccountService;
+import com.yahoo.identity.services.storage.Storage;
+import com.yahoo.identity.services.storage.sql.SqlAccountService;
 
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 
 import javax.annotation.Nonnull;
 
 public class SessionImpl implements Session {
 
-    private String username;
-    private String password;
-    private Credential credential = new CredentialImpl();
+    private AccountService accountService;
 
-    public String getUsername() {
-        return this.username;
-    }
-
-    public void setUsername(@Nonnull String username) {
-        this.username = username;
-    }
-
-    public String getPassword() {
-        return this.password;
-    }
-
-    public void setPassword(@Nonnull String password) {
-        this.password = password;
+    public SessionImpl(@Nonnull Storage storage) {
+        this.accountService = new SqlAccountService(storage);
     }
 
     @Override
     @Nonnull
-    public Credential getCredential() {
-        return this.credential;
+    public Account getAccount(@Nonnull String username) {
+        return this.accountService.getPublicAccount(username);
     }
 
-    public void initCredential() {
-        this.credential.setIssueTime(Instant.now());
-        this.credential.setExpireTime(Instant.now().plus(7, ChronoUnit.DAYS));
-        this.credential.setSubject(getUsername());
-        this.credential.validate();
+    @Nonnull
+    public SessionImpl sessionAccountCreate(@Nonnull Account account) {
+        final boolean mockEmailStatus = true;
+
+        AccountCreate accountCreate = this.accountService.newAccountCreate();
+        accountCreate.setUsername(account.getUsername());
+        accountCreate.setFirstName(account.getFirstName());
+        accountCreate.setLastName(account.getLastName());
+        accountCreate.setEmail(account.getEmail());
+        accountCreate.setEmailStatus(mockEmailStatus);
+
+        accountCreate.setPassword(account.getPassword());
+        accountCreate.setCreateTime(Instant.now());
+        accountCreate.setUpdateTime(Instant.now());
+        accountCreate.setBlockUntilTime(Instant.now());
+        accountCreate.setDescription(account.getDescription());
+        accountCreate.create();
+
+        return this;
     }
+
 }

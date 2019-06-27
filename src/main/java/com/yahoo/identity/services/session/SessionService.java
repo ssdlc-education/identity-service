@@ -1,5 +1,6 @@
 package com.yahoo.identity.services.session;
 
+
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.ThreadSafe;
 
@@ -7,5 +8,11 @@ import javax.annotation.concurrent.ThreadSafe;
 public interface SessionService {
 
     @Nonnull
-    SessionCreate newSessionCreate();
+    LoggedInSession newSessionWithPassword(@Nonnull String username, @Nonnull String password);
+
+    @Nonnull
+    LoggedInSession newSessionWithCredential(@Nonnull String credStr);
+
+    @Nonnull
+    Session newAnonymousSession();
 }

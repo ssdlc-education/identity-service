@@ -32,7 +32,6 @@ public class TokenImpl implements Token {
         this.expireTime = expireTime;
     }
 
-
     @Override
     public void setSubject(@Nonnull String subject) {
         this.subject = subject;
@@ -42,7 +41,7 @@ public class TokenImpl implements Token {
     @Nonnull
     public String toString() {
         try {
-            Algorithm algorithm = Algorithm.HMAC256(this.keyServiceImpl.getSecret("Anonymous"));
+            Algorithm algorithm = Algorithm.HMAC256(this.keyServiceImpl.getSecret("token"));
             String token = JWT.create()
                 .withExpiresAt(Date.from(this.expireTime))
                 .withIssuedAt(Date.from(this.issueTime))

@@ -21,6 +21,8 @@ public interface Account {
     @Nonnull
     String getEmail();
 
+    boolean isEmailVerified();
+
     @Nonnull
     String getPassword();
 
@@ -36,9 +38,7 @@ public interface Account {
     @Nonnull
     Instant getBlockUntilTime();
 
-    @Nonnull
     int getConsecutiveFails();
 
-    @Nonnull
     boolean verify(@Nonnull String password);
 }

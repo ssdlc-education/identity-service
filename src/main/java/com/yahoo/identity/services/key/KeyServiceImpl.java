@@ -18,9 +18,9 @@ public class KeyServiceImpl implements KeyService {
 
     @Override
     @Nonnull
-    public String getSecret(@Nonnull String username) {
+    public String getSecret(@Nonnull String name) {
         try {
-            this.secret = readFileAsString(".secret/" + username + ".key");
+            this.secret = readFileAsString(".secret/" + name + ".key");
         } catch (FileNotFoundException e) {
             throw new InternalServerErrorException("Secret key file doesn't exists");
         } catch (Exception e) {

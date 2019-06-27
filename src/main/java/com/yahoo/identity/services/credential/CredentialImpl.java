@@ -17,7 +17,7 @@ public class CredentialImpl implements Credential {
     private Instant issueTime;
     private Instant expireTime;
     private String subject;
-    private KeyServiceImpl keyServiceImpl = new KeyServiceImpl();
+    private int status;
 
     @Override
     @Nonnull
@@ -54,15 +54,29 @@ public class CredentialImpl implements Credential {
 
     @Override
     @Nonnull
+    public int getStatus() {
+        return this.status;
+    }
+
+    @Override
+    public void setStatus(boolean status) {
+        this.status = status ? 1 : 0;
+    }
+
+    @Override
+    @Nonnull
     public String toString() {
         try {
-            Algorithm algorithm = Algorithm.HMAC256(this.keyServiceImpl.getSecret(this.subject));
+            KeyServiceImpl keyServiceImpl = new KeyServiceImpl();
+            Algorithm algorithm = Algorithm.HMAC256(keyServiceImpl.getSecret("cookie"));
             String token = JWT.create()
-                .withExpiresAt(Date.from(this.expireTime))
-                .withIssuedAt(Date.from(this.issueTime))
-                .withSubject(this.subject)
+                .withExpiresAt(Date.from(getExpireTime()))
+                .withIssuedAt(Date.from(getIssueTime()))
+                .withClaim("sta", getStatus())
+                .withSubject(getSubject())
                 .sign(algorithm);
             return token;
+
         } catch (JWTCreationException exception) {
             throw new BadRequestException("JWT creation does not succeed.");
         }

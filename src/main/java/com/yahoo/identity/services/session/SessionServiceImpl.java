@@ -1,12 +1,38 @@
 package com.yahoo.identity.services.session;
 
+import com.yahoo.identity.services.storage.Storage;
+
 import javax.annotation.Nonnull;
 
 public class SessionServiceImpl implements SessionService {
 
+    private final Storage storage;
+
+    public SessionServiceImpl(@Nonnull Storage storage) {
+        this.storage = storage;
+    }
+
     @Override
     @Nonnull
-    public SessionCreate newSessionCreate() {
-        return new SessionCreateImpl();
+    public LoggedInSession newSessionWithPassword(@Nonnull String username, @Nonnull String password) {
+        LoggedInSessionImpl loggedInSession = new LoggedInSessionImpl(this.storage);
+        loggedInSession.verifyPassword(username, password);
+
+        return loggedInSession;
+    }
+
+    @Override
+    @Nonnull
+    public LoggedInSession newSessionWithCredential(@Nonnull String credStr) {
+        LoggedInSessionImpl loggedInSession = new LoggedInSessionImpl(this.storage);
+        loggedInSession.setCredential(credStr);
+
+        return loggedInSession;
+    }
+
+    @Override
+    @Nonnull
+    public Session newAnonymousSession() {
+        return new SessionImpl(this.storage);
     }
 }

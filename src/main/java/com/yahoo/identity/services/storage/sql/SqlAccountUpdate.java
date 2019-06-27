@@ -1,10 +1,12 @@
 package com.yahoo.identity.services.storage.sql;
 
 import static com.kosprov.jargon2.api.Jargon2.jargon2Hasher;
+import static org.apache.commons.text.StringEscapeUtils.escapeHtml4;
 
 import com.kosprov.jargon2.api.Jargon2;
 import com.yahoo.identity.IdentityException;
 import com.yahoo.identity.services.account.AccountUpdate;
+import com.yahoo.identity.services.storage.AccountModel;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 
@@ -27,7 +29,7 @@ public class SqlAccountUpdate implements AccountUpdate {
     @Override
     @Nonnull
     public AccountUpdate setEmail(@Nonnull String email) {
-        account.setEmail(email);
+        account.setEmail(escapeHtml4(email));
         return this;
     }
 
@@ -62,7 +64,7 @@ public class SqlAccountUpdate implements AccountUpdate {
     @Nonnull
     @Override
     public AccountUpdate setDescription(@Nonnull String title) {
-        account.setDescription(title);
+        account.setDescription(escapeHtml4(title));
         return this;
     }
 

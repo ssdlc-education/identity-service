@@ -1,4 +1,4 @@
-package com.yahoo.identity.services.storage.sql;
+package com.yahoo.identity.services.storage;
 
 import javax.annotation.Nonnull;
 
