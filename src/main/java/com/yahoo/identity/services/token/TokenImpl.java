@@ -32,7 +32,6 @@ public class TokenImpl implements Token {
         this.expireTime = expireTime;
     }
 
-
     @Override
     public void setSubject(@Nonnull String subject) {
         this.subject = subject;

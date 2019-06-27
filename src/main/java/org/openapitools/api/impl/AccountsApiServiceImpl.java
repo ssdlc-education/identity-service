@@ -89,13 +89,14 @@ public class AccountsApiServiceImpl extends AccountsApiService {
             LoggedInSession
                 loggedInSession =
                 identity.getSessionService().newSessionWithPassword(account.getUsername(), account.getPassword());
-            String token = loggedInSession.getCredential().toString();
+            String cookie = loggedInSession.getCredential().toString();
 
             ApiResponseMessage
                 successMsg =
                 new ApiResponseMessage(Response.Status.NO_CONTENT.getStatusCode(),
                                        "The account is created successfully.");
-            return Response.status(Response.Status.NO_CONTENT).entity(successMsg).header("Set-Cookie", token).build();
+            return Response.status(Response.Status.NO_CONTENT).entity(successMsg)
+                .header("Set-Cookie", cookie + ";HttpOnly").build();
 
         } catch (BadRequestException e) {
             ApiResponseMessage
@@ -126,7 +127,7 @@ public class AccountsApiServiceImpl extends AccountsApiService {
             Map<String, Object> accountMap = objectMapper.convertValue(accountApi, Map.class);
             Account account = new AccountImpl(accountMap);
 
-            loggedInSession.sessionAccountUpdate(account).getCredential().toString();
+            loggedInSession.sessionAccountUpdate(account);
 
             ApiResponseMessage
                 successMsg =
