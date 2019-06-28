@@ -132,6 +132,7 @@
             <scope>compile</scope>
         </dependency>
 
+        <!-- Hash Functions -->
         <dependency>
             <groupId>com.kosprov.jargon2</groupId>
             <artifactId>jargon2-api</artifactId>
@@ -143,19 +144,31 @@
             <version>1.1.1</version>
             <scope>runtime</scope>
         </dependency>
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+            <version>1.12</version>
+        </dependency>
 
+        <!-- Unit Testing -->
         <dependency>
             <groupId>org.jmockit</groupId>
             <artifactId>jmockit</artifactId>
             <version>${jmockit-version}</version>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>org.jmockit</groupId>
             <artifactId>jmockit-coverage</artifactId>
             <version>1.23</version>
         </dependency>
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <version>6.14.3</version>
+            <scope>test</scope>
+        </dependency>
+
 
         <dependency>
             <groupId>javax.servlet</groupId>
@@ -233,13 +246,6 @@
             <groupId>org.xerial</groupId>
             <artifactId>sqlite-jdbc</artifactId>
             <version>3.27.2.1</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
-            <version>6.14.3</version>
-            <scope>test</scope>
         </dependency>
 
         <dependency>
