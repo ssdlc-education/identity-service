@@ -5,8 +5,7 @@ script:
   # make path to locally store JWT secret
   - mkdir .secret
   - bash .scripts/buildDB.sh
-  # code needs reformat, skip test
-  - mvn clean package -DskipTests jetty:run &
+  - mvn clean package jetty:run &
   # sleep to wait for jetty service to be ready
   - sleep 30
   - bash .scripts/curl.sh
