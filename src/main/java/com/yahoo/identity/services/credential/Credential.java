@@ -22,7 +22,7 @@ public interface Credential {
     void setSubject(@Nonnull String subject);
 
     @Nonnull
-    boolean getStatus();
+    int getStatus();
 
     void setStatus(boolean status);
 
