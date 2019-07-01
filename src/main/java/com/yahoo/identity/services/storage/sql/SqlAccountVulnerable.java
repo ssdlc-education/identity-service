@@ -51,6 +51,11 @@ public class SqlAccountVulnerable implements Account {
         }
     }
 
+    @Nonnull
+    public AccountModel getAccountModel() {
+        return this.account;
+    }
+
     @Override
     @Nonnull
     public String getUid() {

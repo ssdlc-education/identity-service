@@ -5,6 +5,7 @@ import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Tested;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
@@ -23,10 +24,16 @@ public class SqlAccountVulnerableTest {
     SqlSessionFactory sqlSessionFactory;
     @Injectable
     AccountModel accountModel;
+    @Injectable
+    SqlSession sqlSession;
+    @Injectable
+    AccountMapper mapper;
 
 
     String password;
     String hash;
+    AccountModel acctModel;
+    String username;
 
     @DataProvider(name = "Fails")
     public static Object[][] fails() {
@@ -34,9 +41,46 @@ public class SqlAccountVulnerableTest {
     }
 
     @BeforeMethod
-    public void setAccountUpdate() {
+    public void setup() {
         password = "00000";
         hash = DigestUtils.md5Hex(password);
+
+        acctModel = new AccountModel();
+        acctModel.setUsername(username);
+    }
+
+    @Test
+    public void testGetAccount() {
+        new Expectations() {{
+            sqlSessionFactory.openSession();
+            result = sqlSession;
+            mapper.getAccount(username);
+            result = acctModel;
+        }};
+
+        accountVulnerable.getAccount(username);
+        Assert.assertEquals(accountVulnerable.getAccountModel().getUsername(), username);
+
+        new Expectations() {{
+            mapper.getPublicAccount(username);
+            result = acctModel;
+        }};
+        accountVulnerable.getPublicAccount(username);
+        Assert.assertEquals(accountVulnerable.getAccountModel().getUsername(), username);
+    }
+
+    @Test
+    public void testGetAccountFailed() {
+        new Expectations() {{
+            sqlSessionFactory.openSession();
+            result = new Exception();
+        }};
+
+        accountVulnerable.getAccount(username);
+        Assert.assertNull(accountVulnerable.getAccountModel().getUsername());
+
+        accountVulnerable.getPublicAccount(username);
+        Assert.assertNull(accountVulnerable.getAccountModel().getUsername());
     }
 
     @Test

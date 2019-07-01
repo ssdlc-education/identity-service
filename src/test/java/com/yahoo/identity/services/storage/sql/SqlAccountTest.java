@@ -6,6 +6,7 @@ import com.yahoo.identity.services.storage.AccountModel;
 import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Tested;
+import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
@@ -24,13 +25,20 @@ public class SqlAccountTest {
     @Injectable
     SqlSessionFactory sqlSessionFactory;
     @Injectable
+    AccountMapper mapper;
+    @Injectable
     AccountModel accountModel;
+    @Injectable
+    SqlSession sqlSession;
 
 
     String password;
     String salt;
     String hash;
     byte[] saltBytes;
+    AccountModel acctModel;
+    String username;
+
 
     @DataProvider(name = "Fails")
     public static Object[][] fails() {
@@ -38,11 +46,49 @@ public class SqlAccountTest {
     }
 
     @BeforeMethod
-    public void setAccountUpdate() {
+    public void setup() {
         password = "00000";
+        username = "username";
         saltBytes = new byte[64];
         salt = Base64.getEncoder().encodeToString(saltBytes);
         hash = jargon2Hasher().salt(saltBytes).password(password.getBytes()).encodedHash();
+
+        acctModel = new AccountModel();
+        acctModel.setUsername(username);
+    }
+
+    @Test
+    public void testGetAccount() {
+        new Expectations() {{
+            sqlSessionFactory.openSession();
+            result = sqlSession;
+            mapper.getAccount(username);
+            result = acctModel;
+        }};
+
+        account.getAccount(username);
+        Assert.assertEquals(account.getAccountModel().getUsername(), username);
+
+        new Expectations() {{
+           mapper.getPublicAccount(username);
+           result = acctModel;
+        }};
+        account.getPublicAccount(username);
+        Assert.assertEquals(account.getAccountModel().getUsername(), username);
+    }
+
+    @Test
+    public void testGetAccountFailed() {
+        new Expectations() {{
+            sqlSessionFactory.openSession();
+            result = new Exception();
+        }};
+
+        account.getAccount(username);
+        Assert.assertNull(account.getAccountModel().getUsername());
+
+        account.getPublicAccount(username);
+        Assert.assertNull(account.getAccountModel().getUsername());
     }
 
     @Test
