@@ -6,6 +6,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"html/template"
 	"io/ioutil"
 	"log"
@@ -68,7 +69,7 @@ func (p *Profile) saveToBackend() error {
 	updateInfo.Description = p.Description
 	jsonData, err := json.Marshal(updateInfo)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	Data := string(jsonData)
 	// Encode the information to byte payload
@@ -78,8 +79,9 @@ func (p *Profile) saveToBackend() error {
 	_, err = client.Do(request)
 	client.CloseIdleConnections()
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
+
 	return err
 }
 
@@ -88,22 +90,23 @@ func readFromBackend(userid string) (*Profile, error) {
 	apiUrl := "http://localhost:8080/v1/accounts/@me?token=" + token
 	res, err := http.Get(apiUrl)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	defer res.Body.Close()
 	bodyBytes, err := ioutil.ReadAll(res.Body)
-	var responseInfo Response
-	err = json.Unmarshal(bodyBytes, &responseInfo)
+	//var responseInfo Response
+	var pageInfo Profile
+	err = json.Unmarshal(bodyBytes, &pageInfo)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	// Extract the data from http response and generate data to render backend pages
-	data := responseInfo.Message
-	var pageInfo Profile
-	err = json.Unmarshal([]byte(data), &pageInfo)
-	if err != nil {
-		log.Fatal(err)
-	}
+	//data := responseInfo.Message
+	//
+	//err = json.Unmarshal([]byte(data), &pageInfo)
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
 	return &pageInfo, err
 }
 
@@ -116,16 +119,10 @@ func readFromPublic(username string) (*PublicInfo, error) {
 	}
 	defer resp.Body.Close()
 	bodyBytes, err := ioutil.ReadAll(resp.Body)
-	var responseInfo Response
-	err = json.Unmarshal(bodyBytes, &responseInfo)
-	if err != nil {
-		log.Fatal(err)
-	}
-	data := responseInfo.Message
 	var pageData PublicInfo
-	err = json.Unmarshal([]byte(data), &pageData)
+	err = json.Unmarshal(bodyBytes, &pageData)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	return &pageData, err
 }
@@ -133,8 +130,7 @@ func readFromPublic(username string) (*PublicInfo, error) {
 func accountsHandler(w http.ResponseWriter, r *http.Request, title string) {
 	p, err := readFromPublic(title)
 	if err != nil {
-		http.Redirect(w, r, "/accounts/oscarwilde", http.StatusFound)
-		return
+		log.Println(err)
 	}
 	page := Profile{}
 	page.Username = p.Username
@@ -147,7 +143,7 @@ func accountsHandler(w http.ResponseWriter, r *http.Request, title string) {
 func editHandler(w http.ResponseWriter, r *http.Request, title string) {
 	p, err := readFromBackend(title)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	renderTemplate(w, "edit", p)
 }
@@ -159,14 +155,14 @@ func saveHandler(w http.ResponseWriter, r *http.Request, title string) {
 	description := r.FormValue("description")
 	originalPage, err := readFromBackend(title)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	// Change the information from preloaded information
 	originalPage.Email = email
 	originalPage.Description = description
 	err = originalPage.saveToBackend()
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	// After edited it redirect to the private information page
 	http.Redirect(w, r, "/privatePage/", http.StatusFound)
@@ -205,17 +201,17 @@ func createHandler(w http.ResponseWriter, r *http.Request, title string){
 	pageinfo.Verified = "true"
 	newUser, err := json.Marshal(pageinfo)
 	if err != nil {
-		log.Fatal()
+		log.Println(err)
 	}
 	Data := string(newUser)
 	payload := strings.NewReader(Data)
 	_, err = http.Post("http://localhost:8080/v1/accounts/", "application/json", payload)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
-	err = login(pageinfo.Username, pageinfo.Password)
+	err = login(w, pageinfo.Username, pageinfo.Password)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	http.Redirect(w, r, "/privatePage/", http.StatusFound)
 }
@@ -229,7 +225,7 @@ func homeHandler(w http.ResponseWriter, r *http.Request, title string) {
 
 // Do the login job and set the token
 
-func login(username string, password string) error {
+func login(w http.ResponseWriter, username string, password string) error {
 	user := LogInfo{}
 	user.Username = username
 	user.Password = password
@@ -238,10 +234,15 @@ func login(username string, password string) error {
 	payload := strings.NewReader(userString)
 	response, err := http.Post("http://localhost:8080/v1/sessions/", "application/json", payload)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	// Get token from login response from backend
 	token = response.Header.Get("Set-Cookie")
+	Cookie := http.Cookie{Name:user.Username,
+		Value: token,
+		HttpOnly:true}
+	http.SetCookie(w, &Cookie)
+	//fmt.Println(token)
 	return err
 }
 
@@ -250,11 +251,15 @@ func loginHandler(w http.ResponseWriter, r *http.Request, title string) {
 	username := r.FormValue("username")
 	password := r.FormValue("password")
 	//User information struct
-	err := login(username, password)
+	err := login(w,username, password)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
+	cookie,_ := r.Cookie(username)
+	//fmt.Println(r.Cookie("Alice"))
+	//fmt.Println(cookie)
 	// After login, redirect to private page
+	http.SetCookie(w, cookie)
 	http.Redirect(w, r, "/privatePage/", http.StatusFound)
 }
 
@@ -264,17 +269,20 @@ func registerHandler(w http.ResponseWriter, r *http.Request, title string) {
 }
 
 func privateHandler(w http.ResponseWriter, r *http.Request, title string) {
+	fmt.Println("Cookie.......")
+	cookie,_ := r.Cookie("Alice")
+	fmt.Println(cookie)
 	link := "http://localhost:8080/v1/accounts/@me?token=" + token
 	resp, err := http.Get(link)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	defer resp.Body.Close()
 	bodyBytes, err := ioutil.ReadAll(resp.Body)
 	var responseInfo Response
 	err = json.Unmarshal(bodyBytes, &responseInfo)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	data := responseInfo.Message
 	var pageInfo Profile
@@ -291,5 +299,5 @@ func main() {
 	http.HandleFunc("/login/", makeHandler(loginHandler))
 	http.HandleFunc("/home/", makeHandler(homeHandler))
 	http.HandleFunc("/privatePage/", makeHandler(privateHandler))
-	log.Fatal(http.ListenAndServe(":5000", nil))
+	log.Println(http.ListenAndServe(":5000", nil))
 }
