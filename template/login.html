@@ -7,11 +7,12 @@
 </head>
 <body>
 <div>
+    <nav class="navbar navbar-expand-lg navbar-primary bg-primary">
+        <h1> Login </h1>
+    </nav>
   <form action="/login/" method = "POST">
-    <div class="container">
-      <h1>Log in</h1>
-      <p>Please use your username and password to login.</p>
-      <hr>
+    <div class="container" style="margin-top: 10px">
+
       <div class = "container">
           <div class = "input-group">
               <div class = "input-group-prepend">
@@ -23,21 +24,12 @@
               </div>
               <input type="psw" class = "form-control" placeholder="Enter Password" name="password" required>
           </div>
-{{/*        <div class = "row">*/}}
-{{/*          <label for="Username"><b>Username</b></label>*/}}
-{{/*          <input type="text" placeholder="Enter username" name="username" required>*/}}
-{{/*        </div>*/}}
-{{/*        <div class = "row">*/}}
-{{/*          <label for="password"><b>Password</b></label>*/}}
-{{/*          <input type="text" placeholder="Enter Password" name="password" required>*/}}
-{{/*        </div>*/}}
-      </div>
-      <div><input class = "btn btn-primary" type="submit" value="Login"></div>
-    </div>
 
-{{/*    <div class="">*/}}
-{{/*      <p>Forget your password? <a href="#">Reset password</a>.</p>*/}}
-{{/*    </div>*/}}
+      <div style="margin-top: 20px; margin-left: 10px">
+          <input class = "btn btn-primary" type="submit" value="Login">
+      </div>
+    </div>
+    </div>
   </form>
 </div>
 </body>
