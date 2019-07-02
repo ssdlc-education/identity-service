@@ -1,13 +1,12 @@
 package com.yahoo.identity.services.storage.sql;
 
-import static com.kosprov.jargon2.api.Jargon2.jargon2Verifier;
 import static java.time.temporal.ChronoUnit.SECONDS;
 
-import com.kosprov.jargon2.api.Jargon2;
 import com.yahoo.identity.IdentityException;
 import com.yahoo.identity.services.account.Account;
 import com.yahoo.identity.services.account.AccountUpdate;
 import com.yahoo.identity.services.storage.AccountModel;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 
@@ -16,7 +15,7 @@ import java.time.Instant;
 import javax.annotation.Nonnull;
 import javax.ws.rs.NotAuthorizedException;
 
-public class SqlAccount implements Account {
+public class SqlAccountVulnerable implements Account {
 
     private static final int ABUSE_MAX_TRIES = 5;
     private static final long ABUSE_MIN_BLOCK = 300;
@@ -26,7 +25,7 @@ public class SqlAccount implements Account {
     private AccountModel account;
     private SqlSessionFactory sqlSessionFactory;
 
-    public SqlAccount(@Nonnull SqlSessionFactory sqlSessionFactory) throws IdentityException {
+    public SqlAccountVulnerable(@Nonnull SqlSessionFactory sqlSessionFactory) throws IdentityException {
         this.sqlSessionFactory = sqlSessionFactory;
     }
 
@@ -133,37 +132,32 @@ public class SqlAccount implements Account {
         int consecutiveFails = this.getConsecutiveFails();
         long blockTimeLeft = Instant.now().until(blockUntil, SECONDS);
 
-        AccountUpdate accountUpdate = new SqlAccountUpdate(this.sqlSessionFactory, getUsername());
+        AccountUpdate accountUpdateVulnerable = new SqlAccountUpdateVulnerable(this.sqlSessionFactory, getUsername());
 
         if (blockTimeLeft > 0) {
             return false;
         }
 
-        Jargon2.Verifier verifier = jargon2Verifier();
-        boolean isVerified = verifier
-            .salt(this.account.getPasswordSalt().getBytes())
-            .hash(this.account.getPasswordHash())
-            .password(password.getBytes())
-            .verifyEncoded();
-
-        if (!isVerified) {
+        if (!this.account.getPasswordHash().equals(DigestUtils.md5Hex(password))) {
             if (consecutiveFails >= ABUSE_MAX_TRIES) {
                 long blockTime =
                     (long) (Math.pow(ABUSE_BLOCK_FACTOR, consecutiveFails - ABUSE_MAX_TRIES) * ABUSE_MIN_BLOCK);
-                accountUpdate.setBlockUntilTime(Instant.now().plusSeconds(Math.min(ABUSE_MAX_BLOCK, blockTime)));
+                accountUpdateVulnerable
+                    .setBlockUntilTime(Instant.now().plusSeconds(Math.min(ABUSE_MAX_BLOCK, blockTime)));
             } else {
-                accountUpdate.setBlockUntilTime(Instant.now());
+                accountUpdateVulnerable.setBlockUntilTime(Instant.now());
             }
-            accountUpdate.setConsecutiveFails(consecutiveFails + 1);
-            accountUpdate.update();
+            accountUpdateVulnerable.setConsecutiveFails(consecutiveFails + 1);
+            accountUpdateVulnerable.update();
             throw new NotAuthorizedException("Username and password are not matched!");
         }
 
         if (consecutiveFails > 0) {
-            accountUpdate.setConsecutiveFails(ABUSE_RESET_ZERO);
-            accountUpdate.setBlockUntilTime(Instant.now());
-            accountUpdate.update();
+            accountUpdateVulnerable.setConsecutiveFails(ABUSE_RESET_ZERO);
+            accountUpdateVulnerable.setBlockUntilTime(Instant.now());
+            accountUpdateVulnerable.update();
         }
         return true;
     }
 }
+

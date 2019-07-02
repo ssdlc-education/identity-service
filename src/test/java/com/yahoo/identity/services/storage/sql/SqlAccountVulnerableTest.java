@@ -1,11 +1,10 @@
 package com.yahoo.identity.services.storage.sql;
 
-import static com.kosprov.jargon2.api.Jargon2.jargon2Hasher;
-
 import com.yahoo.identity.services.storage.AccountModel;
 import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Tested;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.testng.Assert;
@@ -14,31 +13,27 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.time.Instant;
-import java.util.Base64;
 
 import javax.ws.rs.NotAuthorizedException;
 
-public class SqlAccountTest {
+public class SqlAccountVulnerableTest {
 
     @Tested
-    SqlAccount account;
+    SqlAccountVulnerable accountVulnerable;
     @Injectable
     SqlSessionFactory sqlSessionFactory;
-    @Injectable
-    AccountMapper mapper;
     @Injectable
     AccountModel accountModel;
     @Injectable
     SqlSession sqlSession;
+    @Injectable
+    AccountMapper mapper;
 
 
     String password;
-    String salt;
     String hash;
-    byte[] saltBytes;
     AccountModel acctModel;
     String username;
-
 
     @DataProvider(name = "Fails")
     public static Object[][] fails() {
@@ -48,10 +43,7 @@ public class SqlAccountTest {
     @BeforeMethod
     public void setup() {
         password = "00000";
-        username = "username";
-        saltBytes = new byte[64];
-        salt = Base64.getEncoder().encodeToString(saltBytes);
-        hash = jargon2Hasher().salt(saltBytes).password(password.getBytes()).encodedHash();
+        hash = DigestUtils.md5Hex(password);
 
         acctModel = new AccountModel();
         acctModel.setUsername(username);
@@ -66,15 +58,15 @@ public class SqlAccountTest {
             result = acctModel;
         }};
 
-        account.getAccount(username);
-        Assert.assertEquals(account.getAccountModel().getUsername(), username);
+        accountVulnerable.getAccount(username);
+        Assert.assertEquals(accountVulnerable.getAccountModel().getUsername(), username);
 
         new Expectations() {{
-           mapper.getPublicAccount(username);
-           result = acctModel;
+            mapper.getPublicAccount(username);
+            result = acctModel;
         }};
-        account.getPublicAccount(username);
-        Assert.assertEquals(account.getAccountModel().getUsername(), username);
+        accountVulnerable.getPublicAccount(username);
+        Assert.assertEquals(accountVulnerable.getAccountModel().getUsername(), username);
     }
 
     @Test
@@ -84,68 +76,56 @@ public class SqlAccountTest {
             result = new Exception();
         }};
 
-        account.getAccount(username);
-        Assert.assertNull(account.getAccountModel().getUsername());
+        accountVulnerable.getAccount(username);
+        Assert.assertNull(accountVulnerable.getAccountModel().getUsername());
 
-        account.getPublicAccount(username);
-        Assert.assertNull(account.getAccountModel().getUsername());
+        accountVulnerable.getPublicAccount(username);
+        Assert.assertNull(accountVulnerable.getAccountModel().getUsername());
     }
 
     @Test
     public void testVerifyUnblockedAndRight() {
         new Expectations() {{
-            account.getBlockUntilTime();
+            accountVulnerable.getBlockUntilTime();
             result = Instant.now().toEpochMilli();
-            account.getConsecutiveFails();
+            accountVulnerable.getConsecutiveFails();
             result = 0;
-            accountModel.getPasswordSalt();
-            result = salt;
             accountModel.getPasswordHash();
             result = hash;
-            salt.getBytes();
-            result = saltBytes;
         }};
 
-        Assert.assertTrue(account.verify(password));
+        Assert.assertTrue(accountVulnerable.verify(password));
 
         new Expectations() {{
-            account.getConsecutiveFails();
+            accountVulnerable.getConsecutiveFails();
             result = 1;
-            accountModel.getPasswordSalt();
-            result = salt;
             accountModel.getPasswordHash();
             result = hash;
-            salt.getBytes();
-            result = saltBytes;
         }};
-        Assert.assertTrue(account.verify(password));
+        Assert.assertTrue(accountVulnerable.verify(password));
     }
 
     @Test(expectedExceptions = NotAuthorizedException.class, dataProvider = "Fails")
     public void testVerifyUnblockedAndWrong(int fails) {
         new Expectations() {{
-            account.getBlockUntilTime();
+            accountVulnerable.getBlockUntilTime();
             result = Instant.now().toEpochMilli();
-            account.getConsecutiveFails();
+            accountVulnerable.getConsecutiveFails();
             result = fails;
-            accountModel.getPasswordSalt();
-            result = salt;
             accountModel.getPasswordHash();
             result = hash;
-            salt.getBytes();
-            result = saltBytes;
         }};
-        account.verify("12345");
+        accountVulnerable.verify("12345");
     }
 
     @Test
     public void testVerifyBlocked() {
         new Expectations() {{
-            account.getConsecutiveFails();
+            accountVulnerable.getConsecutiveFails();
             result = 6;
-            account.getBlockUntilTime();
+            accountVulnerable.getBlockUntilTime();
             result = Instant.now().plusSeconds(10000).toEpochMilli();
         }};
-        Assert.assertFalse(account.verify(password));
+        Assert.assertFalse(accountVulnerable.verify(password));
     }
 }
