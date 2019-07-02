@@ -5,7 +5,7 @@ import com.yahoo.identity.Identity;
 import com.yahoo.identity.services.account.Account;
 import com.yahoo.identity.services.session.LoggedInSession;
 import com.yahoo.identity.services.session.Session;
-import com.yahoo.identity.services.storage.AccountImpl;
+import com.yahoo.identity.services.storage.AccountConvert;
 import com.yahoo.identity.services.token.TokenCreate;
 import org.openapitools.api.AccountsApiService;
 import org.openapitools.api.ApiResponseMessage;
@@ -82,7 +82,7 @@ public class AccountsApiServiceImpl extends AccountsApiService {
 
             ObjectMapper objectMapper = new ObjectMapper();
             Map<String, Object> accountMap = objectMapper.convertValue(accountApi, Map.class);
-            Account account = new AccountImpl(accountMap);
+            Account account = new AccountConvert(accountMap);
 
             session.sessionAccountCreate(account);
 
@@ -124,7 +124,7 @@ public class AccountsApiServiceImpl extends AccountsApiService {
 
             ObjectMapper objectMapper = new ObjectMapper();
             Map<String, Object> accountMap = objectMapper.convertValue(accountApi, Map.class);
-            Account account = new AccountImpl(accountMap);
+            Account account = new AccountConvert(accountMap);
 
             loggedInSession.sessionAccountUpdate(account);
 

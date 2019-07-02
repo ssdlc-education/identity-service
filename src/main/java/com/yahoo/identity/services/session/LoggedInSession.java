@@ -14,5 +14,8 @@ public interface LoggedInSession {
     Account getAccount();
 
     @Nonnull
+    String getUsername();
+
+    @Nonnull
     LoggedInSession sessionAccountUpdate(@Nonnull Account account);
 }

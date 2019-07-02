@@ -27,12 +27,13 @@ public class SessionsApiServiceImpl extends SessionsApiService {
             LoggedInSession
                 loggedInSession =
                 identity.getSessionService().newSessionWithPassword(session.getUsername(), session.getPassword());
-            String token = loggedInSession.getCredential().toString();
+            String cookie = loggedInSession.getCredential().toString();
 
             ApiResponseMessage
                 successMsg =
                 new ApiResponseMessage(Response.Status.CREATED.getStatusCode(), "The session is created successfully");
-            return Response.status(Response.Status.CREATED).entity(successMsg).header("Set-Cookie", token).build();
+            return Response.status(Response.Status.CREATED).entity(session).header("Set-Cookie", "cookie=" + cookie)
+                .build();
 
         } catch (NotAuthorizedException e) {
             ApiResponseMessage

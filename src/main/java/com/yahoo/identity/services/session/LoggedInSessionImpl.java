@@ -37,6 +37,11 @@ public class LoggedInSessionImpl implements LoggedInSession {
         this.credential.validate();
     }
 
+    @Nonnull
+    public String getUsername() {
+        return this.username;
+    }
+
     @Override
     @Nonnull
     public Credential getCredential() {

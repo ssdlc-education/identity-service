@@ -32,10 +32,10 @@ public interface Account {
     @Nonnull
     String getDescription();
 
-    @Nonnull
-    Instant getBlockUntilTime();
+//    @Nonnull
+//    Instant getBlockUntilTime();
+//
+//    int getConsecutiveFails();
 
-    int getConsecutiveFails();
-
-    boolean verify(@Nonnull String password);
+//    boolean verify(@Nonnull String password);
 }

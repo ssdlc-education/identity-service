@@ -6,14 +6,19 @@ import com.yahoo.identity.services.account.Account;
 import com.yahoo.identity.services.account.AccountCreate;
 import com.yahoo.identity.services.account.AccountUpdate;
 import com.yahoo.identity.services.random.RandomService;
+import com.yahoo.identity.services.random.RandomServiceImpl;
+import com.yahoo.identity.services.storage.AccountImpl;
+import com.yahoo.identity.services.storage.AccountModel;
 import com.yahoo.identity.services.storage.Storage;
 import com.yahoo.identity.services.system.SystemService;
+import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 
 import java.io.InputStream;
 
 import javax.annotation.Nonnull;
+import javax.ws.rs.BadRequestException;
 
 public class SqlStorage implements Storage {
 
@@ -36,17 +41,31 @@ public class SqlStorage implements Storage {
     @Nonnull
     @Override
     public Account getAccount(@Nonnull String username) {
-        SqlAccount sqlAccount = new SqlAccount(sqlSessionFactory);
-        sqlAccount.getAccount(username);
-        return sqlAccount;
+        AccountModel accountModel;
+        try (SqlSession session = sqlSessionFactory.openSession()) {
+            AccountMapper mapper = session.getMapper(AccountMapper.class);
+            accountModel = mapper.getAccount(username);
+            session.commit();
+        } catch (Exception e) {
+            throw new BadRequestException("cannot retrieve username");
+        }
+        AccountImpl accountImpl = new AccountImpl(accountModel);
+        return accountImpl;
     }
 
     @Nonnull
     @Override
     public Account getPublicAccount(@Nonnull String username) {
-        SqlAccount sqlAccount = new SqlAccount(sqlSessionFactory);
-        sqlAccount.getPublicAccount(username);
-        return sqlAccount;
+        AccountModel accountModel;
+        try (SqlSession session = sqlSessionFactory.openSession()) {
+            AccountMapper mapper = session.getMapper(AccountMapper.class);
+            accountModel = mapper.getPublicAccount(username);
+            session.commit();
+        } catch (Exception e) {
+            throw new BadRequestException("cannot retrieve username");
+        }
+        AccountImpl accountImpl = new AccountImpl(accountModel);
+        return accountImpl;
     }
 
     @Nonnull
