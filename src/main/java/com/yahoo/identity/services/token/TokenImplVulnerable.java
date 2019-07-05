@@ -59,11 +59,11 @@ public class TokenImplVulnerable implements Token {
 
     @Override
     public void validate() {
-        Boolean isValid = this.expireTime.compareTo(Instant.now()) < 0;
+        Boolean isValid = this.expireTime.compareTo(Instant.now()) > 0;
 
         if (tokenType == TokenType.CRITICAL) {
             Instant criteriaTs = Instant.now().plus(-5, ChronoUnit.MINUTES);
-            isValid = (this.issueTime.compareTo(criteriaTs) > 0) & isValid;
+            isValid = (this.issueTime.compareTo(criteriaTs) > 0) && isValid;
         }
         if (!isValid) {
             throw new NotAuthorizedException("Token is not valid.");
