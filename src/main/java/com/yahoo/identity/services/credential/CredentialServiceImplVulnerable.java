@@ -7,17 +7,11 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.yahoo.identity.services.key.KeyService;
 import com.yahoo.identity.services.key.KeyServiceImpl;
-import sun.security.ec.ECPrivateKeyImpl;
-import sun.security.ec.ECPublicKeyImpl;
-
-import java.security.InvalidKeyException;
-import java.security.interfaces.ECPrivateKey;
-import java.security.interfaces.ECPublicKey;
 
 import javax.annotation.Nonnull;
 import javax.ws.rs.BadRequestException;
 
-public class CredentialServiceImpl implements CredentialService {
+public class CredentialServiceImplVulnerable implements CredentialService {
 
     private final KeyService keyService = new KeyServiceImpl();
     private final Credential credential = new CredentialImpl();
@@ -26,10 +20,8 @@ public class CredentialServiceImpl implements CredentialService {
     @Nonnull
     public Credential fromString(@Nonnull String credStr) {
         try {
-            ECPublicKey ecPublicKey = new ECPublicKeyImpl(this.keyService.getSecret("cookie-public").getBytes());
-            ECPrivateKey ecPrivateKey = new ECPrivateKeyImpl(this.keyService.getSecret("cookie-private").getBytes());
 
-            Algorithm algorithm = Algorithm.ECDSA256(ecPublicKey, ecPrivateKey);
+            Algorithm algorithm = Algorithm.HMAC256(this.keyService.getSecret("cookie"));
 
             JWTVerifier verifier = JWT.require(algorithm)
                 .acceptLeeway(1)   // 1 sec for nbf and iat
@@ -44,9 +36,8 @@ public class CredentialServiceImpl implements CredentialService {
 
         } catch (JWTVerificationException e) {
             throw new BadRequestException("JWT verification does not succeed.");
-        } catch (InvalidKeyException e) {
-            throw new BadRequestException("Invalid key for ECDSA256.");
         }
         return this.credential;
     }
+
 }

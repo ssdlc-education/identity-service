@@ -7,6 +7,8 @@ import com.kosprov.jargon2.api.Jargon2;
 import com.yahoo.identity.IdentityException;
 import com.yahoo.identity.services.account.Account;
 import com.yahoo.identity.services.account.AccountUpdate;
+import com.yahoo.identity.services.random.RandomService;
+import com.yahoo.identity.services.random.RandomServiceImpl;
 import com.yahoo.identity.services.storage.AccountModel;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -133,7 +135,8 @@ public class SqlAccount implements Account {
         int consecutiveFails = this.getConsecutiveFails();
         long blockTimeLeft = Instant.now().until(blockUntil, SECONDS);
 
-        AccountUpdate accountUpdate = new SqlAccountUpdate(this.sqlSessionFactory, getUsername());
+        RandomService randomService = new RandomServiceImpl();
+        AccountUpdate accountUpdate = new SqlAccountUpdate(this.sqlSessionFactory, randomService, getUsername());
 
         if (blockTimeLeft > 0) {
             return false;

@@ -6,6 +6,7 @@ import static org.apache.commons.text.StringEscapeUtils.escapeHtml4;
 import com.kosprov.jargon2.api.Jargon2;
 import com.yahoo.identity.IdentityException;
 import com.yahoo.identity.services.account.AccountCreate;
+import com.yahoo.identity.services.random.RandomService;
 import com.yahoo.identity.services.storage.AccountModel;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -22,10 +23,11 @@ public class SqlAccountCreate implements AccountCreate {
 
     private final SqlSessionFactory sqlSessionFactory;
     private final AccountModel account = new AccountModel();
-    private final SecureRandom secureRandom = new SecureRandom();
+    private final SecureRandom secureRandom;
 
-    public SqlAccountCreate(@Nonnull SqlSessionFactory sqlSessionFactory) {
+    public SqlAccountCreate(@Nonnull SqlSessionFactory sqlSessionFactory, @Nonnull RandomService randomService) {
         this.sqlSessionFactory = sqlSessionFactory;
+        this.secureRandom = randomService.getRandom();
     }
 
     @Override
@@ -66,7 +68,6 @@ public class SqlAccountCreate implements AccountCreate {
     @Override
     @Nonnull
     public AccountCreate setPassword(@Nonnull String password) {
-        secureRandom.setSeed(Instant.now().toString().getBytes());
 
         byte[] saltBytes = new byte[64];
         secureRandom.nextBytes(saltBytes);

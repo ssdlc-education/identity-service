@@ -7,25 +7,18 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.yahoo.identity.services.key.KeyService;
 import com.yahoo.identity.services.key.KeyServiceImpl;
-import org.openapitools.model.Token.TypeEnum;
-import sun.security.ec.ECPrivateKeyImpl;
-import sun.security.ec.ECPublicKeyImpl;
-
-import java.security.InvalidKeyException;
-import java.security.interfaces.ECPrivateKey;
-import java.security.interfaces.ECPublicKey;
 
 import javax.annotation.Nonnull;
 import javax.ws.rs.BadRequestException;
 
-public class TokenCreateImpl implements TokenCreate {
+public class TokenCreateImplVulnerable implements TokenCreate {
 
+    private final KeyService keyService = new KeyServiceImpl();
     private Token token = new TokenImpl();
-    private KeyService keyService = new KeyServiceImpl();
 
     @Override
     @Nonnull
-    public TokenCreate setType(@Nonnull TypeEnum type) {
+    public TokenCreate setType(@Nonnull org.openapitools.model.Token.TypeEnum type) {
         switch (type) {
             case CRITICAL:
                 token.setTokenType(TokenType.CRITICAL);
@@ -43,10 +36,7 @@ public class TokenCreateImpl implements TokenCreate {
     @Nonnull
     public TokenCreate setToken(@Nonnull String tokenStr) {
         try {
-            ECPublicKey ecPublicKey = new ECPublicKeyImpl(this.keyService.getSecret("token-public").getBytes());
-            ECPrivateKey ecPrivateKey = new ECPrivateKeyImpl(this.keyService.getSecret("token-private").getBytes());
-
-            Algorithm algorithm = Algorithm.ECDSA256(ecPublicKey, ecPrivateKey);
+            Algorithm algorithm = Algorithm.HMAC256(keyService.getSecret("token"));
 
             JWTVerifier verifier = JWT.require(algorithm).build();
 
@@ -58,8 +48,6 @@ public class TokenCreateImpl implements TokenCreate {
 
         } catch (JWTVerificationException e) {
             throw new BadRequestException("JWT verification does not succeed.");
-        } catch (InvalidKeyException e) {
-            throw new BadRequestException("Invalid key for ECDSA256.");
         }
         token.validate();
         return this;

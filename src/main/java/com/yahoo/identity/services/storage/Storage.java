@@ -18,8 +18,5 @@ public interface Storage {
     Account getPublicAccount(@Nonnull String id);
 
     @Nonnull
-    Account getPublicAccount(@Nonnull String id);
-
-    @Nonnull
     AccountUpdate newAccountUpdate(@Nonnull String id);
 }

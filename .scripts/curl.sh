@@ -1,7 +1,11 @@
 
 # Write JWT secret for token and credential service
 openssl rand -hex 16 > .secret/token.key
+openssl rand -hex 16 > .secret/token-public.key
+openssl rand -hex 16 > .secret/token-private.key
 openssl rand -hex 16 > .secret/cookie.key
+openssl rand -hex 16 > .secret/cookie-public.key
+openssl rand -hex 16 > .secret/cookie-private.key
 
 # Test POST method for createAccount
 curl -d'{"username":"Alice","firstName":"Alice","lastName":"Demo","email":"alice@gmail.com", "emailStatus":1, "description":"Test account for Alice", "password":"PASSWORD"}' -H "Content-Type: application/json" -X POST http://localhost:8080/v1/accounts/ -i

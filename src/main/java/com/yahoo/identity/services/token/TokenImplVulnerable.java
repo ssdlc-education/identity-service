@@ -5,12 +5,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import com.yahoo.identity.services.key.KeyService;
 import com.yahoo.identity.services.key.KeyServiceImpl;
-import sun.security.ec.ECPrivateKeyImpl;
-import sun.security.ec.ECPublicKeyImpl;
 
-import java.security.InvalidKeyException;
-import java.security.interfaces.ECPrivateKey;
-import java.security.interfaces.ECPublicKey;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
@@ -19,9 +14,9 @@ import javax.annotation.Nonnull;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.NotAuthorizedException;
 
-public class TokenImpl implements Token {
+public class TokenImplVulnerable implements Token {
 
-    private final KeyService keyService = new KeyServiceImpl();
+    private final KeyService keyServiceImpl = new KeyServiceImpl();
     private TokenType tokenType;
     private Instant issueTime;
     private Instant expireTime;
@@ -46,10 +41,7 @@ public class TokenImpl implements Token {
     @Nonnull
     public String toString() {
         try {
-            ECPublicKey ecPublicKey = new ECPublicKeyImpl(this.keyService.getSecret("token-public").getBytes());
-            ECPrivateKey ecPrivateKey = new ECPrivateKeyImpl(this.keyService.getSecret("token-private").getBytes());
-
-            Algorithm algorithm = Algorithm.ECDSA256(ecPublicKey, ecPrivateKey);
+            Algorithm algorithm = Algorithm.HMAC256(this.keyServiceImpl.getSecret("token"));
             String token = JWT.create()
                 .withExpiresAt(Date.from(this.expireTime))
                 .withIssuedAt(Date.from(this.issueTime))
@@ -58,8 +50,6 @@ public class TokenImpl implements Token {
             return token;
         } catch (JWTCreationException exception) {
             throw new BadRequestException("JWT creation does not succeed.");
-        } catch (InvalidKeyException e) {
-            throw new BadRequestException("Invalid key for ECDSA256.");
         }
     }
 

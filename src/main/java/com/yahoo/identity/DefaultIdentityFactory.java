@@ -1,5 +1,7 @@
 package com.yahoo.identity;
 
+import com.yahoo.identity.services.random.RandomService;
+import com.yahoo.identity.services.random.RandomServiceImpl;
 import com.yahoo.identity.services.session.SessionService;
 import com.yahoo.identity.services.session.SessionServiceImpl;
 import com.yahoo.identity.services.storage.Storage;
@@ -16,7 +18,8 @@ public class DefaultIdentityFactory implements IdentityFactory {
     @Override
     public Identity create() {
         SystemService systemService = new SystemService();
-        Storage sqlStorage = new SqlStorage(systemService);
+        RandomService randomService = new RandomServiceImpl();
+        Storage sqlStorage = new SqlStorage(systemService, randomService);
         SessionService sessionService = new SessionServiceImpl(sqlStorage);
         TokenService tokenService = new TokenServiceImpl();
 
