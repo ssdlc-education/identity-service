@@ -11,6 +11,8 @@ import sun.security.ec.ECPublicKeyImpl;
 import java.security.InvalidKeyException;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
@@ -46,10 +48,9 @@ public class TokenImpl implements Token {
     @Nonnull
     public String toString() {
         try {
-            ECPublicKey ecPublicKey = new ECPublicKeyImpl(this.keyService.getSecret("token-public").getBytes());
-            ECPrivateKey ecPrivateKey = new ECPrivateKeyImpl(this.keyService.getSecret("token-private").getBytes());
-
-            Algorithm algorithm = Algorithm.ECDSA256(ecPublicKey, ecPrivateKey);
+            Algorithm algorithm =
+                Algorithm.RSA256((RSAPublicKey) this.keyService.getPublicKey("token-public.pem", "RSA"),
+                                 (RSAPrivateKey) this.keyService.getPrivateKey("token-private.pem", "RSA"));
             String token = JWT.create()
                 .withExpiresAt(Date.from(this.expireTime))
                 .withIssuedAt(Date.from(this.issueTime))
@@ -58,8 +59,6 @@ public class TokenImpl implements Token {
             return token;
         } catch (JWTCreationException exception) {
             throw new BadRequestException("JWT creation does not succeed.");
-        } catch (InvalidKeyException e) {
-            throw new BadRequestException("Invalid key for ECDSA256.");
         }
     }
 

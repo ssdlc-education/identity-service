@@ -14,6 +14,8 @@ import sun.security.ec.ECPublicKeyImpl;
 import java.security.InvalidKeyException;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
 
 import javax.annotation.Nonnull;
 import javax.ws.rs.BadRequestException;
@@ -43,11 +45,9 @@ public class TokenCreateImpl implements TokenCreate {
     @Nonnull
     public TokenCreate setToken(@Nonnull String tokenStr) {
         try {
-            ECPublicKey ecPublicKey = new ECPublicKeyImpl(this.keyService.getSecret("token-public").getBytes());
-            ECPrivateKey ecPrivateKey = new ECPrivateKeyImpl(this.keyService.getSecret("token-private").getBytes());
-
-            Algorithm algorithm = Algorithm.ECDSA256(ecPublicKey, ecPrivateKey);
-
+            Algorithm algorithm =
+                Algorithm.RSA256((RSAPublicKey) this.keyService.getPublicKey("token-public.pem", "RSA"),
+                                 (RSAPrivateKey) this.keyService.getPrivateKey("token-private.pem", "RSA"));
             JWTVerifier verifier = JWT.require(algorithm).build();
 
             DecodedJWT jwt = verifier.verify(tokenStr);
@@ -58,8 +58,6 @@ public class TokenCreateImpl implements TokenCreate {
 
         } catch (JWTVerificationException e) {
             throw new BadRequestException("JWT verification does not succeed.");
-        } catch (InvalidKeyException e) {
-            throw new BadRequestException("Invalid key for ECDSA256.");
         }
         token.validate();
         return this;

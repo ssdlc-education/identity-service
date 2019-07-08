@@ -5,12 +5,9 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import com.yahoo.identity.services.key.KeyService;
 import com.yahoo.identity.services.key.KeyServiceImpl;
-import sun.security.ec.ECPrivateKeyImpl;
-import sun.security.ec.ECPublicKeyImpl;
 
-import java.security.InvalidKeyException;
-import java.security.interfaces.ECPrivateKey;
-import java.security.interfaces.ECPublicKey;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
 import java.time.Instant;
 import java.util.Date;
 
@@ -74,10 +71,9 @@ public class CredentialImpl implements Credential {
     @Nonnull
     public String toString() {
         try {
-            ECPublicKey ecPublicKey = new ECPublicKeyImpl(this.keyService.getSecret("cookie-public").getBytes());
-            ECPrivateKey ecPrivateKey = new ECPrivateKeyImpl(this.keyService.getSecret("cookie-private").getBytes());
-
-            Algorithm algorithm = Algorithm.ECDSA256(ecPublicKey, ecPrivateKey);
+            Algorithm algorithm =
+                Algorithm.RSA256((RSAPublicKey) this.keyService.getPublicKey("cookie-public.pem", "RSA"),
+                                 (RSAPrivateKey) this.keyService.getPrivateKey("cookie-private.pem", "RSA"));
 
             String token = JWT.create()
                 .withExpiresAt(Date.from(getExpireTime()))
@@ -87,10 +83,8 @@ public class CredentialImpl implements Credential {
                 .sign(algorithm);
             return token;
 
-        } catch (JWTCreationException exception) {
-            throw new BadRequestException("JWT creation does not succeed.");
-        } catch (InvalidKeyException e) {
-            throw new BadRequestException("Invalid key for ECDSA256.");
+        } catch (JWTCreationException e) {
+            throw new BadRequestException("JWT creation does not succeed: " + e.toString());
         }
     }
 
