@@ -13,7 +13,6 @@ import org.apache.ibatis.session.SqlSessionFactory;
 
 import java.security.SecureRandom;
 import java.time.Instant;
-import java.util.Arrays;
 import java.util.Base64;
 
 import javax.annotation.Nonnull;
