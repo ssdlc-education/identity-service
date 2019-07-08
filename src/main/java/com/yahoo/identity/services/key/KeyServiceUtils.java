@@ -19,6 +19,7 @@ import java.security.spec.X509EncodedKeySpec;
 import javax.ws.rs.BadRequestException;
 
 public class KeyServiceUtils {
+
     private static byte[] parsePEMFile(File pemFile) throws IOException {
         if (!pemFile.isFile() || !pemFile.exists()) {
             throw new FileNotFoundException(String.format("The file '%s' doesn't exist.", pemFile.getAbsolutePath()));
@@ -37,7 +38,8 @@ public class KeyServiceUtils {
             EncodedKeySpec keySpec = new X509EncodedKeySpec(keyBytes);
             publicKey = kf.generatePublic(keySpec);
         } catch (NoSuchAlgorithmException e) {
-            throw new BadRequestException("Could not reconstruct the public key, the given algorithm could not be found.");
+            throw new BadRequestException(
+                "Could not reconstruct the public key, the given algorithm could not be found.");
         } catch (InvalidKeySpecException e) {
             throw new BadRequestException("Could not reconstruct the public key");
         }
@@ -52,7 +54,8 @@ public class KeyServiceUtils {
             EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(keyBytes);
             privateKey = kf.generatePrivate(keySpec);
         } catch (NoSuchAlgorithmException e) {
-            throw new BadRequestException("Could not reconstruct the private key, the given algorithm could not be found.");
+            throw new BadRequestException(
+                "Could not reconstruct the private key, the given algorithm could not be found.");
         } catch (InvalidKeySpecException e) {
             throw new BadRequestException("Could not reconstruct the private key");
         }

@@ -1,4 +1,3 @@
-
 # Write JWT secret for token and credential service
 openssl genrsa -out .secret/cookie-private.key 512
 openssl rsa -pubout -in .secret/cookie-private.key -out .secret/cookie-public.pem
@@ -14,7 +13,6 @@ rm .secret/token-private.key
 curl -d'{"username":"Alice","firstName":"Alice","lastName":"Demo","email":"alice@gmail.com", "emailStatus":1, "description":"Test account for Alice", "password":"PASSWORD"}' -H "Content-Type: application/json" -X POST http://localhost:8080/v1/accounts/ -i
 # curl -i will append the message to the terminal without starting a new line
 echo ""
-
 
 curl -d'{"username":"Bob","firstName":"Bob","lastName":"Demo","email":"bob@gmail.com", "emailStatus":1, "description":"Test account for Bob", "password":"PASSWORD"}' -H "Content-Type: application/json" -X POST http://localhost:8080/v1/accounts/ -i
 # curl -i will append the message to the terminal without starting a new line
