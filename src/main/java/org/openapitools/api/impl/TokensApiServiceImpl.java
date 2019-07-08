@@ -30,8 +30,6 @@ public class TokensApiServiceImpl extends TokensApiService {
             tokenCreate.setToken(token.getValue());
             tokenCreate.setType(token.getType());
 
-            tokenCreate.create();
-
             ApiResponseMessage
                 successMsg =
                 new ApiResponseMessage(Response.Status.CREATED.getStatusCode(), "The session is created successfully");

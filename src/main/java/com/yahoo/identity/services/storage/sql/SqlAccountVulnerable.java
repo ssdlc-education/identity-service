@@ -58,12 +58,6 @@ public class SqlAccountVulnerable implements Account {
 
     @Override
     @Nonnull
-    public String getUid() {
-        return this.account.getUid();
-    }
-
-    @Override
-    @Nonnull
     public String getUsername() {
         return this.account.getUsername();
     }

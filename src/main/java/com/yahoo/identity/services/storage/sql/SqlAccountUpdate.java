@@ -11,11 +11,13 @@ import com.yahoo.identity.services.storage.AccountModel;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 
+import java.io.UnsupportedEncodingException;
 import java.security.SecureRandom;
 import java.time.Instant;
 import java.util.Base64;
 
 import javax.annotation.Nonnull;
+import javax.ws.rs.BadRequestException;
 
 public class SqlAccountUpdate implements AccountUpdate {
 
@@ -54,7 +56,11 @@ public class SqlAccountUpdate implements AccountUpdate {
         account.setPasswordSalt(Base64.getEncoder().encodeToString(saltBytes));
 
         Jargon2.Hasher hasher = jargon2Hasher();
-        account.setPasswordHash(hasher.salt(saltBytes).password(password.getBytes()).encodedHash());
+        try {
+            account.setPasswordHash(hasher.salt(saltBytes).password(password.getBytes("UTF-8")).encodedHash());
+        } catch (UnsupportedEncodingException e) {
+            throw new BadRequestException("Unsupported encoding.");
+        }
         return this;
     }
 

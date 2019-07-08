@@ -119,7 +119,6 @@ public class AccountsApiServiceImpl extends AccountsApiService {
         try {
             TokenCreate tokenCreate = identity.getTokenService().newTokenCreate();
             tokenCreate.setToken(token).setType(Token.TypeEnum.CRITICAL);
-            tokenCreate.create();
 
             LoggedInSession loggedInSession = identity.getSessionService().newSessionWithCredential(token);
 

@@ -7,9 +7,6 @@ import javax.annotation.Nonnull;
 public interface Account {
 
     @Nonnull
-    String getUid();
-
-    @Nonnull
     String getUsername();
 
     @Nonnull

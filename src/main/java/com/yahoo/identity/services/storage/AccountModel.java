@@ -4,7 +4,6 @@ import javax.annotation.Nonnull;
 
 public class AccountModel {
 
-    private String uid;
     private String username;
     private String firstName;
     private String lastName;
@@ -17,10 +16,6 @@ public class AccountModel {
     private long updateTs;
     private long blockUntilTs;
     private int consecutiveFails;
-
-    public String getUid() {
-        return this.uid;
-    }
 
     @Nonnull
     public String getUsername() {

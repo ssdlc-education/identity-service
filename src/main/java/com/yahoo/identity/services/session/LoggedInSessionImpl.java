@@ -9,7 +9,6 @@ import com.yahoo.identity.services.credential.CredentialService;
 import com.yahoo.identity.services.credential.CredentialServiceImpl;
 import com.yahoo.identity.services.storage.Storage;
 import com.yahoo.identity.services.storage.sql.SqlAccountService;
-import org.openapitools.model.Session;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -17,7 +16,7 @@ import java.time.temporal.ChronoUnit;
 import javax.annotation.Nonnull;
 import javax.ws.rs.NotAuthorizedException;
 
-public class LoggedInSessionImpl extends Session implements LoggedInSession {
+public class LoggedInSessionImpl implements LoggedInSession {
 
     private CredentialService credentialService;
     private AccountService accountService;

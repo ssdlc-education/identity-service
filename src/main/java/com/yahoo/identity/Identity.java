@@ -28,9 +28,7 @@ public class Identity {
         return this.tokenService;
     }
 
-    @Nonnull
     public ChallengeService getVerificationService() {
-        //TODO
         return null;
     }
 }

@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.util.Base64;
 
 import javax.annotation.Nonnull;
 import javax.ws.rs.InternalServerErrorException;
@@ -14,8 +15,7 @@ public class KeyServiceImpl implements KeyService {
     private final KeyServiceUtils keyServiceUtils = new KeyServiceUtils();
 
     private static String readFileAsString(String fileName) throws Exception {
-        String data = Files.readAllBytes(Paths.get(fileName)).toString();
-        return data;
+        return Base64.getEncoder().encodeToString((Files.readAllBytes(Paths.get(fileName))));
     }
 
     @Override
@@ -30,12 +30,11 @@ public class KeyServiceImpl implements KeyService {
         }
     }
 
-
     @Override
     @Nonnull
     public PublicKey getPublicKey(@Nonnull String publicKeyName, @Nonnull String crpytoScheme) {
         try {
-            return keyServiceUtils.readPublicKeyFromFile(".secret/" + publicKeyName, crpytoScheme);
+            return KeyServiceUtils.readPublicKeyFromFile(".secret/" + publicKeyName, crpytoScheme);
         } catch (Exception e) {
             throw new InternalServerErrorException("Unknown error occurs when reading file: " + e.toString());
         }
@@ -45,7 +44,7 @@ public class KeyServiceImpl implements KeyService {
     @Nonnull
     public PrivateKey getPrivateKey(@Nonnull String privateKeyName, @Nonnull String crpytoScheme) {
         try {
-            return keyServiceUtils.readPrivateKeyFromFile(".secret/" + privateKeyName, crpytoScheme);
+            return KeyServiceUtils.readPrivateKeyFromFile(".secret/" + privateKeyName, crpytoScheme);
         } catch (Exception e) {
             throw new InternalServerErrorException("Unknown error occurs when reading file: " + e.toString());
         }

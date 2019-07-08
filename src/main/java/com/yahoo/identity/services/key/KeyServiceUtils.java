@@ -4,9 +4,11 @@ import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemReader;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
@@ -24,7 +26,8 @@ public class KeyServiceUtils {
         if (!pemFile.isFile() || !pemFile.exists()) {
             throw new FileNotFoundException(String.format("The file '%s' doesn't exist.", pemFile.getAbsolutePath()));
         }
-        PemReader reader = new PemReader(new FileReader(pemFile));
+        InputStream inputStream = new FileInputStream(pemFile);
+        PemReader reader = new PemReader(new InputStreamReader(inputStream, "UTF-8"));
         PemObject pemObject = reader.readPemObject();
         byte[] content = pemObject.getContent();
         reader.close();

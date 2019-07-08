@@ -17,12 +17,6 @@ public class AccountImpl implements Account {
 
     @Nonnull
     @Override
-    public String getUid() {
-        return data.get("uid").toString();
-    }
-
-    @Nonnull
-    @Override
     public String getUsername() {
         return data.get("username").toString();
     }

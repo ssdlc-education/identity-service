@@ -7,7 +7,6 @@ import io.swagger.models.License;
 import io.swagger.models.Swagger;
 
 import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 
@@ -26,7 +25,6 @@ public class Bootstrap extends HttpServlet {
                          .name("")
                          .url("http://unlicense.org"));
 
-        ServletContext context = config.getServletContext();
         Swagger swagger = new Swagger().info(info);
 
         new SwaggerContextService().withServletConfig(config).updateSwagger(swagger);
