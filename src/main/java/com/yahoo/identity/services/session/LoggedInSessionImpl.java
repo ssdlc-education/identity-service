@@ -76,11 +76,23 @@ public class LoggedInSessionImpl implements LoggedInSession {
     public LoggedInSessionImpl sessionAccountUpdate(@Nonnull Account account) {
         final boolean mockEmailStatus = true;
 
-        AccountUpdate accountUpdate = this.accountService.newAccountUpdate(account.getUsername());
-        accountUpdate.setEmail(account.getEmail());
+        String email = account.getEmail();
+        String password = account.getPassword();
+        String description = account.getDescription();
+        String username = account.getUsername();
+
+        AccountUpdate accountUpdate = this.accountService.newAccountUpdate(username);
+        if (email != null) {
+            accountUpdate.setEmail(email);
+        }
+        if (password != null) {
+            accountUpdate.setPassword(password);
+        }
+        if (description != null) {
+            accountUpdate.setDescription(description);
+        }
+
         accountUpdate.setEmailStatus(mockEmailStatus);
-        accountUpdate.setPassword(account.getPassword());
-        accountUpdate.setDescription(account.getDescription());
         accountUpdate.setUpdateTime(Instant.now());
         accountUpdate.update();
 

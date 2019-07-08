@@ -7,6 +7,7 @@ import com.yahoo.identity.services.session.LoggedInSession;
 import com.yahoo.identity.services.session.Session;
 import com.yahoo.identity.services.storage.AccountConvert;
 import com.yahoo.identity.services.token.TokenCreate;
+import org.openapitools.api.AccountsApi;
 import org.openapitools.api.AccountsApiService;
 import org.openapitools.api.ApiResponseMessage;
 import org.openapitools.api.NotFoundException;
@@ -44,10 +45,10 @@ public class AccountsApiServiceImpl extends AccountsApiService {
     }
 
     @Override
-    public Response accountsmeGet(String token, SecurityContext securityContext) throws NotFoundException {
+    public Response accountsmeGet(String cookie, SecurityContext securityContext) throws NotFoundException {
         final boolean emailStatus = true;
         try {
-            LoggedInSession loggedInSession = identity.getSessionService().newSessionWithCredential(token);
+            LoggedInSession loggedInSession = identity.getSessionService().newSessionWithCredential(cookie);
             Account account = loggedInSession.getAccount();
 
             AccountApi accountApi = new AccountApi();
@@ -96,7 +97,7 @@ public class AccountsApiServiceImpl extends AccountsApiService {
                 new ApiResponseMessage(Response.Status.NO_CONTENT.getStatusCode(),
                                        "The account is created successfully.");
             return Response.status(Response.Status.NO_CONTENT).entity(successMsg)
-                .header("Set-Cookie", cookie).build();
+                .header("Set-Cookie", "cookie=" + cookie).build();
 
         } catch (BadRequestException e) {
             ApiResponseMessage
@@ -113,14 +114,20 @@ public class AccountsApiServiceImpl extends AccountsApiService {
     }
 
     @Override
-    public Response accountsmePut(String token, AccountApi accountApi, SecurityContext securityContext)
+    public Response accountsmePut(String cookie, String token, AccountApi accountApi, SecurityContext securityContext)
         throws NotFoundException {
         final boolean emailStatus = true;
         try {
             TokenCreate tokenCreate = identity.getTokenService().newTokenCreate();
-            tokenCreate.setToken(token).setType(Token.TypeEnum.CRITICAL);
+            tokenCreate.setToken(token);
+            if (accountApi.getEmails() == null && accountApi.getPassword() == null) {
+                tokenCreate.setType(Token.TypeEnum.STANDARD);
+            } else {
+                tokenCreate.setType(Token.TypeEnum.CRITICAL);
+            }
+            tokenCreate.create();
 
-            LoggedInSession loggedInSession = identity.getSessionService().newSessionWithCredential(token);
+            LoggedInSession loggedInSession = identity.getSessionService().newSessionWithCredential(cookie);
 
             ObjectMapper objectMapper = new ObjectMapper();
             Map<String, Object> accountMap = objectMapper.convertValue(accountApi, Map.class);
@@ -131,7 +138,7 @@ public class AccountsApiServiceImpl extends AccountsApiService {
             ApiResponseMessage
                 successMsg =
                 new ApiResponseMessage(Response.Status.NO_CONTENT.getStatusCode(), "Successfully upate the account.");
-            return Response.ok().entity(successMsg).build();
+            return Response.status(Response.Status.NO_CONTENT).entity(successMsg).build();
 
         } catch (NotAuthorizedException e) {
             ApiResponseMessage

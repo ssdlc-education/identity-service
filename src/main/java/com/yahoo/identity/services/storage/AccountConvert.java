@@ -30,19 +30,22 @@ public class AccountConvert implements Account {
     @Nonnull
     @Override
     public String getFirstName() {
-        return data.get("firstName").toString();
+        Object firstName = data.get("firstName");
+        return firstName == null ? null : firstName.toString();
     }
 
     @Nonnull
     @Override
     public String getLastName() {
-        return data.get("lastName").toString();
+        Object lastName = data.get("lastName");
+        return lastName == null ? null : lastName.toString();
     }
 
     @Nonnull
     @Override
     public String getEmail() {
-        return data.get("email").toString();
+        Object email = data.get("email");
+        return email == null ? null : email.toString();
     }
 
     @Override
@@ -53,7 +56,8 @@ public class AccountConvert implements Account {
     @Nonnull
     @Override
     public String getPassword() {
-        return data.get("password").toString();
+        Object password = data.get("password");
+        return password == null ? null : password.toString();
     }
 
     @Nonnull
@@ -71,7 +75,10 @@ public class AccountConvert implements Account {
     @Nonnull
     @Override
     public String getDescription() {
-        return data.get("description").toString();
+        Object description = data.get("description");
+        return description == null ? null : description.toString();
     }
 
+    @Override
+    public boolean verify(@Nonnull String password){return false;}
 }
