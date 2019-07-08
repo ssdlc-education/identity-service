@@ -13,6 +13,8 @@ import org.apache.ibatis.session.SqlSessionFactory;
 
 import java.security.SecureRandom;
 import java.time.Instant;
+import java.util.Arrays;
+import java.util.Base64;
 
 import javax.annotation.Nonnull;
 
@@ -49,7 +51,8 @@ public class SqlAccountUpdate implements AccountUpdate {
 
         byte[] saltBytes = new byte[64];
         secureRandom.nextBytes(saltBytes);
-        account.setPasswordSalt(saltBytes.toString());
+
+        account.setPasswordSalt(Base64.getEncoder().encodeToString(saltBytes));
 
         Jargon2.Hasher hasher = jargon2Hasher();
         account.setPasswordHash(hasher.salt(saltBytes).password(password.getBytes()).encodedHash());

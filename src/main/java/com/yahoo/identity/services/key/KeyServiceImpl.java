@@ -14,7 +14,7 @@ public class KeyServiceImpl implements KeyService {
     private final KeyServiceUtils keyServiceUtils = new KeyServiceUtils();
 
     private static String readFileAsString(String fileName) throws Exception {
-        String data = new String(Files.readAllBytes(Paths.get(fileName)));
+        String data = Files.readAllBytes(Paths.get(fileName)).toString();
         return data;
     }
 
