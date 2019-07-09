@@ -9,11 +9,9 @@ import com.yahoo.identity.services.storage.sql.SqlAccountService;
 import java.time.Instant;
 
 import javax.annotation.Nonnull;
-import javax.inject.Inject;
 
 public class SessionImpl implements Session {
 
-    @Inject
     private AccountService accountService;
 
     public SessionImpl(@Nonnull Storage storage) {

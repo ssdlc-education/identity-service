@@ -1,5 +1,6 @@
 package com.yahoo.identity.services.session;
 
+import com.yahoo.identity.services.key.KeyService;
 import com.yahoo.identity.services.storage.Storage;
 
 import javax.annotation.Nonnull;
@@ -7,15 +8,17 @@ import javax.annotation.Nonnull;
 public class SessionServiceImpl implements SessionService {
 
     private final Storage storage;
+    private final KeyService keyService;
 
-    public SessionServiceImpl(@Nonnull Storage storage) {
+    public SessionServiceImpl(@Nonnull Storage storage, @Nonnull KeyService keyService) {
         this.storage = storage;
+        this.keyService = keyService;
     }
 
     @Override
     @Nonnull
     public LoggedInSession newSessionWithPassword(@Nonnull String username, @Nonnull String password) {
-        LoggedInSessionImpl loggedInSession = new LoggedInSessionImpl(this.storage);
+        LoggedInSessionImpl loggedInSession = new LoggedInSessionImpl(this.storage, this.keyService);
         loggedInSession.verifyPassword(username, password);
 
         return loggedInSession;
@@ -24,7 +27,7 @@ public class SessionServiceImpl implements SessionService {
     @Override
     @Nonnull
     public LoggedInSession newSessionWithCredential(@Nonnull String credStr) {
-        LoggedInSessionImpl loggedInSession = new LoggedInSessionImpl(this.storage);
+        LoggedInSessionImpl loggedInSession = new LoggedInSessionImpl(this.storage, this.keyService);
         loggedInSession.setCredential(credStr);
 
         return loggedInSession;

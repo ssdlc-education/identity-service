@@ -8,20 +8,21 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.yahoo.identity.IdentityError;
 import com.yahoo.identity.IdentityException;
 import com.yahoo.identity.services.key.KeyService;
-import com.yahoo.identity.services.key.KeyServiceImpl;
 
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 
 import javax.annotation.Nonnull;
-import javax.inject.Inject;
 
 public class CredentialServiceImpl implements CredentialService {
 
-    @Inject
-    private final KeyService keyService = new KeyServiceImpl();
+    private final KeyService keyService;
+    private final Credential credential;
 
-    private final Credential credential = new CredentialImpl();
+    public CredentialServiceImpl(@Nonnull KeyService keyService) {
+        this.keyService = keyService;
+        this.credential = new CredentialImpl(this.keyService);
+    }
 
     @Override
     @Nonnull

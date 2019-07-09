@@ -7,6 +7,7 @@ import com.yahoo.identity.services.credential.Credential;
 import com.yahoo.identity.services.credential.CredentialImpl;
 import com.yahoo.identity.services.credential.CredentialService;
 import com.yahoo.identity.services.credential.CredentialServiceImpl;
+import com.yahoo.identity.services.key.KeyService;
 import com.yahoo.identity.services.storage.Storage;
 import com.yahoo.identity.services.storage.sql.SqlAccountService;
 
@@ -14,23 +15,19 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
 import javax.annotation.Nonnull;
-import javax.inject.Inject;
 import javax.ws.rs.NotAuthorizedException;
 
 public class LoggedInSessionImpl implements LoggedInSession {
 
-    @Inject
     private CredentialService credentialService;
-    @Inject
     private AccountService accountService;
-
     private Credential credential;
     private String username;
 
-    public LoggedInSessionImpl(@Nonnull Storage storage) {
+    public LoggedInSessionImpl(@Nonnull Storage storage, @Nonnull KeyService keyService) {
         this.accountService = new SqlAccountService(storage);
-        this.credentialService = new CredentialServiceImpl();
-        this.credential = new CredentialImpl();
+        this.credentialService = new CredentialServiceImpl(keyService);
+        this.credential = new CredentialImpl(keyService);
     }
 
     public void initCredential() {

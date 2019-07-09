@@ -16,13 +16,11 @@ import java.time.Instant;
 import java.util.Base64;
 
 import javax.annotation.Nonnull;
-import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 
 
 public class SqlAccountCreate implements AccountCreate {
 
-    @Inject
     private final RandomService randomService;
     private final SqlSessionFactory sqlSessionFactory;
     private final AccountModel account = new AccountModel();

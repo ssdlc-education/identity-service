@@ -6,24 +6,25 @@ import com.auth0.jwt.exceptions.JWTCreationException;
 import com.yahoo.identity.IdentityError;
 import com.yahoo.identity.IdentityException;
 import com.yahoo.identity.services.key.KeyService;
-import com.yahoo.identity.services.key.KeyServiceImpl;
 
 import java.time.Instant;
 import java.util.Date;
 
 import javax.annotation.Nonnull;
-import javax.inject.Inject;
 import javax.ws.rs.NotAuthorizedException;
 
 public class CredentialImplVulnerable implements Credential {
 
-    @Inject
-    private final KeyService keyService = new KeyServiceImpl();
+    private final KeyService keyService;
 
     private Instant issueTime;
     private Instant expireTime;
     private String subject;
     private int status;
+
+    public CredentialImplVulnerable(@Nonnull KeyService keyService) {
+        this.keyService = keyService;
+    }
 
     @Override
     @Nonnull

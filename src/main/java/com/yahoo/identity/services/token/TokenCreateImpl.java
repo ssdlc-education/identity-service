@@ -8,21 +8,23 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.yahoo.identity.IdentityError;
 import com.yahoo.identity.IdentityException;
 import com.yahoo.identity.services.key.KeyService;
-import com.yahoo.identity.services.key.KeyServiceImpl;
 import org.openapitools.model.Token.TypeEnum;
 
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 
 import javax.annotation.Nonnull;
-import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 
 public class TokenCreateImpl implements TokenCreate {
 
-    @Inject
-    private KeyService keyService = new KeyServiceImpl();
-    private Token token = new TokenImpl();
+    private KeyService keyService;
+    private Token token;
+
+    public TokenCreateImpl(@Nonnull KeyService keyService) {
+        this.keyService = keyService;
+        this.token = new TokenImpl(this.keyService);
+    }
 
     @Override
     @Nonnull

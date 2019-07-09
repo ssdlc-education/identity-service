@@ -8,18 +8,19 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.yahoo.identity.IdentityError;
 import com.yahoo.identity.IdentityException;
 import com.yahoo.identity.services.key.KeyService;
-import com.yahoo.identity.services.key.KeyServiceImpl;
 
 import javax.annotation.Nonnull;
-import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 
 public class TokenCreateImplVulnerable implements TokenCreate {
 
-    @Inject
-    private final KeyService keyService = new KeyServiceImpl();
+    private final KeyService keyService;
+    private Token token;
 
-    private Token token = new TokenImpl();
+    public TokenCreateImplVulnerable(@Nonnull KeyService keyService) {
+        this.keyService = keyService;
+        this.token = new TokenImpl(this.keyService);
+    }
 
     @Override
     @Nonnull

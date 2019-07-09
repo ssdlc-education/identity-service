@@ -6,25 +6,25 @@ import com.auth0.jwt.exceptions.JWTCreationException;
 import com.yahoo.identity.IdentityError;
 import com.yahoo.identity.IdentityException;
 import com.yahoo.identity.services.key.KeyService;
-import com.yahoo.identity.services.key.KeyServiceImpl;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
 import javax.annotation.Nonnull;
-import javax.inject.Inject;
 import javax.ws.rs.NotAuthorizedException;
 
 public class TokenImplVulnerable implements Token {
 
-    @Inject
-    private final KeyService keyServiceImpl = new KeyServiceImpl();
-
+    private final KeyService keyService;
     private TokenType tokenType;
     private Instant issueTime;
     private Instant expireTime;
     private String subject;
+
+    public TokenImplVulnerable(@Nonnull KeyService keyService) {
+        this.keyService = keyService;
+    }
 
     @Override
     public void setIssueTime(@Nonnull Instant issueTime) {
@@ -45,7 +45,7 @@ public class TokenImplVulnerable implements Token {
     @Nonnull
     public String toString() {
         try {
-            Algorithm algorithm = Algorithm.HMAC256(this.keyServiceImpl.getSecret("token.key"));
+            Algorithm algorithm = Algorithm.HMAC256(this.keyService.getSecret("token.key"));
             String token = JWT.create()
                 .withExpiresAt(Date.from(this.expireTime))
                 .withIssuedAt(Date.from(this.issueTime))

@@ -7,5 +7,5 @@ script:
   - bash .scripts/buildDB.sh
   - mvn clean package spotbugs:check jetty:run &
   # sleep to wait for jetty service to be ready
-  - sleep 60
+  - sleep 90
   - bash .scripts/curl.sh

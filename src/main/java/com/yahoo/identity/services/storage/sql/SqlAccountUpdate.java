@@ -16,19 +16,18 @@ import java.time.Instant;
 import java.util.Base64;
 
 import javax.annotation.Nonnull;
-import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 
 public class SqlAccountUpdate implements AccountUpdate {
 
-    @Inject
     private final RandomService randomService;
-    private final AccountModel account = new AccountModel();
+    private final AccountModel account;
     private final SqlSessionFactory sqlSessionFactory;
 
 
     public SqlAccountUpdate(@Nonnull SqlSessionFactory sqlSessionFactory, @Nonnull RandomService randomService,
                             @Nonnull String username) {
+        this.account = new AccountModel();
         this.sqlSessionFactory = sqlSessionFactory;
         this.randomService = randomService;
         this.account.setUsername(username);
