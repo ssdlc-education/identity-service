@@ -7,13 +7,14 @@
 </head>
 <body>
 <nav class="navbar navbar-expand-lg navbar-primary bg-primary">
-
-    <a class="navbar-brand" href="#">Change Profile</a>
+    <a class="navbar-brand" href="#" style="color: #FFFFFF">Change Profile</a>
 </nav>
 
-<form action="/save/{{.Username}}" method="POST">
-    <div>Email: <textarea name="email" rows=1>{{printf "%s" .Email}}</textarea></div>
-    <div>Description <textarea name="description" rows=20 cols="100">{{printf "%s" .Description}}</textarea></div>
-    <div><input class = "btn btn-primary" type="submit" value="Save"></div>
+<form action="/save/" method="POST">
+    <label for = "description">description</label>
+    <input class="form-control" type="text" placeholder= "{{.Description}}" name = "description" required>
+    <input class = "form-control" type = "hidden" name = "CSRFToken" placeholder="token" value="{{.Token}}">
+    <div><input class = "btn btn-primary" type="submit" value="Save" style="margin-top: 20px; margin-left: 30px"></div>
+    <div><a class = "btn btn-primary" href = "/password/" role = "button" style="margin-top: 20px">Change Password</a></div>
 </form>
 </body>
