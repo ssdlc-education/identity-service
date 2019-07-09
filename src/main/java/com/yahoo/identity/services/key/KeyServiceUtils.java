@@ -35,7 +35,7 @@ public class KeyServiceUtils {
     }
 
     private static PublicKey getPublicKey(byte[] keyBytes, String algorithm) {
-        PublicKey publicKey = null;
+        PublicKey publicKey;
         try {
             KeyFactory kf = KeyFactory.getInstance(algorithm);
             EncodedKeySpec keySpec = new X509EncodedKeySpec(keyBytes);
@@ -51,7 +51,7 @@ public class KeyServiceUtils {
     }
 
     private static PrivateKey getPrivateKey(byte[] keyBytes, String algorithm) {
-        PrivateKey privateKey = null;
+        PrivateKey privateKey;
         try {
             KeyFactory kf = KeyFactory.getInstance(algorithm);
             EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(keyBytes);
