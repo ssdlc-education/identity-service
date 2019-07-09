@@ -3,6 +3,8 @@ package com.yahoo.identity.services.token;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
+import com.yahoo.identity.IdentityError;
+import com.yahoo.identity.IdentityException;
 import com.yahoo.identity.services.key.KeyService;
 import com.yahoo.identity.services.key.KeyServiceImpl;
 
@@ -11,12 +13,14 @@ import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
 import javax.annotation.Nonnull;
-import javax.ws.rs.BadRequestException;
+import javax.inject.Inject;
 import javax.ws.rs.NotAuthorizedException;
 
 public class TokenImplVulnerable implements Token {
 
+    @Inject
     private final KeyService keyServiceImpl = new KeyServiceImpl();
+
     private TokenType tokenType;
     private Instant issueTime;
     private Instant expireTime;
@@ -41,7 +45,7 @@ public class TokenImplVulnerable implements Token {
     @Nonnull
     public String toString() {
         try {
-            Algorithm algorithm = Algorithm.HMAC256(this.keyServiceImpl.getSecret("token"));
+            Algorithm algorithm = Algorithm.HMAC256(this.keyServiceImpl.getSecret("token.key"));
             String token = JWT.create()
                 .withExpiresAt(Date.from(this.expireTime))
                 .withIssuedAt(Date.from(this.issueTime))
@@ -49,7 +53,7 @@ public class TokenImplVulnerable implements Token {
                 .sign(algorithm);
             return token;
         } catch (JWTCreationException exception) {
-            throw new BadRequestException("JWT creation does not succeed.");
+            throw new IdentityException(IdentityError.INVALID_CREDENTIAL, "JWT verification does not succeed.");
         }
     }
 

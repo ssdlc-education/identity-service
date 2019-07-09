@@ -3,6 +3,8 @@ package com.yahoo.identity.services.credential;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
+import com.yahoo.identity.IdentityError;
+import com.yahoo.identity.IdentityException;
 import com.yahoo.identity.services.key.KeyService;
 import com.yahoo.identity.services.key.KeyServiceImpl;
 
@@ -10,12 +12,14 @@ import java.time.Instant;
 import java.util.Date;
 
 import javax.annotation.Nonnull;
-import javax.ws.rs.BadRequestException;
+import javax.inject.Inject;
 import javax.ws.rs.NotAuthorizedException;
 
 public class CredentialImplVulnerable implements Credential {
 
+    @Inject
     private final KeyService keyService = new KeyServiceImpl();
+
     private Instant issueTime;
     private Instant expireTime;
     private String subject;
@@ -69,7 +73,7 @@ public class CredentialImplVulnerable implements Credential {
     @Nonnull
     public String toString() {
         try {
-            Algorithm algorithm = Algorithm.HMAC256(this.keyService.getSecret("cookie"));
+            Algorithm algorithm = Algorithm.HMAC256(this.keyService.getSecret("cookie.key"));
             String token = JWT.create()
                 .withExpiresAt(Date.from(getExpireTime()))
                 .withIssuedAt(Date.from(getIssueTime()))
@@ -79,7 +83,7 @@ public class CredentialImplVulnerable implements Credential {
             return token;
 
         } catch (JWTCreationException exception) {
-            throw new BadRequestException("JWT creation does not succeed.");
+            throw new IdentityException(IdentityError.INVALID_CREDENTIAL, "JWT verification does not succeed.");
         }
     }
 

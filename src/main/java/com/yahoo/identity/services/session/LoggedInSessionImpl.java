@@ -14,12 +14,16 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
 import javax.annotation.Nonnull;
+import javax.inject.Inject;
 import javax.ws.rs.NotAuthorizedException;
 
 public class LoggedInSessionImpl implements LoggedInSession {
 
+    @Inject
     private CredentialService credentialService;
+    @Inject
     private AccountService accountService;
+
     private Credential credential;
     private String username;
 

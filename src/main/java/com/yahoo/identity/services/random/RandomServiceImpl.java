@@ -10,7 +10,8 @@ public class RandomServiceImpl implements RandomService {
 
     @Override
     @Nonnull
-    public SecureRandom getRandom() {
-        return secureRandom;
+    public byte[] getRandomBytes(@Nonnull byte[] buffer) {
+        secureRandom.nextBytes(buffer);
+        return buffer;
     }
 }

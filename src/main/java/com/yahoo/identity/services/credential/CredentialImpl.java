@@ -3,6 +3,8 @@ package com.yahoo.identity.services.credential;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
+import com.yahoo.identity.IdentityError;
+import com.yahoo.identity.IdentityException;
 import com.yahoo.identity.services.key.KeyService;
 import com.yahoo.identity.services.key.KeyServiceImpl;
 
@@ -12,12 +14,14 @@ import java.time.Instant;
 import java.util.Date;
 
 import javax.annotation.Nonnull;
-import javax.ws.rs.BadRequestException;
+import javax.inject.Inject;
 import javax.ws.rs.NotAuthorizedException;
 
 public class CredentialImpl implements Credential {
 
+    @Inject
     private final KeyService keyService = new KeyServiceImpl();
+
     private Instant issueTime;
     private Instant expireTime;
     private String subject;
@@ -84,7 +88,7 @@ public class CredentialImpl implements Credential {
             return token;
 
         } catch (JWTCreationException e) {
-            throw new BadRequestException("JWT creation does not succeed: " + e.toString());
+            throw new IdentityException(IdentityError.INVALID_CREDENTIAL, "JWT verification does not succeed.");
         }
     }
 

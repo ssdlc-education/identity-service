@@ -5,6 +5,8 @@ public enum IdentityError {
     // General bad request error
     INVALID_ARGUMENTS(400001),
 
+    INVALID_CREDENTIAL(401001),
+
     ACCOUNT_NOT_FOUND(404001),
 
     INTERNAL_SERVER_ERROR(500000);

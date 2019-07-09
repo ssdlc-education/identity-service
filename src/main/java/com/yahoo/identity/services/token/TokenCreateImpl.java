@@ -5,6 +5,8 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.yahoo.identity.IdentityError;
+import com.yahoo.identity.IdentityException;
 import com.yahoo.identity.services.key.KeyService;
 import com.yahoo.identity.services.key.KeyServiceImpl;
 import org.openapitools.model.Token.TypeEnum;
@@ -13,12 +15,14 @@ import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 
 import javax.annotation.Nonnull;
+import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 
 public class TokenCreateImpl implements TokenCreate {
 
-    private Token token = new TokenImpl();
+    @Inject
     private KeyService keyService = new KeyServiceImpl();
+    private Token token = new TokenImpl();
 
     @Override
     @Nonnull
@@ -52,7 +56,7 @@ public class TokenCreateImpl implements TokenCreate {
             token.setExpireTime(jwt.getExpiresAt().toInstant());
 
         } catch (JWTVerificationException e) {
-            throw new BadRequestException("JWT verification does not succeed.");
+            throw new IdentityException(IdentityError.INVALID_CREDENTIAL, "JWT verification does not succeed.");
         }
         token.validate();
         return this;

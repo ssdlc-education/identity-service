@@ -12,23 +12,25 @@ import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 
 import java.io.UnsupportedEncodingException;
-import java.security.SecureRandom;
 import java.time.Instant;
 import java.util.Base64;
 
 import javax.annotation.Nonnull;
+import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 
 public class SqlAccountUpdate implements AccountUpdate {
 
+    @Inject
+    private final RandomService randomService;
+    private final AccountModel account = new AccountModel();
     private final SqlSessionFactory sqlSessionFactory;
-    private final SecureRandom secureRandom;
-    private AccountModel account = new AccountModel();
+
 
     public SqlAccountUpdate(@Nonnull SqlSessionFactory sqlSessionFactory, @Nonnull RandomService randomService,
                             @Nonnull String username) {
         this.sqlSessionFactory = sqlSessionFactory;
-        this.secureRandom = randomService.getRandom();
+        this.randomService = randomService;
         this.account.setUsername(username);
     }
 
@@ -51,7 +53,7 @@ public class SqlAccountUpdate implements AccountUpdate {
     public AccountUpdate setPassword(@Nonnull String password) {
 
         byte[] saltBytes = new byte[64];
-        secureRandom.nextBytes(saltBytes);
+        this.randomService.getRandomBytes(saltBytes);
 
         account.setPasswordSalt(Base64.getEncoder().encodeToString(saltBytes));
 

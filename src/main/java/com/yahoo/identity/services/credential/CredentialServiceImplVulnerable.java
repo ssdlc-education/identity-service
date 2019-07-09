@@ -5,15 +5,19 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.yahoo.identity.IdentityError;
+import com.yahoo.identity.IdentityException;
 import com.yahoo.identity.services.key.KeyService;
 import com.yahoo.identity.services.key.KeyServiceImpl;
 
 import javax.annotation.Nonnull;
-import javax.ws.rs.BadRequestException;
+import javax.inject.Inject;
 
 public class CredentialServiceImplVulnerable implements CredentialService {
 
+    @Inject
     private final KeyService keyService = new KeyServiceImpl();
+
     private final Credential credential = new CredentialImpl();
 
     @Override
@@ -21,12 +25,9 @@ public class CredentialServiceImplVulnerable implements CredentialService {
     public Credential fromString(@Nonnull String credStr) {
         try {
 
-            Algorithm algorithm = Algorithm.HMAC256(this.keyService.getSecret("cookie"));
+            Algorithm algorithm = Algorithm.HMAC256(this.keyService.getSecret("cookie.key"));
 
-            JWTVerifier verifier = JWT.require(algorithm)
-                .acceptLeeway(1)   // 1 sec for nbf and iat
-                .acceptExpiresAt(5)   // 5 secs for exp
-                .build();
+            JWTVerifier verifier = JWT.require(algorithm).acceptExpiresAt(0).build();
 
             DecodedJWT jwt = verifier.verify(credStr);
 
@@ -35,7 +36,7 @@ public class CredentialServiceImplVulnerable implements CredentialService {
             this.credential.setExpireTime(jwt.getExpiresAt().toInstant());
 
         } catch (JWTVerificationException e) {
-            throw new BadRequestException("JWT verification does not succeed.");
+            throw new IdentityException(IdentityError.INVALID_CREDENTIAL, "JWT verification does not succeed.");
         }
         return this.credential;
     }

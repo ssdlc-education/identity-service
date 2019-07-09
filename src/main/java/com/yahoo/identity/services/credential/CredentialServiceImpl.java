@@ -5,6 +5,8 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.yahoo.identity.IdentityError;
+import com.yahoo.identity.IdentityException;
 import com.yahoo.identity.services.key.KeyService;
 import com.yahoo.identity.services.key.KeyServiceImpl;
 
@@ -12,11 +14,13 @@ import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 
 import javax.annotation.Nonnull;
-import javax.ws.rs.BadRequestException;
+import javax.inject.Inject;
 
 public class CredentialServiceImpl implements CredentialService {
 
+    @Inject
     private final KeyService keyService = new KeyServiceImpl();
+
     private final Credential credential = new CredentialImpl();
 
     @Override
@@ -27,10 +31,7 @@ public class CredentialServiceImpl implements CredentialService {
                 Algorithm.RSA256((RSAPublicKey) this.keyService.getPublicKey("cookie-public.pem", "RSA"),
                                  (RSAPrivateKey) this.keyService.getPrivateKey("cookie-private.pem", "RSA"));
 
-            JWTVerifier verifier = JWT.require(algorithm)
-                .acceptLeeway(1)   // 1 sec for nbf and iat
-                .acceptExpiresAt(5)   // 5 secs for exp
-                .build();
+            JWTVerifier verifier = JWT.require(algorithm).acceptExpiresAt(0).build();
 
             DecodedJWT jwt = verifier.verify(credStr);
 
@@ -39,7 +40,7 @@ public class CredentialServiceImpl implements CredentialService {
             this.credential.setExpireTime(jwt.getExpiresAt().toInstant());
 
         } catch (JWTVerificationException e) {
-            throw new BadRequestException("JWT verification does not succeed:" + e.toString());
+            throw new IdentityException(IdentityError.INVALID_CREDENTIAL, "JWT verification does not succeed.");
         }
         return this.credential;
     }
