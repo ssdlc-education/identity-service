@@ -5,6 +5,7 @@ import com.yahoo.identity.IdentityException;
 import com.yahoo.identity.services.account.Account;
 import com.yahoo.identity.services.account.AccountCreate;
 import com.yahoo.identity.services.account.AccountUpdate;
+import com.yahoo.identity.services.random.RandomService;
 import com.yahoo.identity.services.storage.Storage;
 import com.yahoo.identity.services.system.SystemService;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -17,17 +18,19 @@ import javax.annotation.Nonnull;
 public class SqlStorage implements Storage {
 
     private final SystemService systemService;
+    private final RandomService randomService;
     private final SqlSessionFactory sqlSessionFactory;
 
-    public SqlStorage(@Nonnull SystemService systemService) {
+    public SqlStorage(@Nonnull SystemService systemService, @Nonnull RandomService randomService) {
         this.systemService = systemService;
+        this.randomService = randomService;
         this.sqlSessionFactory = createSessionFactory();
     }
 
     @Nonnull
     @Override
     public AccountCreate newAccountCreate() {
-        return new SqlAccountCreate(sqlSessionFactory);
+        return new SqlAccountCreate(sqlSessionFactory, randomService);
     }
 
     @Nonnull
@@ -49,7 +52,7 @@ public class SqlStorage implements Storage {
     @Nonnull
     @Override
     public AccountUpdate newAccountUpdate(@Nonnull String username) {
-        return new SqlAccountUpdate(sqlSessionFactory, username);
+        return new SqlAccountUpdate(sqlSessionFactory, randomService, username);
     }
 
     @Nonnull

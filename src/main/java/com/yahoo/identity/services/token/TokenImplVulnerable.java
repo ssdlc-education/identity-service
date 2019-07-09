@@ -7,8 +7,6 @@ import com.yahoo.identity.IdentityError;
 import com.yahoo.identity.IdentityException;
 import com.yahoo.identity.services.key.KeyService;
 
-import java.security.interfaces.RSAPrivateKey;
-import java.security.interfaces.RSAPublicKey;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
@@ -16,7 +14,7 @@ import java.util.Date;
 import javax.annotation.Nonnull;
 import javax.ws.rs.NotAuthorizedException;
 
-public class TokenImpl implements Token {
+public class TokenImplVulnerable implements Token {
 
     private final KeyService keyService;
     private TokenType tokenType;
@@ -24,7 +22,7 @@ public class TokenImpl implements Token {
     private Instant expireTime;
     private String subject;
 
-    public TokenImpl(@Nonnull KeyService keyService) {
+    public TokenImplVulnerable(@Nonnull KeyService keyService) {
         this.keyService = keyService;
     }
 
@@ -47,9 +45,7 @@ public class TokenImpl implements Token {
     @Nonnull
     public String toString() {
         try {
-            Algorithm algorithm =
-                Algorithm.RSA256((RSAPublicKey) this.keyService.getPublicKey("token-public.pem", "RSA"),
-                                 (RSAPrivateKey) this.keyService.getPrivateKey("token-private.pem", "RSA"));
+            Algorithm algorithm = Algorithm.HMAC256(this.keyService.getSecret("token.key"));
             String token = JWT.create()
                 .withExpiresAt(Date.from(this.expireTime))
                 .withIssuedAt(Date.from(this.issueTime))

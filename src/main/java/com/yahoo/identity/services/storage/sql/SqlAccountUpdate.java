@@ -6,23 +6,30 @@ import static org.apache.commons.text.StringEscapeUtils.escapeHtml4;
 import com.kosprov.jargon2.api.Jargon2;
 import com.yahoo.identity.IdentityException;
 import com.yahoo.identity.services.account.AccountUpdate;
+import com.yahoo.identity.services.random.RandomService;
 import com.yahoo.identity.services.storage.AccountModel;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 
-import java.security.SecureRandom;
+import java.io.UnsupportedEncodingException;
 import java.time.Instant;
+import java.util.Base64;
 
 import javax.annotation.Nonnull;
+import javax.ws.rs.BadRequestException;
 
 public class SqlAccountUpdate implements AccountUpdate {
 
+    private final RandomService randomService;
+    private final AccountModel account;
     private final SqlSessionFactory sqlSessionFactory;
-    private final SecureRandom secureRandom = new SecureRandom();
-    private AccountModel account = new AccountModel();
 
-    public SqlAccountUpdate(@Nonnull SqlSessionFactory sqlSessionFactory, @Nonnull String username) {
+
+    public SqlAccountUpdate(@Nonnull SqlSessionFactory sqlSessionFactory, @Nonnull RandomService randomService,
+                            @Nonnull String username) {
+        this.account = new AccountModel();
         this.sqlSessionFactory = sqlSessionFactory;
+        this.randomService = randomService;
         this.account.setUsername(username);
     }
 
@@ -43,14 +50,18 @@ public class SqlAccountUpdate implements AccountUpdate {
     @Override
     @Nonnull
     public AccountUpdate setPassword(@Nonnull String password) {
-        secureRandom.setSeed(Instant.now().toString().getBytes());
 
         byte[] saltBytes = new byte[64];
-        secureRandom.nextBytes(saltBytes);
-        account.setPasswordSalt(saltBytes.toString());
+        this.randomService.getRandomBytes(saltBytes);
+
+        account.setPasswordSalt(Base64.getEncoder().encodeToString(saltBytes));
 
         Jargon2.Hasher hasher = jargon2Hasher();
-        account.setPasswordHash(hasher.salt(saltBytes).password(password.getBytes()).encodedHash());
+        try {
+            account.setPasswordHash(hasher.salt(saltBytes).password(password.getBytes("UTF-8")).encodedHash());
+        } catch (UnsupportedEncodingException e) {
+            throw new BadRequestException("Unsupported encoding.");
+        }
         return this;
     }
 

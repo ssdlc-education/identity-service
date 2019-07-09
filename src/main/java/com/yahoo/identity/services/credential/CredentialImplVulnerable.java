@@ -7,23 +7,22 @@ import com.yahoo.identity.IdentityError;
 import com.yahoo.identity.IdentityException;
 import com.yahoo.identity.services.key.KeyService;
 
-import java.security.interfaces.RSAPrivateKey;
-import java.security.interfaces.RSAPublicKey;
 import java.time.Instant;
 import java.util.Date;
 
 import javax.annotation.Nonnull;
 import javax.ws.rs.NotAuthorizedException;
 
-public class CredentialImpl implements Credential {
+public class CredentialImplVulnerable implements Credential {
 
     private final KeyService keyService;
+
     private Instant issueTime;
     private Instant expireTime;
     private String subject;
     private int status;
 
-    public CredentialImpl(@Nonnull KeyService keyService) {
+    public CredentialImplVulnerable(@Nonnull KeyService keyService) {
         this.keyService = keyService;
     }
 
@@ -75,10 +74,7 @@ public class CredentialImpl implements Credential {
     @Nonnull
     public String toString() {
         try {
-            Algorithm algorithm =
-                Algorithm.RSA256((RSAPublicKey) this.keyService.getPublicKey("cookie-public.pem", "RSA"),
-                                 (RSAPrivateKey) this.keyService.getPrivateKey("cookie-private.pem", "RSA"));
-
+            Algorithm algorithm = Algorithm.HMAC256(this.keyService.getSecret("cookie.key"));
             String token = JWT.create()
                 .withExpiresAt(Date.from(getExpireTime()))
                 .withIssuedAt(Date.from(getIssueTime()))
@@ -87,7 +83,7 @@ public class CredentialImpl implements Credential {
                 .sign(algorithm);
             return token;
 
-        } catch (JWTCreationException e) {
+        } catch (JWTCreationException exception) {
             throw new IdentityException(IdentityError.INVALID_CREDENTIAL, "JWT verification does not succeed.");
         }
     }

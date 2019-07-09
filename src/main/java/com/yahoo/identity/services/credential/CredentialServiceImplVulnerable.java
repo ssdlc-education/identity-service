@@ -9,17 +9,14 @@ import com.yahoo.identity.IdentityError;
 import com.yahoo.identity.IdentityException;
 import com.yahoo.identity.services.key.KeyService;
 
-import java.security.interfaces.RSAPrivateKey;
-import java.security.interfaces.RSAPublicKey;
-
 import javax.annotation.Nonnull;
 
-public class CredentialServiceImpl implements CredentialService {
+public class CredentialServiceImplVulnerable implements CredentialService {
 
     private final KeyService keyService;
     private final Credential credential;
 
-    public CredentialServiceImpl(@Nonnull KeyService keyService) {
+    public CredentialServiceImplVulnerable(@Nonnull KeyService keyService) {
         this.keyService = keyService;
         this.credential = new CredentialImpl(this.keyService);
     }
@@ -28,9 +25,8 @@ public class CredentialServiceImpl implements CredentialService {
     @Nonnull
     public Credential fromString(@Nonnull String credStr) {
         try {
-            Algorithm algorithm =
-                Algorithm.RSA256((RSAPublicKey) this.keyService.getPublicKey("cookie-public.pem", "RSA"),
-                                 (RSAPrivateKey) this.keyService.getPrivateKey("cookie-private.pem", "RSA"));
+
+            Algorithm algorithm = Algorithm.HMAC256(this.keyService.getSecret("cookie.key"));
 
             JWTVerifier verifier = JWT.require(algorithm).acceptExpiresAt(0).build();
 
@@ -45,4 +41,5 @@ public class CredentialServiceImpl implements CredentialService {
         }
         return this.credential;
     }
+
 }

@@ -7,9 +7,9 @@ import com.yahoo.identity.services.credential.Credential;
 import com.yahoo.identity.services.credential.CredentialImpl;
 import com.yahoo.identity.services.credential.CredentialService;
 import com.yahoo.identity.services.credential.CredentialServiceImpl;
+import com.yahoo.identity.services.key.KeyService;
 import com.yahoo.identity.services.storage.Storage;
 import com.yahoo.identity.services.storage.sql.SqlAccountService;
-import org.openapitools.model.Session;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -17,23 +17,23 @@ import java.time.temporal.ChronoUnit;
 import javax.annotation.Nonnull;
 import javax.ws.rs.NotAuthorizedException;
 
-public class LoggedInSessionImpl extends Session implements LoggedInSession {
+public class LoggedInSessionImpl implements LoggedInSession {
 
     private CredentialService credentialService;
     private AccountService accountService;
     private Credential credential;
     private String username;
 
-    public LoggedInSessionImpl(@Nonnull Storage storage) {
+    public LoggedInSessionImpl(@Nonnull Storage storage, @Nonnull KeyService keyService) {
         this.accountService = new SqlAccountService(storage);
-        this.credentialService = new CredentialServiceImpl();
-        this.credential = new CredentialImpl();
+        this.credentialService = new CredentialServiceImpl(keyService);
+        this.credential = new CredentialImpl(keyService);
     }
 
     public void initCredential() {
         this.credential.setIssueTime(Instant.now());
         this.credential.setExpireTime(Instant.now().plus(7, ChronoUnit.DAYS));
-        this.credential.setSubject(getUsername());
+        this.credential.setSubject(this.username);
         this.credential.validate();
     }
 
@@ -45,7 +45,7 @@ public class LoggedInSessionImpl extends Session implements LoggedInSession {
 
     @Nonnull
     public Credential setCredential(@Nonnull String credStr) {
-        this.credential = this.credentialService.fromString(credStr, "token");
+        this.credential = this.credentialService.fromString(credStr);
         this.username = this.credential.getSubject();
         return this.credential;
     }

@@ -70,8 +70,8 @@ public class SqlAccountTest {
         Assert.assertEquals(account.getAccountModel().getUsername(), username);
 
         new Expectations() {{
-           mapper.getPublicAccount(username);
-           result = acctModel;
+            mapper.getPublicAccount(username);
+            result = acctModel;
         }};
         account.getPublicAccount(username);
         Assert.assertEquals(account.getAccountModel().getUsername(), username);

@@ -8,27 +8,23 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.yahoo.identity.IdentityError;
 import com.yahoo.identity.IdentityException;
 import com.yahoo.identity.services.key.KeyService;
-import org.openapitools.model.Token.TypeEnum;
-
-import java.security.interfaces.RSAPrivateKey;
-import java.security.interfaces.RSAPublicKey;
 
 import javax.annotation.Nonnull;
 import javax.ws.rs.BadRequestException;
 
-public class TokenCreateImpl implements TokenCreate {
+public class TokenCreateImplVulnerable implements TokenCreate {
 
-    private KeyService keyService;
+    private final KeyService keyService;
     private Token token;
 
-    public TokenCreateImpl(@Nonnull KeyService keyService) {
+    public TokenCreateImplVulnerable(@Nonnull KeyService keyService) {
         this.keyService = keyService;
         this.token = new TokenImpl(this.keyService);
     }
 
     @Override
     @Nonnull
-    public TokenCreate setType(@Nonnull TypeEnum type) {
+    public TokenCreate setType(@Nonnull org.openapitools.model.Token.TypeEnum type) {
         switch (type) {
             case CRITICAL:
                 token.setTokenType(TokenType.CRITICAL);
@@ -46,9 +42,8 @@ public class TokenCreateImpl implements TokenCreate {
     @Nonnull
     public TokenCreate setToken(@Nonnull String tokenStr) {
         try {
-            Algorithm algorithm =
-                Algorithm.RSA256((RSAPublicKey) this.keyService.getPublicKey("token-public.pem", "RSA"),
-                                 (RSAPrivateKey) this.keyService.getPrivateKey("token-private.pem", "RSA"));
+            Algorithm algorithm = Algorithm.HMAC256(keyService.getSecret("token.key"));
+
             JWTVerifier verifier = JWT.require(algorithm).build();
 
             DecodedJWT jwt = verifier.verify(tokenStr);

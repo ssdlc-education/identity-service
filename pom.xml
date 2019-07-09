@@ -1,4 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.yahoo.ais32019</groupId>
@@ -18,6 +18,18 @@
     <build>
         <sourceDirectory>src/main/java</sourceDirectory>
         <plugins>
+            <plugin>
+                <artifactId>maven-site-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-descriptor</id>
+                        <goals>
+                            <goal>attach-descriptor</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
@@ -110,6 +122,21 @@
                     <useSystemClassLoader>true</useSystemClassLoader>
                 </configuration>
             </plugin>
+
+            <plugin>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-maven-plugin</artifactId>
+                <version>3.1.12</version>
+                <dependencies>
+                    <!-- overwrite dependency on spotbugs if you want to specify the version of spotbugs -->
+                    <dependency>
+                        <groupId>com.github.spotbugs</groupId>
+                        <artifactId>spotbugs</artifactId>
+                        <version>3.1.12</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+
         </plugins>
     </build>
     <dependencies>
@@ -168,7 +195,6 @@
             <version>6.14.3</version>
             <scope>test</scope>
         </dependency>
-
 
         <dependency>
             <groupId>javax.servlet</groupId>
@@ -254,6 +280,18 @@
             <version>1.6</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk16</artifactId>
+            <version>1.45</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-ext-jdk16</artifactId>
+            <version>1.46</version>
+        </dependency>
+
     </dependencies>
     <repositories>
         <repository>
@@ -264,6 +302,17 @@
             </snapshots>
         </repository>
     </repositories>
+
+    <reporting>
+        <plugins>
+            <plugin>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-maven-plugin</artifactId>
+                <version>3.1.12</version>
+            </plugin>
+        </plugins>
+    </reporting>
+
     <properties>
         <java.version>1.8</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
