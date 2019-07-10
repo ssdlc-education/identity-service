@@ -7,7 +7,6 @@ import com.yahoo.identity.services.session.LoggedInSession;
 import com.yahoo.identity.services.session.Session;
 import com.yahoo.identity.services.storage.AccountConvert;
 import com.yahoo.identity.services.token.TokenCreate;
-import org.openapitools.api.AccountsApi;
 import org.openapitools.api.AccountsApiService;
 import org.openapitools.api.ApiResponseMessage;
 import org.openapitools.api.NotFoundException;

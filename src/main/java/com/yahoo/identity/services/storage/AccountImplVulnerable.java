@@ -32,12 +32,6 @@ public class AccountImplVulnerable implements Account {
 
     @Nonnull
     @Override
-    public String getUid() {
-        return this.accountModel.getUid();
-    }
-
-    @Nonnull
-    @Override
     public String getUsername() {
         return this.accountModel.getUsername();
     }
@@ -129,7 +123,8 @@ public class AccountImplVulnerable implements Account {
             mapper.updateAccount(this.accountModel);
             session.commit();
         } catch (Exception e) {
-            throw new IdentityException(IdentityError.INTERNAL_SERVER_ERROR, "Sql Session failed to open");
+            throw new IdentityException(IdentityError.INTERNAL_SERVER_ERROR,
+                                        "Sql Session failed to open: " + e.toString());
         }
     }
 

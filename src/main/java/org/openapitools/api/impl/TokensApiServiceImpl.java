@@ -1,6 +1,7 @@
 package org.openapitools.api.impl;
 
 import com.yahoo.identity.Identity;
+import com.yahoo.identity.services.session.LoggedInSession;
 import com.yahoo.identity.services.token.TokenCreate;
 import org.openapitools.api.ApiResponseMessage;
 import org.openapitools.api.NotFoundException;
@@ -23,17 +24,19 @@ public class TokensApiServiceImpl extends TokensApiService {
     }
 
     @Override
-    public Response tokensPost(Token token, SecurityContext securityContext) throws NotFoundException {
+    public Response tokensPost(String cookie, Token token, SecurityContext securityContext) throws NotFoundException {
         try {
+            LoggedInSession loggedInSession = identity.getSessionService().newSessionWithCredential(cookie);
 
             TokenCreate tokenCreate = identity.getTokenService().newTokenCreate();
-            tokenCreate.setToken(token.getValue());
             tokenCreate.setType(token.getType());
+            tokenCreate.initToken(loggedInSession.getUsername());
+            token.setValue(tokenCreate.create().toString());
 
             ApiResponseMessage
                 successMsg =
                 new ApiResponseMessage(Response.Status.CREATED.getStatusCode(), "The session is created successfully");
-            return Response.status(Response.Status.CREATED).entity(successMsg).header("Set-Cookie", token).build();
+            return Response.status(Response.Status.CREATED).entity(token).build();
 
         } catch (BadRequestException e) {
             ApiResponseMessage

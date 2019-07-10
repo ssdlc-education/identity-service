@@ -29,10 +29,5 @@ public interface Account {
 
     String getDescription();
 
-//    @Nonnull
-//    Instant getBlockUntilTime();
-//
-//    int getConsecutiveFails();
-
-//    boolean verify(@Nonnull String password);
+    boolean verify(@Nonnull String password);
 }

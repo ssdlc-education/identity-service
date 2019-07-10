@@ -17,12 +17,6 @@ public class AccountConvert implements Account {
 
     @Nonnull
     @Override
-    public String getUid() {
-        return data.get("uid").toString();
-    }
-
-    @Nonnull
-    @Override
     public String getUsername() {
         return data.get("username").toString();
     }
@@ -80,5 +74,7 @@ public class AccountConvert implements Account {
     }
 
     @Override
-    public boolean verify(@Nonnull String password){return false;}
+    public boolean verify(@Nonnull String password) {
+        return false;
+    }
 }

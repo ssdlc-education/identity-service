@@ -12,6 +12,8 @@ import org.openapitools.model.Token.TypeEnum;
 
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
 import javax.annotation.Nonnull;
 import javax.ws.rs.BadRequestException;
@@ -31,10 +33,10 @@ public class TokenCreateImpl implements TokenCreate {
     public TokenCreate setType(@Nonnull TypeEnum type) {
         switch (type) {
             case CRITICAL:
-                token.setTokenType(TokenType.CRITICAL);
+                this.token.setTokenType(TokenType.CRITICAL);
                 break;
             case STANDARD:
-                token.setTokenType(TokenType.STANDARD);
+                this.token.setTokenType(TokenType.STANDARD);
                 break;
             default:
                 throw new BadRequestException("Token type is not valid");
@@ -53,20 +55,35 @@ public class TokenCreateImpl implements TokenCreate {
 
             DecodedJWT jwt = verifier.verify(tokenStr);
 
-            token.setSubject(jwt.getSubject());
-            token.setIssueTime(jwt.getIssuedAt().toInstant());
-            token.setExpireTime(jwt.getExpiresAt().toInstant());
+            this.token.setSubject(jwt.getSubject());
+            this.token.setIssueTime(jwt.getIssuedAt().toInstant());
+            this.token.setExpireTime(jwt.getExpiresAt().toInstant());
 
         } catch (JWTVerificationException e) {
             throw new IdentityException(IdentityError.INVALID_CREDENTIAL, "JWT verification does not succeed.");
         }
-        token.validate();
         return this;
     }
 
     @Override
     @Nonnull
+    public void initToken(@Nonnull String username) {
+        this.token.setSubject(username);
+        this.token.setIssueTime(Instant.now());
+        switch (token.getTokenType()) {
+            case CRITICAL:
+                this.token.setExpireTime(Instant.now().plus(5, ChronoUnit.MINUTES));
+                break;
+            case STANDARD:
+                this.token.setExpireTime(Instant.now().plus(30, ChronoUnit.MINUTES));
+                break;
+        }
+    }
+
+    @Override
+    @Nonnull
     public Token create() {
+        this.token.validate();
         return this.token;
     }
 }

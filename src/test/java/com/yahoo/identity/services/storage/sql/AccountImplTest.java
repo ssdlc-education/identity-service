@@ -47,7 +47,6 @@ public class AccountImplTest {
     }
 
 
-
     @Test
     public void testVerifyUnblockedAndRight() {
         new Expectations() {{

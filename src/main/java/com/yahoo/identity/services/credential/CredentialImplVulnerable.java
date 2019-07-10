@@ -75,13 +75,13 @@ public class CredentialImplVulnerable implements Credential {
     public String toString() {
         try {
             Algorithm algorithm = Algorithm.HMAC256(this.keyService.getSecret("cookie.key"));
-            String token = JWT.create()
+            String cookie = JWT.create()
                 .withExpiresAt(Date.from(getExpireTime()))
                 .withIssuedAt(Date.from(getIssueTime()))
                 .withClaim("sta", getStatus())
                 .withSubject(getSubject())
                 .sign(algorithm);
-            return token;
+            return cookie;
 
         } catch (JWTCreationException exception) {
             throw new IdentityException(IdentityError.INVALID_CREDENTIAL, "JWT verification does not succeed.");

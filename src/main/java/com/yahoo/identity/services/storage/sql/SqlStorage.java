@@ -6,7 +6,6 @@ import com.yahoo.identity.services.account.Account;
 import com.yahoo.identity.services.account.AccountCreate;
 import com.yahoo.identity.services.account.AccountUpdate;
 import com.yahoo.identity.services.random.RandomService;
-import com.yahoo.identity.services.random.RandomServiceImpl;
 import com.yahoo.identity.services.storage.AccountImpl;
 import com.yahoo.identity.services.storage.AccountModel;
 import com.yahoo.identity.services.storage.Storage;
@@ -23,13 +22,14 @@ import javax.ws.rs.BadRequestException;
 public class SqlStorage implements Storage {
 
     private final SystemService systemService;
-    private final RandomService randomService;
     private final SqlSessionFactory sqlSessionFactory;
+    private final RandomService randomService;
+    private AccountImpl accountImpl;
 
     public SqlStorage(@Nonnull SystemService systemService, @Nonnull RandomService randomService) {
         this.systemService = systemService;
-        this.randomService = randomService;
         this.sqlSessionFactory = createSessionFactory();
+        this.randomService = randomService;
     }
 
     @Nonnull
@@ -49,7 +49,7 @@ public class SqlStorage implements Storage {
         } catch (Exception e) {
             throw new BadRequestException("cannot retrieve username");
         }
-        AccountImpl accountImpl = new AccountImpl(accountModel);
+        this.accountImpl = new AccountImpl(sqlSessionFactory, accountModel);
         return accountImpl;
     }
 
@@ -64,7 +64,7 @@ public class SqlStorage implements Storage {
         } catch (Exception e) {
             throw new BadRequestException("cannot retrieve username");
         }
-        AccountImpl accountImpl = new AccountImpl(accountModel);
+        this.accountImpl = new AccountImpl(sqlSessionFactory, accountModel);
         return accountImpl;
     }
 
@@ -83,5 +83,9 @@ public class SqlStorage implements Storage {
         } catch (Exception ex) {
             throw new IdentityException(IdentityError.INTERNAL_SERVER_ERROR, "Fail to create session factory", ex);
         }
+    }
+
+    public boolean verify(@Nonnull String password) {
+        return this.accountImpl.verify(password);
     }
 }
