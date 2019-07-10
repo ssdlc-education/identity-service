@@ -13,7 +13,6 @@ import java.time.Instant;
 import java.util.Date;
 
 import javax.annotation.Nonnull;
-import javax.ws.rs.NotAuthorizedException;
 
 public class CredentialImpl implements Credential {
 
@@ -88,15 +87,14 @@ public class CredentialImpl implements Credential {
             return cookie;
 
         } catch (JWTCreationException e) {
-            throw new IdentityException(IdentityError.INVALID_CREDENTIAL,
-                                        "JWT verification does not succeed: " + e.toString());
+            throw new IdentityException(IdentityError.INVALID_CREDENTIAL, "JWT verification does not succeed.", e);
         }
     }
 
     @Override
     public void validate() {
         if (getExpireTime().compareTo(Instant.now()) < 0) {
-            throw new NotAuthorizedException("token is not valid.");
+            throw new IdentityException(IdentityError.INVALID_CREDENTIAL, "Token has been expired.");
         }
     }
 }

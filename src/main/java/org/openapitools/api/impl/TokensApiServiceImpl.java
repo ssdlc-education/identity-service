@@ -1,16 +1,14 @@
 package org.openapitools.api.impl;
 
 import com.yahoo.identity.Identity;
+import com.yahoo.identity.IdentityException;
 import com.yahoo.identity.services.session.LoggedInSession;
 import com.yahoo.identity.services.token.TokenCreate;
-import org.openapitools.api.ApiResponseMessage;
 import org.openapitools.api.NotFoundException;
 import org.openapitools.api.TokensApiService;
 import org.openapitools.model.Token;
 
 import javax.annotation.Nonnull;
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
@@ -35,24 +33,17 @@ public class TokensApiServiceImpl extends TokensApiService {
 
             return Response.status(Response.Status.CREATED).entity(token).build();
 
-        } catch (BadRequestException e) {
-            ApiResponseMessage
-                errorMsg =
-                new ApiResponseMessage(Response.Status.BAD_REQUEST.getStatusCode(),
-                                       "Invalid request or credential too old: " + e.toString());
-            return Response.status(Response.Status.BAD_REQUEST).entity(errorMsg).build();
-        } catch (NotAuthorizedException e) {
-            ApiResponseMessage
-                errorMsg =
-                new ApiResponseMessage(Response.Status.UNAUTHORIZED.getStatusCode(),
-                                       "Invalid credential: " + e.toString());
-            return Response.status(Response.Status.UNAUTHORIZED).entity(errorMsg).build();
-        } catch (Exception e) {
-            ApiResponseMessage
-                errorMsg =
-                new ApiResponseMessage(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
-                                       "Unknown error occurs: " + e.toString());
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorMsg).build();
+        } catch (IdentityException e) {
+            switch (e.getError()) {
+                case ACCOUNT_NOT_FOUND:
+                    return Response.status(Response.Status.NOT_FOUND).entity(e.toString()).build();
+                case INVALID_ARGUMENTS:
+                    return Response.status(Response.Status.BAD_REQUEST).entity(e.toString()).build();
+                case INVALID_CREDENTIAL:
+                    return Response.status(Response.Status.UNAUTHORIZED).entity(e.toString()).build();
+                default:
+                    return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.toString()).build();
+            }
         }
     }
 }

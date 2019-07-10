@@ -37,9 +37,8 @@ public class CredentialServiceImplVulnerable implements CredentialService {
             this.credential.setExpireTime(jwt.getExpiresAt().toInstant());
 
         } catch (JWTVerificationException e) {
-            throw new IdentityException(IdentityError.INVALID_CREDENTIAL, "JWT verification does not succeed.");
+            throw new IdentityException(IdentityError.INVALID_CREDENTIAL, "JWT verification does not succeed.", e);
         }
         return this.credential;
     }
-
 }

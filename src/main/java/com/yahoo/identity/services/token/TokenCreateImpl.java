@@ -16,7 +16,6 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
 import javax.annotation.Nonnull;
-import javax.ws.rs.BadRequestException;
 
 public class TokenCreateImpl implements TokenCreate {
 
@@ -39,7 +38,7 @@ public class TokenCreateImpl implements TokenCreate {
                 this.token.setTokenType(TokenType.STANDARD);
                 break;
             default:
-                throw new BadRequestException("Token type is not valid");
+                throw new IdentityException(IdentityError.INVALID_ARGUMENTS, "Unsupported token type.");
         }
         return this;
     }
@@ -60,7 +59,7 @@ public class TokenCreateImpl implements TokenCreate {
             this.token.setExpireTime(jwt.getExpiresAt().toInstant());
 
         } catch (JWTVerificationException e) {
-            throw new IdentityException(IdentityError.INVALID_CREDENTIAL, "JWT verification does not succeed.");
+            throw new IdentityException(IdentityError.INVALID_CREDENTIAL, "JWT verification does not succeed.", e);
         }
         return this;
     }

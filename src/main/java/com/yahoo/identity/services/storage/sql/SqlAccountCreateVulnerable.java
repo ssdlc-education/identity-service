@@ -1,5 +1,6 @@
 package com.yahoo.identity.services.storage.sql;
 
+import com.yahoo.identity.IdentityError;
 import com.yahoo.identity.IdentityException;
 import com.yahoo.identity.services.account.AccountCreate;
 import com.yahoo.identity.services.storage.AccountModel;
@@ -10,7 +11,6 @@ import org.apache.ibatis.session.SqlSessionFactory;
 import java.time.Instant;
 
 import javax.annotation.Nonnull;
-import javax.ws.rs.BadRequestException;
 
 
 public class SqlAccountCreateVulnerable implements AccountCreate {
@@ -95,7 +95,7 @@ public class SqlAccountCreateVulnerable implements AccountCreate {
                 mapper.insertAccount(account);
                 session.commit();
             } catch (Exception e) {
-                throw new BadRequestException("account already exists");
+                throw new IdentityException(IdentityError.INVALID_ARGUMENTS, "Account already exists.", e);
             }
         }
         return account.getUsername();

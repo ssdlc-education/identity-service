@@ -1,14 +1,13 @@
 package org.openapitools.api.impl;
 
 import com.yahoo.identity.Identity;
+import com.yahoo.identity.IdentityException;
 import com.yahoo.identity.services.session.LoggedInSession;
-import org.openapitools.api.ApiResponseMessage;
 import org.openapitools.api.NotFoundException;
 import org.openapitools.api.SessionsApiService;
 import org.openapitools.model.Session;
 
 import javax.annotation.Nonnull;
-import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
@@ -29,26 +28,19 @@ public class SessionsApiServiceImpl extends SessionsApiService {
                 identity.getSessionService().newSessionWithPassword(session.getUsername(), session.getPassword());
             String cookie = loggedInSession.getCredential().toString();
 
-            ApiResponseMessage
-                successMsg =
-                new ApiResponseMessage(Response.Status.CREATED.getStatusCode(), "The session is created successfully");
-            return Response.status(Response.Status.CREATED).entity(successMsg).header("Set-Cookie", "cookie=" + cookie)
+            return Response.status(Response.Status.CREATED).entity("The session is created successfully")
+                .header("Set-Cookie", "V=" + cookie)
                 .build();
 
-        } catch (NotAuthorizedException e) {
-            ApiResponseMessage
-                errorMsg =
-                new ApiResponseMessage(Response.Status.UNAUTHORIZED.getStatusCode(),
-                                       "Invalid request: " + e.getMessage());
-            return Response.status(Response.Status.UNAUTHORIZED).entity(errorMsg).build();
-        } catch (Exception e) {
-            ApiResponseMessage
-                errorMsg =
-                new ApiResponseMessage(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
-                                       "Unknown error occurs: " + e.getMessage());
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorMsg).build();
+        } catch (IdentityException e) {
+            switch (e.getError()) {
+                case ACCOUNT_NOT_FOUND:
+                    return Response.status(Response.Status.NOT_FOUND).entity(e.toString()).build();
+                case INVALID_ARGUMENTS:
+                    return Response.status(Response.Status.BAD_REQUEST).entity(e.toString()).build();
+                default:
+                    return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.toString()).build();
+            }
         }
     }
-
-
 }

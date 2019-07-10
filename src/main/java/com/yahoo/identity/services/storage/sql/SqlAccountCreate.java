@@ -4,6 +4,7 @@ import static com.kosprov.jargon2.api.Jargon2.jargon2Hasher;
 import static org.apache.commons.text.StringEscapeUtils.escapeHtml4;
 
 import com.kosprov.jargon2.api.Jargon2;
+import com.yahoo.identity.IdentityError;
 import com.yahoo.identity.IdentityException;
 import com.yahoo.identity.services.account.AccountCreate;
 import com.yahoo.identity.services.random.RandomService;
@@ -16,7 +17,6 @@ import java.time.Instant;
 import java.util.Base64;
 
 import javax.annotation.Nonnull;
-import javax.ws.rs.BadRequestException;
 
 
 public class SqlAccountCreate implements AccountCreate {
@@ -79,7 +79,7 @@ public class SqlAccountCreate implements AccountCreate {
         try {
             account.setPasswordHash(hasher.salt(saltBytes).password(password.getBytes("UTF-8")).encodedHash());
         } catch (UnsupportedEncodingException e) {
-            throw new BadRequestException("Unsupported encoding:" + e.toString());
+            throw new IdentityException(IdentityError.INTERNAL_SERVER_ERROR, "Unsupported encoding standard.", e);
         }
         return this;
     }
@@ -114,7 +114,7 @@ public class SqlAccountCreate implements AccountCreate {
                 mapper.insertAccount(account);
                 session.commit();
             } catch (Exception e) {
-                throw new BadRequestException("account already exists");
+                throw new IdentityException(IdentityError.INVALID_ARGUMENTS, "Account already exists.", e);
             }
         }
         return account.getUsername();

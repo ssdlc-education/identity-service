@@ -17,7 +17,6 @@ import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 import java.io.InputStream;
 
 import javax.annotation.Nonnull;
-import javax.ws.rs.BadRequestException;
 
 public class SqlStorage implements Storage {
 
@@ -47,7 +46,7 @@ public class SqlStorage implements Storage {
             accountModel = mapper.getAccount(username);
             session.commit();
         } catch (Exception e) {
-            throw new BadRequestException("cannot retrieve username");
+            throw new IdentityException(IdentityError.ACCOUNT_NOT_FOUND, "Cannot retrieve user account.", e);
         }
         this.accountImpl = new AccountImpl(sqlSessionFactory, accountModel);
         return accountImpl;
@@ -62,7 +61,7 @@ public class SqlStorage implements Storage {
             accountModel = mapper.getPublicAccount(username);
             session.commit();
         } catch (Exception e) {
-            throw new BadRequestException("cannot retrieve username");
+            throw new IdentityException(IdentityError.ACCOUNT_NOT_FOUND, "Cannot retrieve user account.", e);
         }
         this.accountImpl = new AccountImpl(sqlSessionFactory, accountModel);
         return accountImpl;
@@ -80,8 +79,8 @@ public class SqlStorage implements Storage {
             SqlSessionFactoryBuilder builder = new SqlSessionFactoryBuilder();
             InputStream inputStream = systemService.getResourceAsStream("mybatis-config.xml");
             return builder.build(inputStream);
-        } catch (Exception ex) {
-            throw new IdentityException(IdentityError.INTERNAL_SERVER_ERROR, "Fail to create session factory", ex);
+        } catch (Exception e) {
+            throw new IdentityException(IdentityError.INTERNAL_SERVER_ERROR, "Fail to create session factory", e);
         }
     }
 

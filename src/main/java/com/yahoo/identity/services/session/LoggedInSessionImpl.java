@@ -1,5 +1,7 @@
 package com.yahoo.identity.services.session;
 
+import com.yahoo.identity.IdentityError;
+import com.yahoo.identity.IdentityException;
 import com.yahoo.identity.services.account.Account;
 import com.yahoo.identity.services.account.AccountService;
 import com.yahoo.identity.services.account.AccountUpdate;
@@ -15,7 +17,6 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
 import javax.annotation.Nonnull;
-import javax.ws.rs.NotAuthorizedException;
 
 public class LoggedInSessionImpl implements LoggedInSession {
 
@@ -59,7 +60,8 @@ public class LoggedInSessionImpl implements LoggedInSession {
     public Credential verifyPassword(@Nonnull String username, @Nonnull String password) {
         this.username = username;
         if (!getAccount().verify(password)) {
-            throw new NotAuthorizedException("Account is locked!");
+            throw new IdentityException(IdentityError.INVALID_CREDENTIAL,
+                                        "Account locked, or username and password do not match.");
         }
         initCredential();
         return this.credential;

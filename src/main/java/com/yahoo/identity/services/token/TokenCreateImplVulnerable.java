@@ -8,12 +8,12 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.yahoo.identity.IdentityError;
 import com.yahoo.identity.IdentityException;
 import com.yahoo.identity.services.key.KeyService;
+import org.openapitools.model.Token.TypeEnum;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
 import javax.annotation.Nonnull;
-import javax.ws.rs.BadRequestException;
 
 public class TokenCreateImplVulnerable implements TokenCreate {
 
@@ -27,7 +27,7 @@ public class TokenCreateImplVulnerable implements TokenCreate {
 
     @Override
     @Nonnull
-    public TokenCreate setType(@Nonnull org.openapitools.model.Token.TypeEnum type) {
+    public TokenCreate setType(@Nonnull TypeEnum type) {
         switch (type) {
             case CRITICAL:
                 this.token.setTokenType(TokenType.CRITICAL);
@@ -36,7 +36,7 @@ public class TokenCreateImplVulnerable implements TokenCreate {
                 this.token.setTokenType(TokenType.STANDARD);
                 break;
             default:
-                throw new BadRequestException("Token type is not valid");
+                throw new IdentityException(IdentityError.INVALID_ARGUMENTS, "Unsupported token type.");
         }
         return this;
     }
@@ -56,7 +56,7 @@ public class TokenCreateImplVulnerable implements TokenCreate {
             this.token.setExpireTime(jwt.getExpiresAt().toInstant());
 
         } catch (JWTVerificationException e) {
-            throw new IdentityException(IdentityError.INVALID_CREDENTIAL, "JWT verification does not succeed.");
+            throw new IdentityException(IdentityError.INVALID_CREDENTIAL, "JWT verification does not succeed.", e);
         }
         return this;
     }

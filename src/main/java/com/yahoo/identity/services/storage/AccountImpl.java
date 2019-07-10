@@ -15,8 +15,6 @@ import java.io.UnsupportedEncodingException;
 import java.time.Instant;
 
 import javax.annotation.Nonnull;
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.NotAuthorizedException;
 
 public class AccountImpl implements Account {
 
@@ -118,7 +116,7 @@ public class AccountImpl implements Account {
                 this.accountModel.setConsecutiveFails(consecutiveFails + 1);
                 this.update();
 
-                throw new NotAuthorizedException("Username and password are not matched!");
+                return false;
             }
 
             if (consecutiveFails > 0) {
@@ -128,7 +126,7 @@ public class AccountImpl implements Account {
             }
             return true;
         } catch (UnsupportedEncodingException e) {
-            throw new BadRequestException("Unsupported encoding:" + e.toString());
+            throw new IdentityException(IdentityError.INTERNAL_SERVER_ERROR, "Unsupported encoding standard.", e);
         }
     }
 

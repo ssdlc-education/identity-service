@@ -1,11 +1,12 @@
 package com.yahoo.identity.services.key;
 
+import com.yahoo.identity.IdentityError;
+import com.yahoo.identity.IdentityException;
 import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemReader;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -18,13 +19,12 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
-import javax.ws.rs.BadRequestException;
-
 public class KeyServiceUtils {
 
     private static byte[] parsePEMFile(File pemFile) throws IOException {
         if (!pemFile.isFile() || !pemFile.exists()) {
-            throw new FileNotFoundException(String.format("The file '%s' doesn't exist.", pemFile.getAbsolutePath()));
+            throw new IdentityException(IdentityError.INTERNAL_SERVER_ERROR,
+                                        String.format("The file '%s' doesn't exist.", pemFile.getAbsolutePath()));
         }
         InputStream inputStream = new FileInputStream(pemFile);
         PemReader reader = new PemReader(new InputStreamReader(inputStream, "UTF-8"));
@@ -41,10 +41,12 @@ public class KeyServiceUtils {
             EncodedKeySpec keySpec = new X509EncodedKeySpec(keyBytes);
             publicKey = kf.generatePublic(keySpec);
         } catch (NoSuchAlgorithmException e) {
-            throw new BadRequestException(
-                "Could not reconstruct the public key, the given algorithm could not be found.");
+            throw new IdentityException(IdentityError.INTERNAL_SERVER_ERROR,
+                                        "Could not reconstruct the public key, the given algorithm could not be found.",
+                                        e);
         } catch (InvalidKeySpecException e) {
-            throw new BadRequestException("Could not reconstruct the public key");
+            throw new IdentityException(IdentityError.INTERNAL_SERVER_ERROR,
+                                        "Could not reconstruct the public key.", e);
         }
 
         return publicKey;
@@ -57,10 +59,12 @@ public class KeyServiceUtils {
             EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(keyBytes);
             privateKey = kf.generatePrivate(keySpec);
         } catch (NoSuchAlgorithmException e) {
-            throw new BadRequestException(
-                "Could not reconstruct the private key, the given algorithm could not be found.");
+            throw new IdentityException(IdentityError.INTERNAL_SERVER_ERROR,
+                                        "Could not reconstruct the private key, the given algorithm could not be found.",
+                                        e);
         } catch (InvalidKeySpecException e) {
-            throw new BadRequestException("Could not reconstruct the private key");
+            throw new IdentityException(IdentityError.INTERNAL_SERVER_ERROR,
+                                        "Could not reconstruct the private key.", e);
         }
 
         return privateKey;

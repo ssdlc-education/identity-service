@@ -4,6 +4,7 @@ import static com.kosprov.jargon2.api.Jargon2.jargon2Hasher;
 import static org.apache.commons.text.StringEscapeUtils.escapeHtml4;
 
 import com.kosprov.jargon2.api.Jargon2;
+import com.yahoo.identity.IdentityError;
 import com.yahoo.identity.IdentityException;
 import com.yahoo.identity.services.account.AccountUpdate;
 import com.yahoo.identity.services.random.RandomService;
@@ -16,7 +17,6 @@ import java.time.Instant;
 import java.util.Base64;
 
 import javax.annotation.Nonnull;
-import javax.ws.rs.BadRequestException;
 
 public class SqlAccountUpdate implements AccountUpdate {
 
@@ -60,7 +60,7 @@ public class SqlAccountUpdate implements AccountUpdate {
         try {
             account.setPasswordHash(hasher.salt(saltBytes).password(password.getBytes("UTF-8")).encodedHash());
         } catch (UnsupportedEncodingException e) {
-            throw new BadRequestException("Unsupported encoding:" + e.toString());
+            throw new IdentityException(IdentityError.INTERNAL_SERVER_ERROR, "Unsupported encoding standard.", e);
         }
         return this;
     }

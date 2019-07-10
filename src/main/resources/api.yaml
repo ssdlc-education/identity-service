@@ -74,13 +74,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AccountApi'
-        '401':
-          description: |
-            Invalid cookie credential is used.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
         '404':
           description: Account not found
           content:

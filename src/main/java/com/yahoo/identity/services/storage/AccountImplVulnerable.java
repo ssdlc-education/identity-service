@@ -13,7 +13,6 @@ import org.apache.ibatis.session.SqlSessionFactory;
 import java.time.Instant;
 
 import javax.annotation.Nonnull;
-import javax.ws.rs.NotAuthorizedException;
 
 public class AccountImplVulnerable implements Account {
 
@@ -106,7 +105,7 @@ public class AccountImplVulnerable implements Account {
             this.accountModel.setConsecutiveFails(consecutiveFails + 1);
             this.update();
 
-            throw new NotAuthorizedException("Username and password are not matched!");
+            return false;
         }
 
         if (consecutiveFails > 0) {
