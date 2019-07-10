@@ -60,7 +60,7 @@ public class SqlAccountUpdate implements AccountUpdate {
         try {
             account.setPasswordHash(hasher.salt(saltBytes).password(password.getBytes("UTF-8")).encodedHash());
         } catch (UnsupportedEncodingException e) {
-            throw new BadRequestException("Unsupported encoding.");
+            throw new BadRequestException("Unsupported encoding:" + e.toString());
         }
         return this;
     }

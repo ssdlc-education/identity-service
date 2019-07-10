@@ -83,8 +83,9 @@ public class CredentialImplVulnerable implements Credential {
                 .sign(algorithm);
             return cookie;
 
-        } catch (JWTCreationException exception) {
-            throw new IdentityException(IdentityError.INVALID_CREDENTIAL, "JWT verification does not succeed.");
+        } catch (JWTCreationException e) {
+            throw new IdentityException(IdentityError.INVALID_CREDENTIAL,
+                                        "JWT verification does not succeed: " + e.toString());
         }
     }
 

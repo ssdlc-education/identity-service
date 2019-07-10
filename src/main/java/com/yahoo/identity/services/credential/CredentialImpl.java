@@ -88,7 +88,8 @@ public class CredentialImpl implements Credential {
             return cookie;
 
         } catch (JWTCreationException e) {
-            throw new IdentityException(IdentityError.INVALID_CREDENTIAL, "JWT verification does not succeed.");
+            throw new IdentityException(IdentityError.INVALID_CREDENTIAL,
+                                        "JWT verification does not succeed: " + e.toString());
         }
     }
 

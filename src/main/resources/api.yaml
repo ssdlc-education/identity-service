@@ -240,12 +240,6 @@ paths:
         Otherwise, try to use cookie to decide the identity. It should happen when the
         user is verifying an unverified email. Therefore, the email must be one of the
         unverified email of the account. Otherwise, 400 is returned.
-      parameters:
-        - name: "cookie"
-          in: "header"
-          schema:
-            type: string
-          required: true
       requestBody:
         content:
           'application/json':

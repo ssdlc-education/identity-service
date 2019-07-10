@@ -11,9 +11,11 @@ import com.yahoo.identity.services.storage.sql.AccountMapper;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 
+import java.io.UnsupportedEncodingException;
 import java.time.Instant;
 
 import javax.annotation.Nonnull;
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.NotAuthorizedException;
 
 public class AccountImpl implements Account {
@@ -87,42 +89,47 @@ public class AccountImpl implements Account {
 
     @Override
     public boolean verify(@Nonnull String password) {
-        Instant blockUntil = Instant.ofEpochMilli(this.accountModel.getBlockUntilTs());
-        int consecutiveFails = this.accountModel.getConsecutiveFails();
-        long blockTimeLeft = Instant.now().until(blockUntil, SECONDS);
+        try {
+            Instant blockUntil = Instant.ofEpochMilli(this.accountModel.getBlockUntilTs());
+            int consecutiveFails = this.accountModel.getConsecutiveFails();
+            long blockTimeLeft = Instant.now().until(blockUntil, SECONDS);
 
-        if (blockTimeLeft > 0) {
-            return false;
-        }
-
-        Jargon2.Verifier verifier = jargon2Verifier();
-        boolean isVerified = verifier
-            .salt(this.accountModel.getPasswordSalt().getBytes())
-            .hash(this.accountModel.getPasswordHash())
-            .password(password.getBytes())
-            .verifyEncoded();
-
-        if (!isVerified) {
-            if (consecutiveFails >= ABUSE_MAX_TRIES) {
-                long blockTime =
-                    (long) (Math.pow(ABUSE_BLOCK_FACTOR, consecutiveFails - ABUSE_MAX_TRIES) * ABUSE_MIN_BLOCK);
-                this.accountModel
-                    .setBlockUntilTs(Instant.now().plusSeconds(Math.min(ABUSE_MAX_BLOCK, blockTime)).toEpochMilli());
-            } else {
-                this.accountModel.setBlockUntilTs(Instant.now().toEpochMilli());
+            if (blockTimeLeft > 0) {
+                return false;
             }
-            this.accountModel.setConsecutiveFails(consecutiveFails + 1);
-            this.update();
 
-            throw new NotAuthorizedException("Username and password are not matched!");
-        }
+            Jargon2.Verifier verifier = jargon2Verifier();
+            boolean isVerified = verifier
+                .salt(this.accountModel.getPasswordSalt().getBytes("UTF-8"))
+                .hash(this.accountModel.getPasswordHash())
+                .password(password.getBytes("UTF-8"))
+                .verifyEncoded();
 
-        if (consecutiveFails > 0) {
-            this.accountModel.setConsecutiveFails(ABUSE_RESET_ZERO);
-            this.accountModel.setBlockUntilTs(Instant.now().toEpochMilli());
-            this.update();
+            if (!isVerified) {
+                if (consecutiveFails >= ABUSE_MAX_TRIES) {
+                    long blockTime =
+                        (long) (Math.pow(ABUSE_BLOCK_FACTOR, consecutiveFails - ABUSE_MAX_TRIES) * ABUSE_MIN_BLOCK);
+                    this.accountModel
+                        .setBlockUntilTs(
+                            Instant.now().plusSeconds(Math.min(ABUSE_MAX_BLOCK, blockTime)).toEpochMilli());
+                } else {
+                    this.accountModel.setBlockUntilTs(Instant.now().toEpochMilli());
+                }
+                this.accountModel.setConsecutiveFails(consecutiveFails + 1);
+                this.update();
+
+                throw new NotAuthorizedException("Username and password are not matched!");
+            }
+
+            if (consecutiveFails > 0) {
+                this.accountModel.setConsecutiveFails(ABUSE_RESET_ZERO);
+                this.accountModel.setBlockUntilTs(Instant.now().toEpochMilli());
+                this.update();
+            }
+            return true;
+        } catch (UnsupportedEncodingException e) {
+            throw new BadRequestException("Unsupported encoding:" + e.toString());
         }
-        return true;
     }
 
     private void update() {

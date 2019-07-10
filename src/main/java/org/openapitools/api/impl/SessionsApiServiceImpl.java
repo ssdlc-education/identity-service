@@ -32,7 +32,7 @@ public class SessionsApiServiceImpl extends SessionsApiService {
             ApiResponseMessage
                 successMsg =
                 new ApiResponseMessage(Response.Status.CREATED.getStatusCode(), "The session is created successfully");
-            return Response.status(Response.Status.CREATED).entity(session).header("Set-Cookie", "cookie=" + cookie)
+            return Response.status(Response.Status.CREATED).entity(successMsg).header("Set-Cookie", "cookie=" + cookie)
                 .build();
 
         } catch (NotAuthorizedException e) {

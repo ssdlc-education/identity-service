@@ -5,10 +5,10 @@ import javax.annotation.Nonnull;
 public interface ChallengeSubmit {
 
     @Nonnull
-    ChallengeSubmit setUsername(@Nonnull String username);
+    ChallengeSubmit setUsername();
 
     @Nonnull
-    ChallengeSubmit setEmail(@Nonnull String email);
+    ChallengeSubmit setEmail();
 
     void submit();
 }
