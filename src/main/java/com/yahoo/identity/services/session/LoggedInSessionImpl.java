@@ -75,8 +75,8 @@ public class LoggedInSessionImpl implements LoggedInSession {
 
     @Override
     @Nonnull
-    public AccountUpdate sessionAccountUpdate(@Nonnull String username) {
-        AccountUpdate accountUpdate = this.accountService.newAccountUpdate(username);
+    public AccountUpdate sessionAccountUpdate() {
+        AccountUpdate accountUpdate = this.accountService.newAccountUpdate(this.username);
         return accountUpdate;
     }
 }

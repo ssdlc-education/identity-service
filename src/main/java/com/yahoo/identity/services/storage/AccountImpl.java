@@ -90,7 +90,7 @@ public class AccountImpl implements Account {
         try {
             Long blockUntilTs = this.accountModel.getBlockUntilTs();
             if (blockUntilTs == null) {
-                return false;
+                blockUntilTs = Instant.now().toEpochMilli();
             }
             Instant blockUntil = Instant.ofEpochMilli(blockUntilTs);
             int consecutiveFails = this.accountModel.getConsecutiveFails();
@@ -114,8 +114,6 @@ public class AccountImpl implements Account {
                     this.accountModel
                         .setBlockUntilTs(
                             Instant.now().plusSeconds(Math.min(ABUSE_MAX_BLOCK, blockTime)).toEpochMilli());
-                } else {
-                    this.accountModel.setBlockUntilTs(Instant.now().toEpochMilli());
                 }
                 this.accountModel.setConsecutiveFails(consecutiveFails + 1);
                 this.update();

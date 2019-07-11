@@ -1,9 +1,6 @@
 package com.yahoo.identity.services.token;
 
-import com.yahoo.identity.IdentityError;
-import com.yahoo.identity.IdentityException;
 import com.yahoo.identity.services.key.KeyService;
-import org.openapitools.model.Token.TypeEnum;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -22,17 +19,8 @@ public class TokenCreateImpl implements TokenCreate {
 
     @Override
     @Nonnull
-    public TokenCreate setType(@Nonnull TypeEnum type) {
-        switch (type) {
-            case CRITICAL:
-                this.token.setTokenType(TokenType.CRITICAL);
-                break;
-            case STANDARD:
-                this.token.setTokenType(TokenType.STANDARD);
-                break;
-            default:
-                throw new IdentityException(IdentityError.INVALID_ARGUMENTS, "Unsupported token type.");
-        }
+    public TokenCreate setType(@Nonnull TokenType type) {
+        this.token.setTokenType(type);
         return this;
     }
 

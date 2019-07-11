@@ -14,6 +14,7 @@ import org.openapitools.model.AccountApi;
 import java.time.Instant;
 
 import javax.annotation.Nonnull;
+import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
@@ -98,10 +99,12 @@ public class AccountsApiServiceImpl extends AccountsApiService {
             LoggedInSession
                 loggedInSession =
                 identity.getSessionService().newSessionWithPassword(accountApi.getUsername(), accountApi.getPassword());
-            String cookie = loggedInSession.getCredential().toString();
+
+            String cookieStr = loggedInSession.getCredential().toString();
+            NewCookie cookie = new NewCookie("V", cookieStr);
 
             return Response.status(Response.Status.CREATED).entity("The account is created successfully.")
-                .header("Set-Cookie", "V=" + cookie).build();
+                .cookie(cookie).build();
 
         } catch (IdentityException e) {
             switch (e.getError()) {
@@ -114,15 +117,18 @@ public class AccountsApiServiceImpl extends AccountsApiService {
     }
 
     @Override
-    public Response accountsmePut(String cookie, String token, AccountApi accountApi, SecurityContext securityContext)
+    public Response accountsmePut(String token, AccountApi accountApi, SecurityContext securityContext)
         throws NotFoundException {
         final boolean emailStatus = true;
         try {
-            identity.getTokenService().setToken(token);
+            identity.getTokenService().newTokenFromString(token);
 
-            LoggedInSession loggedInSession = identity.getSessionService().newSessionWithCredential(cookie);
+            LoggedInSession
+                loggedInSession =
+                identity.getSessionService().newSessionWithCredential(securityContext.getAuthenticationScheme());
 
-            AccountUpdate accountUpdate = loggedInSession.sessionAccountUpdate(accountApi.getUsername());
+            AccountUpdate accountUpdate = loggedInSession.sessionAccountUpdate();
+
             String email = accountApi.getEmail();
             String password = accountApi.getPassword();
             String description = accountApi.getDescription();

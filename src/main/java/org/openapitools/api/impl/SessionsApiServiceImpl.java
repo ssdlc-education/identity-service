@@ -8,6 +8,7 @@ import org.openapitools.api.SessionsApiService;
 import org.openapitools.model.Session;
 
 import javax.annotation.Nonnull;
+import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
@@ -26,10 +27,11 @@ public class SessionsApiServiceImpl extends SessionsApiService {
             LoggedInSession
                 loggedInSession =
                 identity.getSessionService().newSessionWithPassword(session.getUsername(), session.getPassword());
-            String cookie = loggedInSession.getCredential().toString();
 
-            return Response.status(Response.Status.CREATED).entity("The session is created successfully")
-                .header("Set-Cookie", "V=" + cookie)
+            String cookieStr = loggedInSession.getCredential().toString();
+            NewCookie cookie = new NewCookie("V", cookieStr);
+
+            return Response.status(Response.Status.CREATED).entity("The session is created successfully").cookie(cookie)
                 .build();
 
         } catch (IdentityException e) {

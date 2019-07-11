@@ -148,18 +148,14 @@ paths:
         If an account already has one verified email, the new email will be appended with "verified" being false.
         After the new email is verified, the new one will replace the old one, and there will be only one email.
         If the account has only one unverified email, the new email will directly replace the old one.
+      security:
+        - cookieAuth: []
       parameters:
-        - name: "cookie"
-          in: "header"
-          schema:
-            type: string
-          required: true
         - name: "token"
           in: "query"
           schema:
             type: string
           required: true
-
       requestBody:
         content:
           'application/json':
@@ -309,12 +305,8 @@ paths:
           - Only need a valid and unexpired credential.
         - critical:
           - The credential must be valid and be issued in the last 5 minutes.
-      parameters:
-        - name: "cookie"
-          in: "header"
-          schema:
-            type: string
-          required: true
+      security:
+        - cookieAuth: []
       requestBody:
         content:
           'application/json':
@@ -428,3 +420,9 @@ components:
         message:
           type: "string"
           example: "Unknown server error"
+
+  securitySchemes:
+    cookieAuth:  # arbitrary name for the security scheme
+      type: apiKey
+      in: cookie
+      name: V  # cookie name

@@ -10,5 +10,5 @@ public interface TokenService {
     TokenCreate newTokenCreate();
 
     @Nonnull
-    Token setToken(@Nonnull String tokenStr);
+    Token newTokenFromString(@Nonnull String tokenStr);
 }
