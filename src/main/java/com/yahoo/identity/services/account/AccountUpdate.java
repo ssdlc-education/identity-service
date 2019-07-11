@@ -24,11 +24,5 @@ public interface AccountUpdate {
     AccountUpdate setDescription(@Nonnull String description);
 
     @Nonnull
-    AccountUpdate setBlockUntilTime(@Nonnull Instant blockUntil);
-
-    @Nonnull
-    AccountUpdate setConsecutiveFails(@Nonnull int consecutiveFails);
-
-    @Nonnull
     String update() throws IdentityException;
 }

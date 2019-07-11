@@ -9,16 +9,13 @@ import com.yahoo.identity.IdentityError;
 import com.yahoo.identity.IdentityException;
 import com.yahoo.identity.services.key.KeyService;
 
-import java.security.interfaces.RSAPrivateKey;
-import java.security.interfaces.RSAPublicKey;
-
 import javax.annotation.Nonnull;
 
-public class TokenServiceImpl implements TokenService {
+public class TokenServiceImplVulnerable implements TokenService {
 
     private final KeyService keyService;
 
-    public TokenServiceImpl(@Nonnull KeyService keyService) {
+    public TokenServiceImplVulnerable(@Nonnull KeyService keyService) {
         this.keyService = keyService;
     }
 
@@ -33,9 +30,7 @@ public class TokenServiceImpl implements TokenService {
     public Token newTokenFromString(@Nonnull String tokenStr) {
         Token token = new TokenImpl(this.keyService);
         try {
-            Algorithm algorithm =
-                Algorithm.RSA256((RSAPublicKey) this.keyService.getPublicKey("token-public.pem", "RSA"),
-                                 (RSAPrivateKey) this.keyService.getPrivateKey("token-private.pem", "RSA"));
+            Algorithm algorithm = Algorithm.HMAC256(this.keyService.getSecret("token.key"));
             JWTVerifier verifier = JWT.require(algorithm).build();
 
             DecodedJWT jwt = verifier.verify(tokenStr);
@@ -49,4 +44,5 @@ public class TokenServiceImpl implements TokenService {
         }
         return token;
     }
+
 }

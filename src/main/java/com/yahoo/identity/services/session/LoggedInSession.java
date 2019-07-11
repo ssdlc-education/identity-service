@@ -1,6 +1,7 @@
 package com.yahoo.identity.services.session;
 
 import com.yahoo.identity.services.account.Account;
+import com.yahoo.identity.services.account.AccountUpdate;
 import com.yahoo.identity.services.credential.Credential;
 
 import javax.annotation.Nonnull;
@@ -14,5 +15,8 @@ public interface LoggedInSession {
     Account getAccount();
 
     @Nonnull
-    LoggedInSession sessionAccountUpdate(@Nonnull Account account);
+    String getUsername();
+
+    @Nonnull
+    AccountUpdate sessionAccountUpdate();
 }

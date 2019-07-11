@@ -14,7 +14,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
 import javax.annotation.Nonnull;
-import javax.ws.rs.NotAuthorizedException;
 
 public class TokenImpl implements Token {
 
@@ -56,9 +55,15 @@ public class TokenImpl implements Token {
                 .withSubject(this.subject)
                 .sign(algorithm);
             return token;
-        } catch (JWTCreationException exception) {
-            throw new IdentityException(IdentityError.INVALID_CREDENTIAL, "JWT verification does not succeed.");
+        } catch (JWTCreationException e) {
+            throw new IdentityException(IdentityError.INVALID_CREDENTIAL, "JWT verification does not succeed.", e);
         }
+    }
+
+    @Override
+    @Nonnull
+    public TokenType getTokenType() {
+        return this.tokenType;
     }
 
     public void setTokenType(@Nonnull TokenType tokenType) {
@@ -74,7 +79,7 @@ public class TokenImpl implements Token {
             isValid = (this.issueTime.compareTo(criteriaTs) > 0) && isValid;
         }
         if (!isValid) {
-            throw new NotAuthorizedException("Token is not valid.");
+            throw new IdentityException(IdentityError.INVALID_CREDENTIAL, "Token has been expired.");
         }
     }
 }

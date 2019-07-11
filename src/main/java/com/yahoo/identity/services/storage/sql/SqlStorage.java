@@ -6,8 +6,11 @@ import com.yahoo.identity.services.account.Account;
 import com.yahoo.identity.services.account.AccountCreate;
 import com.yahoo.identity.services.account.AccountUpdate;
 import com.yahoo.identity.services.random.RandomService;
+import com.yahoo.identity.services.storage.AccountImpl;
+import com.yahoo.identity.services.storage.AccountModel;
 import com.yahoo.identity.services.storage.Storage;
 import com.yahoo.identity.services.system.SystemService;
+import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 
@@ -18,13 +21,14 @@ import javax.annotation.Nonnull;
 public class SqlStorage implements Storage {
 
     private final SystemService systemService;
-    private final RandomService randomService;
     private final SqlSessionFactory sqlSessionFactory;
+    private final RandomService randomService;
+    private AccountImpl accountImpl;
 
     public SqlStorage(@Nonnull SystemService systemService, @Nonnull RandomService randomService) {
         this.systemService = systemService;
-        this.randomService = randomService;
         this.sqlSessionFactory = createSessionFactory();
+        this.randomService = randomService;
     }
 
     @Nonnull
@@ -36,17 +40,31 @@ public class SqlStorage implements Storage {
     @Nonnull
     @Override
     public Account getAccount(@Nonnull String username) {
-        SqlAccount sqlAccount = new SqlAccount(sqlSessionFactory);
-        sqlAccount.getAccount(username);
-        return sqlAccount;
+        AccountModel accountModel;
+        try (SqlSession session = sqlSessionFactory.openSession()) {
+            AccountMapper mapper = session.getMapper(AccountMapper.class);
+            accountModel = mapper.getAccount(username);
+            session.commit();
+        } catch (Exception e) {
+            throw new IdentityException(IdentityError.ACCOUNT_NOT_FOUND, "Cannot retrieve user account.", e);
+        }
+        this.accountImpl = new AccountImpl(sqlSessionFactory, accountModel);
+        return accountImpl;
     }
 
     @Nonnull
     @Override
     public Account getPublicAccount(@Nonnull String username) {
-        SqlAccount sqlAccount = new SqlAccount(sqlSessionFactory);
-        sqlAccount.getPublicAccount(username);
-        return sqlAccount;
+        AccountModel accountModel;
+        try (SqlSession session = sqlSessionFactory.openSession()) {
+            AccountMapper mapper = session.getMapper(AccountMapper.class);
+            accountModel = mapper.getPublicAccount(username);
+            session.commit();
+        } catch (Exception e) {
+            throw new IdentityException(IdentityError.ACCOUNT_NOT_FOUND, "Cannot retrieve user account.", e);
+        }
+        this.accountImpl = new AccountImpl(sqlSessionFactory, accountModel);
+        return accountImpl;
     }
 
     @Nonnull
@@ -61,8 +79,12 @@ public class SqlStorage implements Storage {
             SqlSessionFactoryBuilder builder = new SqlSessionFactoryBuilder();
             InputStream inputStream = systemService.getResourceAsStream("mybatis-config.xml");
             return builder.build(inputStream);
-        } catch (Exception ex) {
-            throw new IdentityException(IdentityError.INTERNAL_SERVER_ERROR, "Fail to create session factory", ex);
+        } catch (Exception e) {
+            throw new IdentityException(IdentityError.INTERNAL_SERVER_ERROR, "Fail to create session factory", e);
         }
+    }
+
+    public boolean verify(@Nonnull String password) {
+        return this.accountImpl.verify(password);
     }
 }

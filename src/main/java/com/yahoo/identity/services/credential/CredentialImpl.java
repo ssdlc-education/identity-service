@@ -13,7 +13,6 @@ import java.time.Instant;
 import java.util.Date;
 
 import javax.annotation.Nonnull;
-import javax.ws.rs.NotAuthorizedException;
 
 public class CredentialImpl implements Credential {
 
@@ -79,23 +78,24 @@ public class CredentialImpl implements Credential {
                 Algorithm.RSA256((RSAPublicKey) this.keyService.getPublicKey("cookie-public.pem", "RSA"),
                                  (RSAPrivateKey) this.keyService.getPrivateKey("cookie-private.pem", "RSA"));
 
-            String token = JWT.create()
+            String cookie = JWT.create()
                 .withExpiresAt(Date.from(getExpireTime()))
                 .withIssuedAt(Date.from(getIssueTime()))
                 .withClaim("sta", getStatus())
                 .withSubject(getSubject())
                 .sign(algorithm);
-            return token;
+
+            return cookie;
 
         } catch (JWTCreationException e) {
-            throw new IdentityException(IdentityError.INVALID_CREDENTIAL, "JWT verification does not succeed.");
+            throw new IdentityException(IdentityError.INVALID_CREDENTIAL, "JWT verification does not succeed.", e);
         }
     }
 
     @Override
     public void validate() {
         if (getExpireTime().compareTo(Instant.now()) < 0) {
-            throw new NotAuthorizedException("token is not valid.");
+            throw new IdentityException(IdentityError.INVALID_CREDENTIAL, "Token has been expired.");
         }
     }
 }

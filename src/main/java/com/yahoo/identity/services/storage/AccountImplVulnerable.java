@@ -1,22 +1,20 @@
 package com.yahoo.identity.services.storage;
 
-import static com.kosprov.jargon2.api.Jargon2.jargon2Verifier;
 import static java.time.temporal.ChronoUnit.SECONDS;
 
-import com.kosprov.jargon2.api.Jargon2;
 import com.yahoo.identity.IdentityError;
 import com.yahoo.identity.IdentityException;
 import com.yahoo.identity.services.account.Account;
 import com.yahoo.identity.services.storage.sql.AccountMapper;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 
-import java.io.UnsupportedEncodingException;
 import java.time.Instant;
 
 import javax.annotation.Nonnull;
 
-public class AccountImpl implements Account {
+public class AccountImplVulnerable implements Account {
 
     private static final int ABUSE_MAX_TRIES = 5;
     private static final long ABUSE_MIN_BLOCK = 300;
@@ -26,7 +24,7 @@ public class AccountImpl implements Account {
     private final AccountModel accountModel;
     private final SqlSessionFactory sqlSessionFactory;
 
-    public AccountImpl(@Nonnull SqlSessionFactory sqlSessionFactory, @Nonnull AccountModel accountModel) {
+    public AccountImplVulnerable(@Nonnull SqlSessionFactory sqlSessionFactory, @Nonnull AccountModel accountModel) {
         this.accountModel = accountModel;
         this.sqlSessionFactory = sqlSessionFactory;
     }
@@ -87,51 +85,39 @@ public class AccountImpl implements Account {
 
     @Override
     public boolean verify(@Nonnull String password) {
-        try {
-            Long blockUntilTs = this.accountModel.getBlockUntilTs();
-            if (blockUntilTs == null) {
-                blockUntilTs = Instant.now().toEpochMilli();
-            }
-            Instant blockUntil = Instant.ofEpochMilli(blockUntilTs);
-            int consecutiveFails = this.accountModel.getConsecutiveFails();
-            long blockTimeLeft = Instant.now().until(blockUntil, SECONDS);
-
-            if (blockTimeLeft > 0) {
-                return false;
-            }
-
-            Jargon2.Verifier verifier = jargon2Verifier();
-            boolean isVerified = verifier
-                .salt(this.accountModel.getPasswordSalt().getBytes("UTF-8"))
-                .hash(this.accountModel.getPasswordHash())
-                .password(password.getBytes("UTF-8"))
-                .verifyEncoded();
-
-            if (!isVerified) {
-                if (consecutiveFails >= ABUSE_MAX_TRIES) {
-                    long blockTime =
-                        (long) (Math.pow(ABUSE_BLOCK_FACTOR, consecutiveFails - ABUSE_MAX_TRIES) * ABUSE_MIN_BLOCK);
-                    this.accountModel
-                        .setBlockUntilTs(
-                            Instant.now().plusSeconds(Math.min(ABUSE_MAX_BLOCK, blockTime)).toEpochMilli());
-                }
-                this.accountModel.setConsecutiveFails(consecutiveFails + 1);
-                this.update();
-
-                return false;
-            }
-
-            if (consecutiveFails > 0) {
-                this.accountModel.setConsecutiveFails(ABUSE_RESET_ZERO);
-                this.accountModel.setBlockUntilTs(Instant.now().toEpochMilli());
-                this.update();
-            }
-            return true;
-
-        } catch (UnsupportedEncodingException e) {
-
-            throw new IdentityException(IdentityError.INTERNAL_SERVER_ERROR, "Unsupported encoding standard.", e);
+        Long blockUntilTs = this.accountModel.getBlockUntilTs();
+        if (blockUntilTs == null) {
+            return false;
         }
+        Instant blockUntil = Instant.ofEpochMilli(blockUntilTs);
+        int consecutiveFails = this.accountModel.getConsecutiveFails();
+        long blockTimeLeft = Instant.now().until(blockUntil, SECONDS);
+
+        if (blockTimeLeft > 0) {
+            return false;
+        }
+
+        if (!this.accountModel.getPasswordHash().equals(DigestUtils.md5Hex(password))) {
+            if (consecutiveFails >= ABUSE_MAX_TRIES) {
+                long blockTime =
+                    (long) (Math.pow(ABUSE_BLOCK_FACTOR, consecutiveFails - ABUSE_MAX_TRIES) * ABUSE_MIN_BLOCK);
+                this.accountModel
+                    .setBlockUntilTs(Instant.now().plusSeconds(Math.min(ABUSE_MAX_BLOCK, blockTime)).toEpochMilli());
+            } else {
+                this.accountModel.setBlockUntilTs(Instant.now().toEpochMilli());
+            }
+            this.accountModel.setConsecutiveFails(consecutiveFails + 1);
+            this.update();
+
+            return false;
+        }
+
+        if (consecutiveFails > 0) {
+            this.accountModel.setConsecutiveFails(ABUSE_RESET_ZERO);
+            this.accountModel.setBlockUntilTs(Instant.now().toEpochMilli());
+            this.update();
+        }
+        return true;
     }
 
     private void update() {

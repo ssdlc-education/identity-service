@@ -36,11 +36,5 @@ public interface AccountCreate {
     AccountCreate setDescription(@Nonnull String description);
 
     @Nonnull
-    AccountCreate setBlockUntilTime(@Nonnull Instant blockUntil);
-
-    @Nonnull
-    AccountCreate setConsecutiveFails(@Nonnull int consecutiveFails);
-
-    @Nonnull
     String create() throws IdentityException;
 }

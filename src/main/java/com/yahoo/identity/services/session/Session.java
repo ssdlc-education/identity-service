@@ -1,6 +1,7 @@
 package com.yahoo.identity.services.session;
 
 import com.yahoo.identity.services.account.Account;
+import com.yahoo.identity.services.account.AccountCreate;
 
 import javax.annotation.Nonnull;
 
@@ -10,5 +11,5 @@ public interface Session {
     Account getAccount(@Nonnull String username);
 
     @Nonnull
-    SessionImpl sessionAccountCreate(@Nonnull Account account);
+    AccountCreate sessionAccountCreate();
 }

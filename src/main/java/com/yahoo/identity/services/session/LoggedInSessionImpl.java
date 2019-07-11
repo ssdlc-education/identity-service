@@ -1,5 +1,7 @@
 package com.yahoo.identity.services.session;
 
+import com.yahoo.identity.IdentityError;
+import com.yahoo.identity.IdentityException;
 import com.yahoo.identity.services.account.Account;
 import com.yahoo.identity.services.account.AccountService;
 import com.yahoo.identity.services.account.AccountUpdate;
@@ -15,7 +17,6 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
 import javax.annotation.Nonnull;
-import javax.ws.rs.NotAuthorizedException;
 
 public class LoggedInSessionImpl implements LoggedInSession {
 
@@ -37,6 +38,11 @@ public class LoggedInSessionImpl implements LoggedInSession {
         this.credential.validate();
     }
 
+    @Nonnull
+    public String getUsername() {
+        return this.username;
+    }
+
     @Override
     @Nonnull
     public Credential getCredential() {
@@ -54,7 +60,8 @@ public class LoggedInSessionImpl implements LoggedInSession {
     public Credential verifyPassword(@Nonnull String username, @Nonnull String password) {
         this.username = username;
         if (!getAccount().verify(password)) {
-            throw new NotAuthorizedException("Account is locked!");
+            throw new IdentityException(IdentityError.INVALID_CREDENTIAL,
+                                        "Account locked, or username and password do not match.");
         }
         initCredential();
         return this.credential;
@@ -68,17 +75,8 @@ public class LoggedInSessionImpl implements LoggedInSession {
 
     @Override
     @Nonnull
-    public LoggedInSessionImpl sessionAccountUpdate(@Nonnull Account account) {
-        final boolean mockEmailStatus = true;
-
-        AccountUpdate accountUpdate = this.accountService.newAccountUpdate(account.getUsername());
-        accountUpdate.setEmail(account.getEmail());
-        accountUpdate.setEmailStatus(mockEmailStatus);
-        accountUpdate.setPassword(account.getPassword());
-        accountUpdate.setDescription(account.getDescription());
-        accountUpdate.setUpdateTime(Instant.now());
-        accountUpdate.update();
-
-        return this;
+    public AccountUpdate sessionAccountUpdate() {
+        AccountUpdate accountUpdate = this.accountService.newAccountUpdate(this.username);
+        return accountUpdate;
     }
 }

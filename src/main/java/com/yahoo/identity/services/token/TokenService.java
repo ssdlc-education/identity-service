@@ -8,4 +8,7 @@ public interface TokenService {
 
     @Nonnull
     TokenCreate newTokenCreate();
+
+    @Nonnull
+    Token newTokenFromString(@Nonnull String tokenStr);
 }

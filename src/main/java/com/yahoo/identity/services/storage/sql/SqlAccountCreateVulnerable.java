@@ -1,5 +1,6 @@
 package com.yahoo.identity.services.storage.sql;
 
+import com.yahoo.identity.IdentityError;
 import com.yahoo.identity.IdentityException;
 import com.yahoo.identity.services.account.AccountCreate;
 import com.yahoo.identity.services.storage.AccountModel;
@@ -10,7 +11,6 @@ import org.apache.ibatis.session.SqlSessionFactory;
 import java.time.Instant;
 
 import javax.annotation.Nonnull;
-import javax.ws.rs.BadRequestException;
 
 
 public class SqlAccountCreateVulnerable implements AccountCreate {
@@ -88,20 +88,6 @@ public class SqlAccountCreateVulnerable implements AccountCreate {
 
     @Nonnull
     @Override
-    public AccountCreate setBlockUntilTime(@Nonnull Instant blockUntil) {
-        account.setBlockUntilTs(blockUntil.toEpochMilli());
-        return this;
-    }
-
-    @Nonnull
-    @Override
-    public AccountCreate setConsecutiveFails(@Nonnull int consecutiveFails) {
-        account.setConsecutiveFails(consecutiveFails);
-        return this;
-    }
-
-    @Nonnull
-    @Override
     public String create() throws IdentityException {
         try (SqlSession session = sqlSessionFactory.openSession()) {
             AccountMapper mapper = session.getMapper(AccountMapper.class);
@@ -109,7 +95,7 @@ public class SqlAccountCreateVulnerable implements AccountCreate {
                 mapper.insertAccount(account);
                 session.commit();
             } catch (Exception e) {
-                throw new BadRequestException("account already exists");
+                throw new IdentityException(IdentityError.INVALID_ARGUMENTS, "Account already exists.", e);
             }
         }
         return account.getUsername();

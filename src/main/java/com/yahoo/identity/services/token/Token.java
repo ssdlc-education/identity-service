@@ -12,6 +12,9 @@ public interface Token {
 
     void setSubject(@Nonnull String subject);
 
+    @Nonnull
+    TokenType getTokenType();
+
     void setTokenType(@Nonnull TokenType tokenType);
 
     void validate();

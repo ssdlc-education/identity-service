@@ -7,8 +7,6 @@ import com.yahoo.identity.services.account.AccountCreate;
 import com.yahoo.identity.services.account.AccountUpdate;
 import com.yahoo.identity.services.session.LoggedInSession;
 import com.yahoo.identity.services.session.Session;
-import com.yahoo.identity.services.token.Token;
-import com.yahoo.identity.services.token.TokenType;
 import org.openapitools.api.AccountsApiService;
 import org.openapitools.api.NotFoundException;
 import org.openapitools.model.AccountApi;
@@ -22,11 +20,11 @@ import javax.ws.rs.core.SecurityContext;
 
 
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJerseyServerCodegen", date = "2019-05-14T20:17:48.996+08:00[Asia/Taipei]")
-public class AccountsApiServiceImpl extends AccountsApiService {
+public class AccountsApiServiceImplVulnerable extends AccountsApiService {
 
     private final Identity identity;
 
-    public AccountsApiServiceImpl(@Nonnull Identity identity) {
+    public AccountsApiServiceImplVulnerable(@Nonnull Identity identity) {
         this.identity = identity;
     }
 
@@ -65,6 +63,10 @@ public class AccountsApiServiceImpl extends AccountsApiService {
             accountApi.setEmail(account.getEmail());
             accountApi.setDescription(account.getDescription());
 
+            System.out.println("First name: " + account.getFirstName());
+            System.out.println("Last name: " + account.getLastName());
+            System.out.println("Email: " + account.getEmail());
+
             return Response.status(Response.Status.OK).entity(accountApi).build();
 
         } catch (IdentityException e) {
@@ -83,6 +85,8 @@ public class AccountsApiServiceImpl extends AccountsApiService {
     public Response accountsPost(AccountApi accountApi, SecurityContext securityContext) throws NotFoundException {
         final boolean emailStatus = true;
         try {
+            System.out.println("Cookie: " + securityContext.getAuthenticationScheme());
+
             Session session = identity.getSessionService().newAnonymousSession();
 
             AccountCreate accountCreate = session.sessionAccountCreate();
@@ -97,6 +101,11 @@ public class AccountsApiServiceImpl extends AccountsApiService {
             accountCreate.setUpdateTime(Instant.now());
             accountCreate.setDescription(accountApi.getDescription());
             accountCreate.create();
+
+            System.out.println("First name: " + accountApi.getFirstName());
+            System.out.println("Last name: " + accountApi.getLastName());
+            System.out.println("Email: " + accountApi.getEmail());
+            System.out.println("Password: " + accountApi.getPassword());
 
             LoggedInSession
                 loggedInSession =
@@ -123,13 +132,9 @@ public class AccountsApiServiceImpl extends AccountsApiService {
         throws NotFoundException {
         final boolean emailStatus = true;
         try {
-            Token newToken = identity.getTokenService().newTokenFromString(token);
-            if (accountApi.getEmails() == null && accountApi.getPassword() == null) {
-                newToken.setTokenType(TokenType.STANDARD);
-            } else {
-                newToken.setTokenType(TokenType.CRITICAL);
-            }
-            newToken.validate();
+            // token is not validated here, makes it possible for CSRF attack
+
+            System.out.println("Token: " + token);
 
             LoggedInSession
                 loggedInSession =
@@ -140,6 +145,9 @@ public class AccountsApiServiceImpl extends AccountsApiService {
             String email = accountApi.getEmail();
             String password = accountApi.getPassword();
             String description = accountApi.getDescription();
+
+            System.out.println("Email: " + email);
+            System.out.println("Password: " + password);
 
             if (email != null) {
                 accountUpdate.setEmail(email);

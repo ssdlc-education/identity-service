@@ -15,12 +15,10 @@ public interface Account {
     @Nonnull
     String getLastName();
 
-    @Nonnull
     String getEmail();
 
     boolean isEmailVerified();
 
-    @Nonnull
     String getPassword();
 
     @Nonnull
@@ -29,13 +27,7 @@ public interface Account {
     @Nonnull
     Instant getUpdateTime();
 
-    @Nonnull
     String getDescription();
-
-    @Nonnull
-    Instant getBlockUntilTime();
-
-    int getConsecutiveFails();
 
     boolean verify(@Nonnull String password);
 }
