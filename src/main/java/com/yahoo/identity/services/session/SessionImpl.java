@@ -6,8 +6,6 @@ import com.yahoo.identity.services.account.AccountService;
 import com.yahoo.identity.services.storage.Storage;
 import com.yahoo.identity.services.storage.sql.SqlAccountService;
 
-import java.time.Instant;
-
 import javax.annotation.Nonnull;
 
 public class SessionImpl implements Session {
@@ -25,23 +23,8 @@ public class SessionImpl implements Session {
     }
 
     @Nonnull
-    public SessionImpl sessionAccountCreate(@Nonnull Account account) {
-        final boolean mockEmailStatus = true;
-
+    public AccountCreate sessionAccountCreate() {
         AccountCreate accountCreate = this.accountService.newAccountCreate();
-        accountCreate.setUsername(account.getUsername());
-        accountCreate.setFirstName(account.getFirstName());
-        accountCreate.setLastName(account.getLastName());
-        accountCreate.setEmail(account.getEmail());
-        accountCreate.setEmailStatus(mockEmailStatus);
-
-        accountCreate.setPassword(account.getPassword());
-        accountCreate.setCreateTime(Instant.now());
-        accountCreate.setUpdateTime(Instant.now());
-        accountCreate.setDescription(account.getDescription());
-        accountCreate.create();
-
-        return this;
+        return accountCreate;
     }
-
 }

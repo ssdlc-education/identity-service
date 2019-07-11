@@ -75,29 +75,8 @@ public class LoggedInSessionImpl implements LoggedInSession {
 
     @Override
     @Nonnull
-    public LoggedInSessionImpl sessionAccountUpdate(@Nonnull Account account) {
-        final boolean mockEmailStatus = true;
-
-        String email = account.getEmail();
-        String password = account.getPassword();
-        String description = account.getDescription();
-        String username = account.getUsername();
-
+    public AccountUpdate sessionAccountUpdate(@Nonnull String username) {
         AccountUpdate accountUpdate = this.accountService.newAccountUpdate(username);
-        if (email != null) {
-            accountUpdate.setEmail(email);
-        }
-        if (password != null) {
-            accountUpdate.setPassword(password);
-        }
-        if (description != null) {
-            accountUpdate.setDescription(description);
-        }
-
-        accountUpdate.setEmailStatus(mockEmailStatus);
-        accountUpdate.setUpdateTime(Instant.now());
-        accountUpdate.update();
-
-        return this;
+        return accountUpdate;
     }
 }

@@ -88,7 +88,11 @@ public class AccountImpl implements Account {
     @Override
     public boolean verify(@Nonnull String password) {
         try {
-            Instant blockUntil = Instant.ofEpochMilli(this.accountModel.getBlockUntilTs());
+            Long blockUntilTs = this.accountModel.getBlockUntilTs();
+            if (blockUntilTs == null) {
+                return false;
+            }
+            Instant blockUntil = Instant.ofEpochMilli(blockUntilTs);
             int consecutiveFails = this.accountModel.getConsecutiveFails();
             long blockTimeLeft = Instant.now().until(blockUntil, SECONDS);
 
@@ -125,7 +129,9 @@ public class AccountImpl implements Account {
                 this.update();
             }
             return true;
+
         } catch (UnsupportedEncodingException e) {
+
             throw new IdentityException(IdentityError.INTERNAL_SERVER_ERROR, "Unsupported encoding standard.", e);
         }
     }

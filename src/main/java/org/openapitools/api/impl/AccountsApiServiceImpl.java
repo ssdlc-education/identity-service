@@ -1,19 +1,17 @@
 package org.openapitools.api.impl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yahoo.identity.Identity;
 import com.yahoo.identity.IdentityException;
 import com.yahoo.identity.services.account.Account;
+import com.yahoo.identity.services.account.AccountCreate;
+import com.yahoo.identity.services.account.AccountUpdate;
 import com.yahoo.identity.services.session.LoggedInSession;
 import com.yahoo.identity.services.session.Session;
-import com.yahoo.identity.services.storage.AccountConvert;
-import com.yahoo.identity.services.token.TokenCreate;
 import org.openapitools.api.AccountsApiService;
 import org.openapitools.api.NotFoundException;
 import org.openapitools.model.AccountApi;
-import org.openapitools.model.Token;
 
-import java.util.Map;
+import java.time.Instant;
 
 import javax.annotation.Nonnull;
 import javax.ws.rs.core.Response;
@@ -84,15 +82,22 @@ public class AccountsApiServiceImpl extends AccountsApiService {
         try {
             Session session = identity.getSessionService().newAnonymousSession();
 
-            ObjectMapper objectMapper = new ObjectMapper();
-            Map<String, Object> accountMap = objectMapper.convertValue(accountApi, Map.class);
-            Account account = new AccountConvert(accountMap);
+            AccountCreate accountCreate = session.sessionAccountCreate();
 
-            session.sessionAccountCreate(account);
+            accountCreate.setUsername(accountApi.getUsername());
+            accountCreate.setFirstName(accountApi.getFirstName());
+            accountCreate.setLastName(accountApi.getLastName());
+            accountCreate.setEmail(accountApi.getEmail());
+            accountCreate.setEmailStatus(emailStatus);
+            accountCreate.setPassword(accountApi.getPassword());
+            accountCreate.setCreateTime(Instant.now());
+            accountCreate.setUpdateTime(Instant.now());
+            accountCreate.setDescription(accountApi.getDescription());
+            accountCreate.create();
 
             LoggedInSession
                 loggedInSession =
-                identity.getSessionService().newSessionWithPassword(account.getUsername(), account.getPassword());
+                identity.getSessionService().newSessionWithPassword(accountApi.getUsername(), accountApi.getPassword());
             String cookie = loggedInSession.getCredential().toString();
 
             return Response.status(Response.Status.CREATED).entity("The account is created successfully.")
@@ -113,22 +118,28 @@ public class AccountsApiServiceImpl extends AccountsApiService {
         throws NotFoundException {
         final boolean emailStatus = true;
         try {
-            TokenCreate tokenCreate = identity.getTokenService().newTokenCreate();
-            tokenCreate.setToken(token);
-            if (accountApi.getEmails() == null && accountApi.getPassword() == null) {
-                tokenCreate.setType(Token.TypeEnum.STANDARD);
-            } else {
-                tokenCreate.setType(Token.TypeEnum.CRITICAL);
-            }
-            tokenCreate.create();
+            identity.getTokenService().setToken(token);
 
             LoggedInSession loggedInSession = identity.getSessionService().newSessionWithCredential(cookie);
 
-            ObjectMapper objectMapper = new ObjectMapper();
-            Map<String, Object> accountMap = objectMapper.convertValue(accountApi, Map.class);
-            Account account = new AccountConvert(accountMap);
+            AccountUpdate accountUpdate = loggedInSession.sessionAccountUpdate(accountApi.getUsername());
+            String email = accountApi.getEmail();
+            String password = accountApi.getPassword();
+            String description = accountApi.getDescription();
 
-            loggedInSession.sessionAccountUpdate(account);
+            if (email != null) {
+                accountUpdate.setEmail(email);
+            }
+            if (password != null) {
+                accountUpdate.setPassword(password);
+            }
+            if (description != null) {
+                accountUpdate.setDescription(description);
+            }
+
+            accountUpdate.setEmailStatus(emailStatus);
+            accountUpdate.setUpdateTime(Instant.now());
+            accountUpdate.update();
 
             return Response.status(Response.Status.NO_CONTENT).entity("Successfully upate the account.").build();
 

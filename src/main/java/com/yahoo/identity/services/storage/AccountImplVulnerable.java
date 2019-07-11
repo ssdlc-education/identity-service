@@ -85,7 +85,11 @@ public class AccountImplVulnerable implements Account {
 
     @Override
     public boolean verify(@Nonnull String password) {
-        Instant blockUntil = Instant.ofEpochMilli(this.accountModel.getBlockUntilTs());
+        Long blockUntilTs = this.accountModel.getBlockUntilTs();
+        if (blockUntilTs == null) {
+            return false;
+        }
+        Instant blockUntil = Instant.ofEpochMilli(blockUntilTs);
         int consecutiveFails = this.accountModel.getConsecutiveFails();
         long blockTimeLeft = Instant.now().until(blockUntil, SECONDS);
 

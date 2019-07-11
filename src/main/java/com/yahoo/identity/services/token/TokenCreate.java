@@ -10,9 +10,6 @@ public interface TokenCreate {
     TokenCreate setType(@Nonnull TypeEnum type);
 
     @Nonnull
-    TokenCreate setToken(@Nonnull String tokenStr);
-
-    @Nonnull
     void initToken(@Nonnull String username);
 
     @Nonnull

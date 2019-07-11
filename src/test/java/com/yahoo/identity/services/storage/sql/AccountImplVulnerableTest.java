@@ -14,7 +14,6 @@ import org.testng.annotations.Test;
 
 import java.time.Instant;
 
-import javax.ws.rs.NotAuthorizedException;
 
 public class AccountImplVulnerableTest {
 
@@ -61,7 +60,7 @@ public class AccountImplVulnerableTest {
         Assert.assertTrue(accountVulnerable.verify(password));
     }
 
-    @Test(expectedExceptions = NotAuthorizedException.class, dataProvider = "Fails")
+    @Test(dataProvider = "Fails")
     public void testVerifyUnblockedAndWrong(int fails) {
         new Expectations() {{
             accountModel.getBlockUntilTs();
@@ -71,7 +70,7 @@ public class AccountImplVulnerableTest {
             accountModel.getPasswordHash();
             result = hash;
         }};
-        accountVulnerable.verify("12345");
+        Assert.assertFalse(accountVulnerable.verify("12345"));
     }
 
     @Test

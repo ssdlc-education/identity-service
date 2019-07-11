@@ -16,8 +16,6 @@ import org.testng.annotations.Test;
 import java.time.Instant;
 import java.util.Base64;
 
-import javax.ws.rs.NotAuthorizedException;
-
 public class AccountImplTest {
 
     @Tested
@@ -77,7 +75,7 @@ public class AccountImplTest {
         Assert.assertTrue(account.verify(password));
     }
 
-    @Test(expectedExceptions = NotAuthorizedException.class, dataProvider = "Fails")
+    @Test(dataProvider = "Fails")
     public void testVerifyUnblockedAndWrong(int fails) {
         new Expectations() {{
             accountModel.getBlockUntilTs();
@@ -91,7 +89,7 @@ public class AccountImplTest {
             salt.getBytes();
             result = saltBytes;
         }};
-        account.verify("12345");
+        Assert.assertFalse(account.verify("12345"));
     }
 
     @Test
