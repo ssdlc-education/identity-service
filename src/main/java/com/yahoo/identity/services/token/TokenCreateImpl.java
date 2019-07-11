@@ -19,7 +19,7 @@ public class TokenCreateImpl implements TokenCreate {
 
     @Override
     @Nonnull
-    public TokenCreate setType(@Nonnull TokenType type) {
+    public TokenCreate setTokenType(@Nonnull TokenType type) {
         this.token.setTokenType(type);
         return this;
     }

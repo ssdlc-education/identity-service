@@ -28,7 +28,7 @@ public class CredentialServiceImplVulnerable implements CredentialService {
 
             Algorithm algorithm = Algorithm.HMAC256(this.keyService.getSecret("cookie.key"));
 
-            JWTVerifier verifier = JWT.require(algorithm).acceptExpiresAt(0).build();
+            JWTVerifier verifier = JWT.require(algorithm).build(); // No validation of the expiration time
 
             DecodedJWT jwt = verifier.verify(credStr);
 

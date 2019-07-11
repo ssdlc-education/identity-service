@@ -5,7 +5,7 @@ import javax.annotation.Nonnull;
 public interface TokenCreate {
 
     @Nonnull
-    TokenCreate setType(@Nonnull TokenType type);
+    TokenCreate setTokenType(@Nonnull TokenType type);
 
     @Nonnull
     void initToken(@Nonnull String username);

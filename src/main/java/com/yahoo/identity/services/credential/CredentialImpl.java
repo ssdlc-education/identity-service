@@ -84,6 +84,7 @@ public class CredentialImpl implements Credential {
                 .withClaim("sta", getStatus())
                 .withSubject(getSubject())
                 .sign(algorithm);
+
             return cookie;
 
         } catch (JWTCreationException e) {

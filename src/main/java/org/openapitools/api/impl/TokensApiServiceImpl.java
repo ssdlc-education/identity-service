@@ -33,10 +33,10 @@ public class TokensApiServiceImpl extends TokensApiService {
             TokenCreate tokenCreate = identity.getTokenService().newTokenCreate();
             switch (token.getType()) {
                 case CRITICAL:
-                    tokenCreate.setType(TokenType.CRITICAL);
+                    tokenCreate.setTokenType(TokenType.CRITICAL);
                     break;
                 case STANDARD:
-                    tokenCreate.setType(TokenType.STANDARD);
+                    tokenCreate.setTokenType(TokenType.STANDARD);
                     break;
                 default:
                     throw new IdentityException(IdentityError.INVALID_ARGUMENTS, "Unsupported token type.");
