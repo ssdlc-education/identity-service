@@ -1,8 +1,12 @@
-language: go
-
-go:
-  - "1.12.5"
-
+language: java
+jdk:
+  - openjdk8
+before_install:
+  - mkdir .secret
+  - bash .scripts/buildDB.sh
+  - bash .scripts/initKey.sh
 script:
-  - go run request_handler.go &
-  - sleep 30
+  - mvn clean package spotbugs:check jetty:run &
+  # sleep to wait for jetty service to be ready
+  - sleep 90
+  - bash .scripts/curl.sh

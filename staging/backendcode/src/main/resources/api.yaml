@@ -1,0 +1,443 @@
+openapi: 3.0.0
+info:
+  title: Identity Service
+  description: |
+    It's an service that allows you to create and manage account, and issue login credentials.
+    This file is the API spec written in OpenAPI. It's what the API may look like if it's really implemented as a RESTful
+    backend service. It's not actually used for now.
+  version: 0.1.0
+servers:
+  - url: http://api.example.com/v1
+    description: Production server
+  - url: http://staging-api.example.com/v1
+    description: Staging server
+paths:
+  /accounts:
+    post:
+      summary: Create an account.
+      description: |
+        Create an account, and issue cookie credential.
+        Initially, the account is in inactive state, user need to email verification to activate it.
+        The issued cookie will be returned with "Set-Cookie" header.
+      operationId: createAccount
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/Account'
+      responses:
+        '201':
+          description: The account is created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+        '400':
+          description: Invalid request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Unknown error occurs.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /accounts/{id}:
+    parameters:
+      - name: "id"
+        in: "path"
+        schema:
+          type: string
+          minLength: 1
+        required: true
+    get:
+      summary: Get user's account.
+      description: |
+        It gets the user's account information.
+        If "id" is the special string "@me", it means the cookie credential will be used to determine the account to get.
+        If cookie credential is given, belongs to the same account as the owner of the account to get, then the following information
+        will be returned:
+        - username
+        - firstName
+        - lastName
+        - emails
+        - description
+
+        Otherwise, only the following information will be returned:
+        - username
+        - description
+      operationId: getAccount
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+        '404':
+          description: Account not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Unknown error occurs.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /accounts/@me:
+    get:
+      summary: Get full profile info.
+      description: |
+        cookie credential will be used to determine the account to get.
+        If cookie credential is given, belongs to the same account as the owner of the account to get, then the following information
+        will be returned:
+        - username
+        - firstName
+        - lastName
+        - emails
+        - description
+      operationId: getOwnAccount
+      parameters:
+        - name: "cookie"
+          in: "header"
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+        '401':
+          description: |
+            Invalid cookie credential is used.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Account not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Unknown error occurs.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    put:
+      summary: Update an account.
+      description: |
+        Updates an account's information. The user's cookie credential must be carried.
+        The following fields can be updated:
+        - password
+        - description
+        - emails
+
+        If "emails" is carried, it will be merged with the existing emails. Only one email can be carried at a time.
+        If a duplicate one is found, 400 is returned.
+        An account can have at most two emails, and at least one, and at most one can be verified, at most one can be
+        unverified.
+        If an account already has one verified email, the new email will be appended with "verified" being false.
+        After the new email is verified, the new one will replace the old one, and there will be only one email.
+        If the account has only one unverified email, the new email will directly replace the old one.
+      operationId: updateAccount
+      parameters:
+        - name: "token"
+          in: "query"
+          schema:
+            type: string
+          required: true
+        - name: "cookie"
+          in: "header"
+          schema:
+            type: string
+          required: true
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/Account'
+      responses:
+        '204':
+          description: Successfully upate the account.
+        '400':
+          description: Invalid request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: |
+            Invalid cookie credential is used.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Account not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Unknown error occurs.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /sessions:
+    post:
+      summary: Create a new login session.
+      description: |
+        Given the username and password, login and obtain the cookie credential.
+        The issued cookie will be returned with "Set-Cookie" header.
+      operationId: createSession
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/Session'
+      responses:
+        '201':
+          description: The session is created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Session'
+        '400':
+          description: Invalid request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Unknown error occurs.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /verifications:
+    post:
+      summary: Send a new email verification.
+      description: |
+        Send a new email verification for the given email address.
+        If "username" is carried, it will be used to lookup the account.
+        It should happen for sending verification email when user forgets password.
+        Otherwise, try to use cookie to decide the identity. It should happen when the
+        user is verifying an unverified email. Therefore, the email must be one of the
+        unverified email of the account. Otherwise, 400 is returned.
+      operationId: createVerification
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/Verification'
+      responses:
+        '201':
+          description: The verification is created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Verification'
+        '400':
+          description: Invalid request or credential too old.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Invalid credential or token (including expired cases).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Unknown error occurs.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    put:
+      summary: Submitting email verification OTP code.
+      description: |
+        Submitting OTP code for email verification for the given email address.
+        If `username` is carried, it's used to decide the identity, and a new cookie
+        credential is returned via `Set-Cookie` header on success.
+        Otherwise, cookie credential must be present, and will be used to decide the
+        identity. In such case, no new cookie credential is issued, and the email address
+        must be one of the unverified email of the account.
+      operationId: updateVerification
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/Verification'
+      responses:
+        '204':
+          description: The verification is finished successfully or the email is already verified.
+        '400':
+          description: Invalid request or credential too old.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Invalid credential or token (including expired cases).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Unknown error occurs.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /tokens:
+    post:
+      summary: Create a new token.
+      description: |
+        Create a new token.
+        Cookie credential must be carried.
+        Depending on the type of the requested token, different criteria must be met:
+        - standard:
+          - Only need a valid and unexpired credential.
+        - critical:
+          - The credential must be valid and be issued in the last 5 minutes.
+      operationId: createToken
+      parameters:
+        - name: "cookie"
+          in: "header"
+          schema:
+            type: string
+          required: true
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/Token'
+      responses:
+        '201':
+          description: The session is created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Token'
+        '400':
+          description: Invalid request or credential too old.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Invalid credential.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Unknown error occurs.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+components:
+  schemas:
+    Account:
+      type: "object"
+      properties:
+        username:
+          type: "string"
+          pattern: '^[A-Za-z0-9_-]{1,30}$'
+        firstName:
+          type: "string"
+          pattern: '^[A-Za-z]{1,20}$'
+        lastName:
+          type: "string"
+          pattern: '^[A-Za-z]{1,20}$'
+        email:
+          type: "string"
+          pattern: '^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
+        password:
+          type: "string"
+          minLength: 6
+          maxLength: 30
+        description:
+          type: "string"
+          maxLength: 500
+        emails:
+          type: "array"
+          items:
+            $ref: '#/components/schemas/Email'
+    Email:
+      type: "object"
+      properties:
+        value:
+          type: "string"
+          maxLength: 256
+        verified:
+          type: "boolean"
+      required:
+        - "value"
+    Session:
+      type: "object"
+      properties:
+        username:
+          type: "string"
+        password:
+          type: "string"
+        tags:
+          type: array
+          items:
+            type: string
+            enum:
+              - emailUnverified
+    Token:
+      type: "object"
+      properties:
+        value:
+          type: "string"
+        type:
+          type: "string"
+          enum:
+            - STANDARD
+            - CRITICAL
+    Verification:
+      type: object
+      properties:
+        username:
+          type: string
+        type:
+          type: string
+          enum:
+            - email
+        value:
+          type: string
+        otp:
+          type: string
+    Error:
+      type: "object"
+      properties:
+        code:
+          type: "integer"
+          example: 500000
+        message:
+          type: "string"
+          example: "Unknown server error"
+
+  securitySchemes:
+    cookieAuth:  # arbitrary name for the security scheme
+      type: apiKey
+      in: cookie
+      name: V  # cookie name
