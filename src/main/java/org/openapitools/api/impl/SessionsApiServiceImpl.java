@@ -22,7 +22,7 @@ public class SessionsApiServiceImpl extends SessionsApiService {
     }
 
     @Override
-    public Response sessionsPost(Session session, SecurityContext securityContext) throws NotFoundException {
+    public Response createSession(Session session, SecurityContext securityContext) throws NotFoundException {
         try {
             LoggedInSession
                 loggedInSession =

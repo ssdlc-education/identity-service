@@ -24,7 +24,7 @@ public class TokensApiServiceImpl extends TokensApiService {
     }
 
     @Override
-    public Response tokensPost(Token token, SecurityContext securityContext) throws NotFoundException {
+    public Response createToken(Token token, SecurityContext securityContext) throws NotFoundException {
         try {
             LoggedInSession
                 loggedInSession =
