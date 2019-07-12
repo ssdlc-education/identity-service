@@ -1,14 +1,16 @@
 package com.yahoo.identity.services.token;
 
+import java.time.Instant;
+
 import javax.annotation.Nonnull;
 
 public interface TokenCreate {
 
     @Nonnull
-    TokenCreate setTokenType(@Nonnull TokenType type);
+    TokenCreate setUsername(@Nonnull String username);
 
     @Nonnull
-    void initToken(@Nonnull String username);
+    TokenCreate setExpireTime(@Nonnull Instant expiryTime);
 
     @Nonnull
     Token create();

@@ -28,21 +28,21 @@ public class TokenServiceImplVulnerable implements TokenService {
     @Override
     @Nonnull
     public Token newTokenFromString(@Nonnull String tokenStr) {
-        Token token = new TokenImpl(this.keyService);
         try {
             Algorithm algorithm = Algorithm.HMAC256(this.keyService.getSecret("token.key"));
             JWTVerifier verifier = JWT.require(algorithm).build();
 
             DecodedJWT jwt = verifier.verify(tokenStr);
 
-            token.setSubject(jwt.getSubject());
-            token.setIssueTime(jwt.getIssuedAt().toInstant());
-            token.setExpireTime(jwt.getExpiresAt().toInstant());
-
+            return new TokenImpl.Builder()
+                .setKeyService(keyService)
+                .setSubject(jwt.getSubject())
+                .setIssueTime(jwt.getIssuedAt().toInstant())
+                .setExpireTime(jwt.getExpiresAt().toInstant())
+                .build();
         } catch (JWTVerificationException e) {
             throw new IdentityException(IdentityError.INVALID_CREDENTIAL, "JWT verification does not succeed.", e);
         }
-        return token;
     }
 
 }

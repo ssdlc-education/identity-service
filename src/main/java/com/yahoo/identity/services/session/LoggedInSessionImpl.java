@@ -12,6 +12,8 @@ import com.yahoo.identity.services.credential.CredentialServiceImpl;
 import com.yahoo.identity.services.key.KeyService;
 import com.yahoo.identity.services.storage.Storage;
 import com.yahoo.identity.services.storage.sql.SqlAccountService;
+import com.yahoo.identity.services.token.Token;
+import com.yahoo.identity.services.token.TokenService;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -20,14 +22,19 @@ import javax.annotation.Nonnull;
 
 public class LoggedInSessionImpl implements LoggedInSession {
 
-    private CredentialService credentialService;
-    private AccountService accountService;
+    private final CredentialService credentialService;
+    private final AccountService accountService;
+    private final TokenService tokenService;
     private Credential credential;
     private String username;
 
-    public LoggedInSessionImpl(@Nonnull Storage storage, @Nonnull KeyService keyService) {
+    public LoggedInSessionImpl(
+        @Nonnull Storage storage,
+        @Nonnull KeyService keyService,
+        @Nonnull TokenService tokenService) {
         this.accountService = new SqlAccountService(storage);
         this.credentialService = new CredentialServiceImpl(keyService);
+        this.tokenService = tokenService;
         this.credential = new CredentialImpl(keyService);
     }
 
@@ -78,5 +85,14 @@ public class LoggedInSessionImpl implements LoggedInSession {
     public AccountUpdate sessionAccountUpdate() {
         AccountUpdate accountUpdate = this.accountService.newAccountUpdate(this.username);
         return accountUpdate;
+    }
+
+    @Nonnull
+    @Override
+    public Token createToken() {
+        return tokenService.newTokenCreate()
+            .setExpireTime(credential.getExpireTime())
+            .setUsername(getUsername())
+            .create();
     }
 }
