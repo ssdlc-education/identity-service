@@ -152,11 +152,14 @@ paths:
         After the new email is verified, the new one will replace the old one, and there will be only one email.
         If the account has only one unverified email, the new email will directly replace the old one.
       operationId: updateAccount
-      security:
-        - cookieAuth: []
       parameters:
         - name: "token"
           in: "query"
+          schema:
+            type: string
+          required: true
+        - name: "cookie"
+          in: "header"
           schema:
             type: string
           required: true
@@ -313,8 +316,12 @@ paths:
         - critical:
           - The credential must be valid and be issued in the last 5 minutes.
       operationId: createToken
-      security:
-        - cookieAuth: []
+      parameters:
+        - name: "cookie"
+          in: "header"
+          schema:
+            type: string
+          required: true
       requestBody:
         content:
           'application/json':
