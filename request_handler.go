@@ -97,14 +97,14 @@ func renderTemplate(w http.ResponseWriter, tmplName string, p interface{}) {
 	}
 }
 
-func readMyProfile(cookieValue string) (*profile, error) {
+func readMyProfile(cookie *http.Cookie) (*profile, error) {
 	url := backendURL + "/accounts/@me"
 	request, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		log.Println(err)
 		return nil, err
 	}
-	request.Header.Add("Cookie", cookieValue)
+	request.AddCookie(cookie)
 	resp, err := client.Do(request)
 	if err != nil {
 		log.Println("Cookie may expire ", err)
@@ -166,15 +166,14 @@ func editHandler(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie("V")
 	if err != nil || cookie == nil {
 		log.Println("May log out or cookie expire", err)
-		http.Redirect(w, r, "/loginError/", http.StatusFound)
+		renderTemplate(w, "login", &loginPage{ErrorMessage: "Please login again"})
 		return
 	}
-	cookieValue := strings.TrimPrefix(cookie.Value, "cookie=")
 	// Prefetch from backend API
-	p, err := readMyProfile(cookieValue)
+	p, err := readMyProfile(cookie)
 	if err != nil {
 		log.Println("error happened when getting profile", err)
-		http.Redirect(w, r, "/loginError/", http.StatusFound)
+		renderTemplate(w, "login", &loginPage{ErrorMessage: "Failed to get account information"})
 		return
 	}
 	client := &http.Client{}
@@ -183,7 +182,7 @@ func editHandler(w http.ResponseWriter, r *http.Request) {
 	tokenPayload, err := instanceToPayLoad(token)
 	if err != nil {
 		log.Println("error when decoding JSON", err)
-		http.Redirect(w, r, "/loginError/", http.StatusFound)
+		renderTemplate(w, "login", &loginPage{ErrorMessage: "Internal server error"})
 		return
 	}
 	// Get token request
@@ -191,27 +190,27 @@ func editHandler(w http.ResponseWriter, r *http.Request) {
 	request, err := http.NewRequest("POST", getTokenURL, tokenPayload)
 	if err != nil {
 		log.Println("error when building request ", err)
-		http.Redirect(w, r, "/loginError/", http.StatusFound)
+		renderTemplate(w, "login", &loginPage{ErrorMessage: "Internal server error"})
 		return
 	}
 	request.Header.Add("Content-Type", "application/json")
-	request.Header.Add("Cookie", cookieValue)
+	request.AddCookie(cookie)
 	response, err := client.Do(request)
 	if err != nil {
-		http.Redirect(w, r, "/loginError/", http.StatusFound)
+		renderTemplate(w, "login", &loginPage{ErrorMessage: "Internal server error"})
 		return
 	}
 	defer response.Body.Close()
 	bodyBytes, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		log.Println("error occurred when reading response", err)
-		http.Redirect(w, r, "/loginError/", http.StatusFound)
+		renderTemplate(w, "login", &loginPage{ErrorMessage: "Internal server error"})
 		return
 	}
 	err = json.Unmarshal(bodyBytes, &token)
 	if err != nil {
 		log.Println("Decode response error", err)
-		http.Redirect(w, r, "/loginError/", http.StatusFound)
+		renderTemplate(w, "login", &loginPage{ErrorMessage: "Internal server error"})
 		return
 	}
 	updateNormal := updateDescription{p.Username, p.Description, token.Value}
@@ -229,8 +228,7 @@ func saveEditedInfo(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/loginError/", http.StatusFound)
 		return
 	}
-	cookieValue := strings.TrimPrefix(cookie.Value, "cookie=")
-	originalPage, err := readMyProfile(cookieValue)
+	originalPage, err := readMyProfile(cookie)
 	if err != nil {
 		log.Println("cookie may expire and need to login again ", err)
 		http.Redirect(w, r, "/loginError/", http.StatusFound)
@@ -258,7 +256,7 @@ func saveEditedInfo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	request.Header.Add("Content-Type", "application/json")
-	request.Header.Add("Cookie", cookieValue)
+	request.AddCookie(cookie)
 	_, err = client.Do(request)
 	if err != nil {
 		log.Println("empty response:", err)
@@ -279,9 +277,8 @@ func passwordHandler(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/loginError/", http.StatusFound)
 		return
 	}
-	cookieValue := strings.TrimPrefix(cookie.Value, "cookie=")
 	// Prefetch info to render pages from backend API
-	p, err := readMyProfile(cookieValue)
+	p, err := readMyProfile(cookie)
 	if err != nil {
 		log.Println("cookie may expire login again", err)
 		// When refactoring the code, a more specific page may needed
@@ -308,7 +305,7 @@ func passwordHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	request.Header.Add("Content-Type", "application/json")
-	request.Header.Add("Cookie", cookieValue)
+	request.AddCookie(cookie)
 	response, err := client.Do(request)
 	if err != nil {
 		log.Println(err)
@@ -347,8 +344,7 @@ func passwordSaveHandler(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/login", http.StatusFound)
 		return
 	}
-	cookieValue := strings.TrimPrefix(cookie.Value, "cookie=")
-	originalProfile, err := readMyProfile(cookieValue)
+	originalProfile, err := readMyProfile(cookie)
 	if err != nil {
 		log.Println("login expire, log in again", err)
 		http.Redirect(w, r, "/login", http.StatusFound)
@@ -379,7 +375,7 @@ func passwordSaveHandler(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/password/", http.StatusFound)
 		return
 	}
-	request.Header.Add("Cookie", cookieValue)
+	request.AddCookie(cookie)
 	request.Header.Add("Content-Type", "application/json")
 	response, err := client.Do(request)
 	if err != nil {
@@ -453,9 +449,8 @@ func editEmailHandler(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/loginError/", http.StatusFound)
 		return
 	}
-	cookieValue := strings.TrimPrefix(cookie.Value, "cookie=")
 	// Prefetch info to render pages from backend API
-	p, err := readMyProfile(cookieValue)
+	p, err := readMyProfile(cookie)
 	if err != nil {
 		log.Println("cookie may expire login again", err)
 		// When refactoring the code, a more specific page may needed
@@ -482,7 +477,7 @@ func editEmailHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	request.Header.Add("Content-Type", "application/json")
-	request.Header.Add("Cookie", cookieValue)
+	request.AddCookie(cookie)
 	response, err := client.Do(request)
 	if err != nil {
 		log.Println(err)
@@ -517,8 +512,7 @@ func emailSaveHandler(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/home/", http.StatusFound)
 		return
 	}
-	cookieValue := strings.TrimPrefix(cookie.Value, "cookie=")
-	originalProfile, err := readMyProfile(cookieValue)
+	originalProfile, err := readMyProfile(cookie)
 	if err != nil {
 		log.Println("login expire, log in again", err)
 		http.Redirect(w, r, "/home/", http.StatusFound)
@@ -544,7 +538,7 @@ func emailSaveHandler(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/editEmail/", http.StatusFound)
 		return
 	}
-	request.Header.Add("Cookie", cookieValue)
+	request.AddCookie(cookie)
 	request.Header.Add("Content-Type", "application/json")
 	response, err := client.Do(request)
 	if err != nil {
@@ -585,8 +579,7 @@ func myAccountHandler(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/loginError/", http.StatusFound)
 		return
 	}
-	cookieValue := strings.TrimPrefix(cookie.Value, "cookie=")
-	req.Header.Add("Cookie", cookieValue)
+	req.AddCookie(cookie)
 	resp, err := client.Do(req)
 	if err != nil {
 		log.Println(err)
@@ -615,7 +608,6 @@ func createHandler(w http.ResponseWriter, r *http.Request) {
 	pageInfo.Description = r.FormValue("description")
 	pageInfo.Password = r.FormValue("password")
 	pageInfo.Email = r.FormValue("email")
-	pageInfo.Verified = "true"
 
 	payload, err := instanceToPayLoad(pageInfo)
 	if err != nil {
@@ -624,11 +616,15 @@ func createHandler(w http.ResponseWriter, r *http.Request) {
 		renderTemplate(w, "register", &p)
 		return
 	}
-	// Encode data to Json
-	_, err = client.Post(backendURL+"/accounts/", "application/json", payload)
-	if err != nil {
+	resp, err := client.Post(backendURL+"/accounts", "application/json", payload)
+	if err != nil || resp.StatusCode != http.StatusCreated {
 		log.Println("error occur when creating account", err)
-		p := registerPage{ErrorMessage: "Internal server error"}
+		var p registerPage
+		if err == nil && resp.StatusCode == http.StatusBadRequest {
+			p = registerPage{ErrorMessage: "Invalid data"}
+		} else {
+			p = registerPage{ErrorMessage: "Internal server error"}
+		}
 		renderTemplate(w, "register", &p)
 		return
 	}
@@ -647,7 +643,7 @@ func createHandler(w http.ResponseWriter, r *http.Request) {
 	cookies := response.Cookies()
 	var credential *http.Cookie
 	if credential, err = getCookieByName(cookies, "V"); err != nil {
-		log.Println("Cannot find V cookie in the response", err)
+		log.Println("Cannot find V cookie in the response: ", err)
 		p := registerPage{ErrorMessage: "Internal server error"}
 		renderTemplate(w, "register", &p)
 		return
