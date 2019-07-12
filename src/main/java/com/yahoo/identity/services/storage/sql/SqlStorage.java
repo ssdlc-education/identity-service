@@ -10,6 +10,8 @@ import com.yahoo.identity.services.storage.AccountImpl;
 import com.yahoo.identity.services.storage.AccountModel;
 import com.yahoo.identity.services.storage.Storage;
 import com.yahoo.identity.services.system.SystemService;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
@@ -44,9 +46,12 @@ public class SqlStorage implements Storage {
         try (SqlSession session = sqlSessionFactory.openSession()) {
             AccountMapper mapper = session.getMapper(AccountMapper.class);
             accountModel = mapper.getAccount(username);
-            session.commit();
         } catch (Exception e) {
-            throw new IdentityException(IdentityError.ACCOUNT_NOT_FOUND, "Cannot retrieve user account.", e);
+            throw new IdentityException(IdentityError.INTERNAL_SERVER_ERROR, "Cannot retrieve user account.", e);
+        }
+        if (accountModel == null) {
+            throw new IdentityException(IdentityError.ACCOUNT_NOT_FOUND,
+                                        "Account \"" + StringEscapeUtils.escapeJava(username) + "\" not found");
         }
         this.accountImpl = new AccountImpl(sqlSessionFactory, accountModel);
         return accountImpl;
@@ -59,9 +64,12 @@ public class SqlStorage implements Storage {
         try (SqlSession session = sqlSessionFactory.openSession()) {
             AccountMapper mapper = session.getMapper(AccountMapper.class);
             accountModel = mapper.getPublicAccount(username);
-            session.commit();
         } catch (Exception e) {
-            throw new IdentityException(IdentityError.ACCOUNT_NOT_FOUND, "Cannot retrieve user account.", e);
+            throw new IdentityException(IdentityError.INTERNAL_SERVER_ERROR, "Cannot retrieve user account.", e);
+        }
+        if (accountModel == null) {
+            throw new IdentityException(IdentityError.ACCOUNT_NOT_FOUND,
+                                        "Account \"" + StringEscapeUtils.escapeJava(username) + "\" not found");
         }
         this.accountImpl = new AccountImpl(sqlSessionFactory, accountModel);
         return accountImpl;

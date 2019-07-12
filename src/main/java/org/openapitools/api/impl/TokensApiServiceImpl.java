@@ -25,38 +25,24 @@ public class TokensApiServiceImpl extends TokensApiService {
 
     @Override
     public Response createToken(Token token, SecurityContext securityContext) throws NotFoundException {
-        try {
-            LoggedInSession
-                loggedInSession =
-                identity.getSessionService().newSessionWithCredential(securityContext.getAuthenticationScheme());
+        LoggedInSession
+            loggedInSession =
+            identity.getSessionService().newSessionWithCredential(securityContext.getAuthenticationScheme());
 
-            TokenCreate tokenCreate = identity.getTokenService().newTokenCreate();
-            switch (token.getType()) {
-                case CRITICAL:
-                    tokenCreate.setTokenType(TokenType.CRITICAL);
-                    break;
-                case STANDARD:
-                    tokenCreate.setTokenType(TokenType.STANDARD);
-                    break;
-                default:
-                    throw new IdentityException(IdentityError.INVALID_ARGUMENTS, "Unsupported token type.");
-            }
-            tokenCreate.initToken(loggedInSession.getUsername());
-            token.setValue(tokenCreate.create().toString());
-
-            return Response.status(Response.Status.CREATED).entity(token).build();
-
-        } catch (IdentityException e) {
-            switch (e.getError()) {
-                case ACCOUNT_NOT_FOUND:
-                    return Response.status(Response.Status.NOT_FOUND).entity(e.toString()).build();
-                case INVALID_ARGUMENTS:
-                    return Response.status(Response.Status.BAD_REQUEST).entity(e.toString()).build();
-                case INVALID_CREDENTIAL:
-                    return Response.status(Response.Status.UNAUTHORIZED).entity(e.toString()).build();
-                default:
-                    return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.toString()).build();
-            }
+        TokenCreate tokenCreate = identity.getTokenService().newTokenCreate();
+        switch (token.getType()) {
+            case CRITICAL:
+                tokenCreate.setTokenType(TokenType.CRITICAL);
+                break;
+            case STANDARD:
+                tokenCreate.setTokenType(TokenType.STANDARD);
+                break;
+            default:
+                throw new IdentityException(IdentityError.INVALID_ARGUMENTS, "Unsupported token type.");
         }
+        tokenCreate.initToken(loggedInSession.getUsername());
+        token.setValue(tokenCreate.create().toString());
+
+        return Response.status(Response.Status.CREATED).entity(token).build();
     }
 }
