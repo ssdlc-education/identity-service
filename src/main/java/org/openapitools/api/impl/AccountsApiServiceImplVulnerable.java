@@ -2,14 +2,13 @@ package org.openapitools.api.impl;
 
 import com.yahoo.identity.Identity;
 import com.yahoo.identity.IdentityException;
-import com.yahoo.identity.services.account.Account;
 import com.yahoo.identity.services.account.AccountCreate;
 import com.yahoo.identity.services.account.AccountUpdate;
 import com.yahoo.identity.services.session.LoggedInSession;
 import com.yahoo.identity.services.session.Session;
 import org.openapitools.api.AccountsApiService;
 import org.openapitools.api.NotFoundException;
-import org.openapitools.model.AccountApi;
+import org.openapitools.model.Account;
 
 import java.time.Instant;
 
@@ -32,9 +31,9 @@ public class AccountsApiServiceImplVulnerable extends AccountsApiService {
     public Response getAccount(String username, SecurityContext securityContext) throws NotFoundException {
         try {
             Session session = identity.getSessionService().newAnonymousSession();
-            Account account = session.getAccount(username);
+            com.yahoo.identity.services.account.Account account = session.getAccount(username);
 
-            AccountApi accountApi = new AccountApi();
+            Account accountApi = new Account();
             accountApi.setUsername(username);
             accountApi.setDescription(account.getDescription());
 
@@ -54,9 +53,9 @@ public class AccountsApiServiceImplVulnerable extends AccountsApiService {
         final boolean emailStatus = true;
         try {
             LoggedInSession loggedInSession = identity.getSessionService().newSessionWithCredential(cookie);
-            Account account = loggedInSession.getAccount();
+            com.yahoo.identity.services.account.Account account = loggedInSession.getAccount();
 
-            AccountApi accountApi = new AccountApi();
+            Account accountApi = new Account();
             accountApi.setUsername(account.getUsername());
             accountApi.setFirstName(account.getFirstName());
             accountApi.setLastName(account.getLastName());
@@ -82,7 +81,7 @@ public class AccountsApiServiceImplVulnerable extends AccountsApiService {
     }
 
     @Override
-    public Response createAccount(AccountApi accountApi, SecurityContext securityContext) throws NotFoundException {
+    public Response createAccount(Account account, SecurityContext securityContext) throws NotFoundException {
         final boolean emailStatus = true;
         try {
             System.out.println("Cookie: " + securityContext.getAuthenticationScheme());
@@ -91,25 +90,25 @@ public class AccountsApiServiceImplVulnerable extends AccountsApiService {
 
             AccountCreate accountCreate = session.sessionAccountCreate();
 
-            accountCreate.setUsername(accountApi.getUsername());
-            accountCreate.setFirstName(accountApi.getFirstName());
-            accountCreate.setLastName(accountApi.getLastName());
-            accountCreate.setEmail(accountApi.getEmail());
+            accountCreate.setUsername(account.getUsername());
+            accountCreate.setFirstName(account.getFirstName());
+            accountCreate.setLastName(account.getLastName());
+            accountCreate.setEmail(account.getEmail());
             accountCreate.setEmailStatus(emailStatus);
-            accountCreate.setPassword(accountApi.getPassword());
+            accountCreate.setPassword(account.getPassword());
             accountCreate.setCreateTime(Instant.now());
             accountCreate.setUpdateTime(Instant.now());
-            accountCreate.setDescription(accountApi.getDescription());
+            accountCreate.setDescription(account.getDescription());
             accountCreate.create();
 
-            System.out.println("First name: " + accountApi.getFirstName());
-            System.out.println("Last name: " + accountApi.getLastName());
-            System.out.println("Email: " + accountApi.getEmail());
-            System.out.println("Password: " + accountApi.getPassword());
+            System.out.println("First name: " + account.getFirstName());
+            System.out.println("Last name: " + account.getLastName());
+            System.out.println("Email: " + account.getEmail());
+            System.out.println("Password: " + account.getPassword());
 
             LoggedInSession
                 loggedInSession =
-                identity.getSessionService().newSessionWithPassword(accountApi.getUsername(), accountApi.getPassword());
+                identity.getSessionService().newSessionWithPassword(account.getUsername(), account.getPassword());
 
             String cookieStr = loggedInSession.getCredential().toString();
             NewCookie cookie = new NewCookie("V", cookieStr);
@@ -128,7 +127,7 @@ public class AccountsApiServiceImplVulnerable extends AccountsApiService {
     }
 
     @Override
-    public Response updateAccount(String token, AccountApi accountApi, SecurityContext securityContext)
+    public Response updateAccount(String token, Account account, SecurityContext securityContext)
         throws NotFoundException {
         final boolean emailStatus = true;
         try {
@@ -142,9 +141,9 @@ public class AccountsApiServiceImplVulnerable extends AccountsApiService {
 
             AccountUpdate accountUpdate = loggedInSession.sessionAccountUpdate();
 
-            String email = accountApi.getEmail();
-            String password = accountApi.getPassword();
-            String description = accountApi.getDescription();
+            String email = account.getEmail();
+            String password = account.getPassword();
+            String description = account.getDescription();
 
             System.out.println("Email: " + email);
             System.out.println("Password: " + password);
