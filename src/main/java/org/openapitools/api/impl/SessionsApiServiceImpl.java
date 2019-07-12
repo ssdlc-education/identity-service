@@ -23,26 +23,14 @@ public class SessionsApiServiceImpl extends SessionsApiService {
 
     @Override
     public Response createSession(Session session, SecurityContext securityContext) throws NotFoundException {
-        try {
-            LoggedInSession
-                loggedInSession =
-                identity.getSessionService().newSessionWithPassword(session.getUsername(), session.getPassword());
+        LoggedInSession
+            loggedInSession =
+            identity.getSessionService().newSessionWithPassword(session.getUsername(), session.getPassword());
 
-            String cookieStr = loggedInSession.getCredential().toString();
-            NewCookie cookie = new NewCookie("V", cookieStr);
+        String cookieStr = loggedInSession.getCredential().toString();
+        NewCookie cookie = new NewCookie("V", cookieStr);
 
-            return Response.status(Response.Status.CREATED).entity("The session is created successfully").cookie(cookie)
-                .build();
-
-        } catch (IdentityException e) {
-            switch (e.getError()) {
-                case ACCOUNT_NOT_FOUND:
-                    return Response.status(Response.Status.NOT_FOUND).entity(e.toString()).build();
-                case INVALID_ARGUMENTS:
-                    return Response.status(Response.Status.BAD_REQUEST).entity(e.toString()).build();
-                default:
-                    return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.toString()).build();
-            }
-        }
+        return Response.status(Response.Status.CREATED).entity("The session is created successfully").cookie(cookie)
+            .build();
     }
 }
