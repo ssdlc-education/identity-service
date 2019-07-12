@@ -11,7 +11,6 @@ import com.yahoo.identity.services.token.Token;
 import com.yahoo.identity.services.token.TokenType;
 import org.openapitools.api.AccountsApiService;
 import org.openapitools.api.NotFoundException;
-import org.openapitools.model.AccountApi;
 
 import java.time.Instant;
 
@@ -31,12 +30,12 @@ public class AccountsApiServiceImpl extends AccountsApiService {
     }
 
     @Override
-    public Response getAccount(String username, SecurityContext securityContext) throws NotFoundException {
+    public Response getAccount(@Nonnull String username, @Nonnull SecurityContext securityContext) throws NotFoundException {
         try {
             Session session = identity.getSessionService().newAnonymousSession();
             Account account = session.getAccount(username);
 
-            AccountApi accountApi = new AccountApi();
+            org.openapitools.model.Account accountApi = new org.openapitools.model.Account();
             accountApi.setUsername(username);
             accountApi.setDescription(account.getDescription());
 
@@ -56,16 +55,16 @@ public class AccountsApiServiceImpl extends AccountsApiService {
         final boolean emailStatus = true;
         try {
             LoggedInSession loggedInSession = identity.getSessionService().newSessionWithCredential(cookie);
-            Account account = loggedInSession.getAccount();
+            com.yahoo.identity.services.account.Account account = loggedInSession.getAccount();
 
-            AccountApi accountApi = new AccountApi();
-            accountApi.setUsername(account.getUsername());
-            accountApi.setFirstName(account.getFirstName());
-            accountApi.setLastName(account.getLastName());
-            accountApi.setEmail(account.getEmail());
-            accountApi.setDescription(account.getDescription());
+            org.openapitools.model.Account accountModel = new org.openapitools.model.Account();
+            accountModel.setUsername(account.getUsername());
+            accountModel.setFirstName(account.getFirstName());
+            accountModel.setLastName(account.getLastName());
+            accountModel.setEmail(account.getEmail());
+            accountModel.setDescription(account.getDescription());
 
-            return Response.status(Response.Status.OK).entity(accountApi).build();
+            return Response.status(Response.Status.OK).entity(accountModel).build();
 
         } catch (IdentityException e) {
             switch (e.getError()) {
@@ -80,27 +79,27 @@ public class AccountsApiServiceImpl extends AccountsApiService {
     }
 
     @Override
-    public Response createAccount(AccountApi accountApi, SecurityContext securityContext) throws NotFoundException {
+    public Response createAccount(org.openapitools.model.Account account, SecurityContext securityContext) throws NotFoundException {
         final boolean emailStatus = true;
         try {
             Session session = identity.getSessionService().newAnonymousSession();
 
             AccountCreate accountCreate = session.sessionAccountCreate();
 
-            accountCreate.setUsername(accountApi.getUsername());
-            accountCreate.setFirstName(accountApi.getFirstName());
-            accountCreate.setLastName(accountApi.getLastName());
-            accountCreate.setEmail(accountApi.getEmail());
+            accountCreate.setUsername(account.getUsername());
+            accountCreate.setFirstName(account.getFirstName());
+            accountCreate.setLastName(account.getLastName());
+            accountCreate.setEmail(account.getEmail());
             accountCreate.setEmailStatus(emailStatus);
-            accountCreate.setPassword(accountApi.getPassword());
+            accountCreate.setPassword(account.getPassword());
             accountCreate.setCreateTime(Instant.now());
             accountCreate.setUpdateTime(Instant.now());
-            accountCreate.setDescription(accountApi.getDescription());
+            accountCreate.setDescription(account.getDescription());
             accountCreate.create();
 
             LoggedInSession
                 loggedInSession =
-                identity.getSessionService().newSessionWithPassword(accountApi.getUsername(), accountApi.getPassword());
+                identity.getSessionService().newSessionWithPassword(account.getUsername(), account.getPassword());
 
             String cookieStr = loggedInSession.getCredential().toString();
             NewCookie cookie = new NewCookie("V", cookieStr);
@@ -119,12 +118,12 @@ public class AccountsApiServiceImpl extends AccountsApiService {
     }
 
     @Override
-    public Response updateAccount(String token, AccountApi accountApi, SecurityContext securityContext)
+    public Response updateAccount(String token, org.openapitools.model.Account account, SecurityContext securityContext)
         throws NotFoundException {
         final boolean emailStatus = true;
         try {
             Token newToken = identity.getTokenService().newTokenFromString(token);
-            if (accountApi.getEmails() == null && accountApi.getPassword() == null) {
+            if (account.getEmails() == null && account.getPassword() == null) {
                 newToken.setTokenType(TokenType.STANDARD);
             } else {
                 newToken.setTokenType(TokenType.CRITICAL);
@@ -137,9 +136,9 @@ public class AccountsApiServiceImpl extends AccountsApiService {
 
             AccountUpdate accountUpdate = loggedInSession.sessionAccountUpdate();
 
-            String email = accountApi.getEmail();
-            String password = accountApi.getPassword();
-            String description = accountApi.getDescription();
+            String email = account.getEmail();
+            String password = account.getPassword();
+            String description = account.getDescription();
 
             if (email != null) {
                 accountUpdate.setEmail(email);
