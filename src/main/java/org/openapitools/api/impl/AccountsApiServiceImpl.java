@@ -1,7 +1,6 @@
 package org.openapitools.api.impl;
 
 import com.yahoo.identity.Identity;
-import com.yahoo.identity.IdentityException;
 import com.yahoo.identity.services.account.Account;
 import com.yahoo.identity.services.account.AccountCreate;
 import com.yahoo.identity.services.account.AccountUpdate;
@@ -11,7 +10,6 @@ import com.yahoo.identity.services.token.Token;
 import com.yahoo.identity.services.token.TokenType;
 import org.openapitools.api.AccountsApiService;
 import org.openapitools.api.NotFoundException;
-import org.openapitools.model.Error;
 
 import java.time.Instant;
 
@@ -63,18 +61,17 @@ public class AccountsApiServiceImpl extends AccountsApiService {
         final boolean emailStatus = true;
         Session session = identity.getSessionService().newAnonymousSession();
 
-        AccountCreate accountCreate = session.sessionAccountCreate();
-
-        accountCreate.setUsername(account.getUsername());
-        accountCreate.setFirstName(account.getFirstName());
-        accountCreate.setLastName(account.getLastName());
-        accountCreate.setEmail(account.getEmail());
-        accountCreate.setEmailStatus(emailStatus);
-        accountCreate.setPassword(account.getPassword());
-        accountCreate.setCreateTime(Instant.now());
-        accountCreate.setUpdateTime(Instant.now());
-        accountCreate.setDescription(account.getDescription());
-        accountCreate.create();
+        session.sessionAccountCreate()
+            .setUsername(account.getUsername())
+            .setFirstName(account.getFirstName())
+            .setLastName(account.getLastName())
+            .setEmail(account.getEmail())
+            .setEmailStatus(emailStatus)
+            .setPassword(account.getPassword())
+            .setCreateTime(Instant.now())
+            .setUpdateTime(Instant.now())
+            .setDescription(account.getDescription())
+            .create();
 
         LoggedInSession
             loggedInSession =
@@ -83,8 +80,10 @@ public class AccountsApiServiceImpl extends AccountsApiService {
         String cookieStr = loggedInSession.getCredential().toString();
         NewCookie cookie = new NewCookie("V", cookieStr);
 
-        return Response.status(Response.Status.CREATED).entity("The account is created successfully.")
-            .cookie(cookie).build();
+        return Response.status(Response.Status.CREATED)
+            .entity("The account is created successfully.")
+            .cookie(cookie)
+            .build();
     }
 
     @Override
@@ -92,11 +91,6 @@ public class AccountsApiServiceImpl extends AccountsApiService {
         throws NotFoundException {
         final boolean emailStatus = true;
         Token newToken = identity.getTokenService().newTokenFromString(token);
-        if (account.getEmails() == null && account.getPassword() == null) {
-            newToken.setTokenType(TokenType.STANDARD);
-        } else {
-            newToken.setTokenType(TokenType.CRITICAL);
-        }
         newToken.validate();
 
         LoggedInSession

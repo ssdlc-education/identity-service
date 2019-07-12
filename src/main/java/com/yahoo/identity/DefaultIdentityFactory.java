@@ -24,8 +24,8 @@ public class DefaultIdentityFactory implements IdentityFactory {
         KeyService keyService = new KeyServiceImpl();
 
         Storage sqlStorage = new SqlStorage(systemService, randomService);
-        SessionService sessionService = new SessionServiceImpl(sqlStorage, keyService);
         TokenService tokenService = new TokenServiceImpl(keyService);
+        SessionService sessionService = new SessionServiceImpl(sqlStorage, keyService, tokenService);
 
         return new Identity(sessionService, tokenService);
     }

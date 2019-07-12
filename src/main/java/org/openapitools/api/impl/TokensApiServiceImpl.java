@@ -1,11 +1,7 @@
 package org.openapitools.api.impl;
 
 import com.yahoo.identity.Identity;
-import com.yahoo.identity.IdentityError;
-import com.yahoo.identity.IdentityException;
 import com.yahoo.identity.services.session.LoggedInSession;
-import com.yahoo.identity.services.token.TokenCreate;
-import com.yahoo.identity.services.token.TokenType;
 import org.openapitools.api.NotFoundException;
 import org.openapitools.api.TokensApiService;
 import org.openapitools.model.Token;
@@ -24,25 +20,12 @@ public class TokensApiServiceImpl extends TokensApiService {
     }
 
     @Override
-    public Response createToken(Token token, SecurityContext securityContext) throws NotFoundException {
-        LoggedInSession
-            loggedInSession =
+    public Response createToken(Token tokenModel, SecurityContext securityContext) throws NotFoundException {
+        LoggedInSession loggedInSession =
             identity.getSessionService().newSessionWithCredential(securityContext.getAuthenticationScheme());
+        com.yahoo.identity.services.token.Token token = loggedInSession.createToken();
+        tokenModel.setValue(token.toString());
 
-        TokenCreate tokenCreate = identity.getTokenService().newTokenCreate();
-        switch (token.getType()) {
-            case CRITICAL:
-                tokenCreate.setTokenType(TokenType.CRITICAL);
-                break;
-            case STANDARD:
-                tokenCreate.setTokenType(TokenType.STANDARD);
-                break;
-            default:
-                throw new IdentityException(IdentityError.INVALID_ARGUMENTS, "Unsupported token type.");
-        }
-        tokenCreate.initToken(loggedInSession.getUsername());
-        token.setValue(tokenCreate.create().toString());
-
-        return Response.status(Response.Status.CREATED).entity(token).build();
+        return Response.status(Response.Status.CREATED).entity(tokenModel).build();
     }
 }
