@@ -2,11 +2,11 @@ package main
 
 import (
 	"encoding/json"
+	"github.com/gorilla/mux"
 	"html/template"
 	"io/ioutil"
 	"log"
 	"net/http"
-	"regexp"
 	"strings"
 )
 
@@ -102,8 +102,9 @@ func readFromPublic(username string) (*PublicInfo, error) {
 }
 
 //
-func accountsHandler(w http.ResponseWriter, r *http.Request, title string) {
-	p, err := readFromPublic(title)
+func accountsHandler(w http.ResponseWriter, r *http.Request) {
+	variables := mux.Vars(r)
+	p, err := readFromPublic(variables["id"])
 	if err != nil {
 		log.Println("account does not exist", err)
 		http.Redirect(w, r, "/loginError/", http.StatusFound)
@@ -116,7 +117,7 @@ func accountsHandler(w http.ResponseWriter, r *http.Request, title string) {
 }
 
 // Render the edit information page
-func editHandler(w http.ResponseWriter, r *http.Request, title string) {
+func editHandler(w http.ResponseWriter, r *http.Request) {
 	// Get cookie
 	cookie, err := r.Cookie("V")
 	if err != nil || cookie == nil {
@@ -180,7 +181,7 @@ func editHandler(w http.ResponseWriter, r *http.Request, title string) {
 }
 
 // The Function to save the edited information
-func saveEditedInfo(w http.ResponseWriter, r *http.Request, title string) {
+func saveEditedInfo(w http.ResponseWriter, r *http.Request) {
 	description := r.FormValue("description")
 	token := r.FormValue("CSRFToken")
 	// Get cookie from browser
@@ -531,40 +532,20 @@ func renderTemplatePassword(w http.ResponseWriter, tmpl string, p *UpdatePasswor
 	}
 }
 
-// Regular expression to avoid illegal request
-var validPath = regexp.MustCompile("^(/(edit|accounts|home)/([a-zA-Z0-9]+))|(/(login|home|create|privatePage|register|logout|save|loginError|password)/)$")
-
-//
-func makeHandler(fn func(http.ResponseWriter, *http.Request, string)) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		m := validPath.FindStringSubmatch(r.URL.Path)
-		if m == nil {
-			http.NotFound(w, r)
-			return
-		}
-		fn(w, r, m[3])
-	}
-}
-
-func makeHandlerNoParameter(fn func(http.ResponseWriter, *http.Request)) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		fn(w, r)
-	}
-}
-
-//
 func main() {
-	http.HandleFunc("/accounts/", makeHandler(accountsHandler))
-	http.HandleFunc("/edit/", makeHandler(editHandler))
-	http.HandleFunc("/save/", makeHandler(saveEditedInfo))
-	http.HandleFunc("/register/", makeHandlerNoParameter(registerHandler))
-	http.HandleFunc("/create/", makeHandlerNoParameter(createHandler))
-	http.HandleFunc("/login/", makeHandlerNoParameter(loginHandler))
-	http.HandleFunc("/home/", makeHandlerNoParameter(homeHandler))
-	http.HandleFunc("/privatePage/", makeHandlerNoParameter(privateHandler))
-	http.HandleFunc("/logout/", makeHandlerNoParameter(logoutHandler))
-	http.HandleFunc("/loginError/", makeHandlerNoParameter(errorPasswordHandler))
-	http.HandleFunc("/password/", makeHandlerNoParameter(passwordHandler))
-	http.HandleFunc("/passwordsave/", makeHandlerNoParameter(passwordSaveHandler))
-	log.Println(http.ListenAndServe(":5000", nil))
+	router := mux.NewRouter()
+	router.HandleFunc("/accounts/{id}", accountsHandler)
+	router.HandleFunc("/edit/", editHandler)
+	router.HandleFunc("/save/", saveEditedInfo)
+	router.HandleFunc("/register/", registerHandler)
+	router.HandleFunc("/create/", createHandler)
+	router.HandleFunc("/login/", loginHandler)
+	router.HandleFunc("/", homeHandler).
+		Methods("GET")
+	router.HandleFunc("/privatePage/", privateHandler)
+	router.HandleFunc("/logout/", logoutHandler)
+	router.HandleFunc("/loginError/", errorPasswordHandler)
+	router.HandleFunc("/password/", passwordHandler)
+	router.HandleFunc("/passwordsave/", passwordSaveHandler)
+	log.Println(http.ListenAndServe(":5000", router))
 }
