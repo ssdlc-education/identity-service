@@ -2,10 +2,11 @@ language: java
 jdk:
   - openjdk8
 before_install:
-  - mkdir .secret
-  - bash .scripts/buildDB.sh
-  - bash .scripts/initKey.sh
+  - mkdir staging/backendcode/.secret
+  - bash staging/backendcode/.scripts/buildDB.sh
+  - bash staging/backendcode/.scripts/initKey.sh
 script:
+  - cd staging/backendcode
   - mvn clean package spotbugs:check jetty:run &
   # sleep to wait for jetty service to be ready
   - sleep 90
