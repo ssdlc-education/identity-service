@@ -19,6 +19,7 @@ paths:
         Create an account, and issue cookie credential.
         Initially, the account is in inactive state, user need to email verification to activate it.
         The issued cookie will be returned with "Set-Cookie" header.
+      operationId: createAccount
       requestBody:
         content:
           'application/json':
@@ -67,6 +68,7 @@ paths:
         Otherwise, only the following information will be returned:
         - username
         - description
+      operationId: getAccount
       responses:
         '200':
           description: Success.
@@ -99,6 +101,7 @@ paths:
         - lastName
         - emails
         - description
+      operationId: getOwnAccount
       parameters:
         - name: "cookie"
           in: "header"
@@ -148,6 +151,7 @@ paths:
         If an account already has one verified email, the new email will be appended with "verified" being false.
         After the new email is verified, the new one will replace the old one, and there will be only one email.
         If the account has only one unverified email, the new email will directly replace the old one.
+      operationId: updateAccount
       security:
         - cookieAuth: []
       parameters:
@@ -195,6 +199,7 @@ paths:
       description: |
         Given the username and password, login and obtain the cookie credential.
         The issued cookie will be returned with "Set-Cookie" header.
+      operationId: createSession
       requestBody:
         content:
           'application/json':
@@ -229,6 +234,7 @@ paths:
         Otherwise, try to use cookie to decide the identity. It should happen when the
         user is verifying an unverified email. Therefore, the email must be one of the
         unverified email of the account. Otherwise, 400 is returned.
+      operationId: createVerification
       requestBody:
         content:
           'application/json':
@@ -268,6 +274,7 @@ paths:
         Otherwise, cookie credential must be present, and will be used to decide the
         identity. In such case, no new cookie credential is issued, and the email address
         must be one of the unverified email of the account.
+      operationId: updateVerification
       requestBody:
         content:
           'application/json':
@@ -305,6 +312,7 @@ paths:
           - Only need a valid and unexpired credential.
         - critical:
           - The credential must be valid and be issued in the last 5 minutes.
+      operationId: createToken
       security:
         - cookieAuth: []
       requestBody:

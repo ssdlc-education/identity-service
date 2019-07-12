@@ -29,7 +29,7 @@ public class AccountsApiServiceImplVulnerable extends AccountsApiService {
     }
 
     @Override
-    public Response accountsIdGet(String username, SecurityContext securityContext) throws NotFoundException {
+    public Response getAccount(String username, SecurityContext securityContext) throws NotFoundException {
         try {
             Session session = identity.getSessionService().newAnonymousSession();
             Account account = session.getAccount(username);
@@ -50,7 +50,7 @@ public class AccountsApiServiceImplVulnerable extends AccountsApiService {
     }
 
     @Override
-    public Response accountsmeGet(String cookie, SecurityContext securityContext) throws NotFoundException {
+    public Response getOwnAccount(String cookie, SecurityContext securityContext) throws NotFoundException {
         final boolean emailStatus = true;
         try {
             LoggedInSession loggedInSession = identity.getSessionService().newSessionWithCredential(cookie);
@@ -82,7 +82,7 @@ public class AccountsApiServiceImplVulnerable extends AccountsApiService {
     }
 
     @Override
-    public Response accountsPost(AccountApi accountApi, SecurityContext securityContext) throws NotFoundException {
+    public Response createAccount(AccountApi accountApi, SecurityContext securityContext) throws NotFoundException {
         final boolean emailStatus = true;
         try {
             System.out.println("Cookie: " + securityContext.getAuthenticationScheme());
@@ -128,7 +128,7 @@ public class AccountsApiServiceImplVulnerable extends AccountsApiService {
     }
 
     @Override
-    public Response accountsmePut(String token, AccountApi accountApi, SecurityContext securityContext)
+    public Response updateAccount(String token, AccountApi accountApi, SecurityContext securityContext)
         throws NotFoundException {
         final boolean emailStatus = true;
         try {
