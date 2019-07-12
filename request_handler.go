@@ -14,6 +14,12 @@ import (
 	"github.com/gorilla/mux"
 )
 
+type loginPage struct {
+	ErrorMessage string
+}
+type registerPage struct {
+	ErrorMessage string
+}
 type profile struct {
 	Username    string `json:"username"`
 	Firstname   string `json:"firstName"`
@@ -41,7 +47,7 @@ type publicInfo struct {
 	Description string `json:"description"`
 }
 
-type logInfo struct {
+type session struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 }
@@ -60,8 +66,10 @@ type TokenInfo struct {
 }
 
 const (
-	backendURI       = "/v1"
-	timeoutInSeconds = 10
+	backendURI        = "/v1"
+	timeoutInSeconds  = 10
+	ownAccountURLPath = "/accounts/@me"
+	loginURLPath      = "/login"
 )
 
 var (
@@ -81,9 +89,10 @@ func instanceToPayLoad(info interface{}) (*strings.Reader, error) {
 	return strings.NewReader(tokenBuffer), nil
 }
 
-func renderTemplate(w http.ResponseWriter, tmplName string, p *profile) {
+func renderTemplate(w http.ResponseWriter, tmplName string, p interface{}) {
 	err := templates.ExecuteTemplate(w, tmplName+".html", p)
 	if err != nil {
+		log.Printf("failed to execute template: %s", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
@@ -138,7 +147,7 @@ func readUserProfile(username string) (*publicInfo, error) {
 }
 
 //
-func accountsHandler(w http.ResponseWriter, r *http.Request) {
+func accountHandler(w http.ResponseWriter, r *http.Request) {
 	variables := mux.Vars(r)
 	p, err := readUserProfile(variables["id"])
 	if err != nil {
@@ -258,7 +267,7 @@ func saveEditedInfo(w http.ResponseWriter, r *http.Request) {
 	}
 	client.CloseIdleConnections()
 	// After edited it redirect to the private information page
-	http.Redirect(w, r, "/privatePage/", http.StatusFound)
+	http.Redirect(w, r, ownAccountURLPath, http.StatusFound)
 }
 
 func passwordHandler(w http.ResponseWriter, r *http.Request) {
@@ -384,7 +393,7 @@ func passwordSaveHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	client.CloseIdleConnections()
-	http.Redirect(w, r, "/privatePage/", http.StatusFound)
+	http.Redirect(w, r, ownAccountURLPath, http.StatusFound)
 	return
 }
 
@@ -394,24 +403,27 @@ func loginSubmitHandler(w http.ResponseWriter, r *http.Request) {
 	username := r.FormValue("username")
 	password := r.FormValue("password")
 	// Encode the log in data to the json format payload
-	user := logInfo{username, password}
+	user := session{username, password}
 	payload, err := instanceToPayLoad(user)
 	if err != nil {
 		log.Println("Json decode error", err)
-		http.Redirect(w, r, "/loginError/", http.StatusFound)
+		p := loginPage{ErrorMessage: "Internal server error"}
+		renderTemplate(w, "login", &p)
 		return
 	}
 	response, err := http.Post("http://localhost:8080/v1/sessions/", "application/json", payload)
-	if err != nil || response.StatusCode == 401 {
+	if err != nil || response.StatusCode != http.StatusCreated {
 		log.Println("login Failure", err)
-		http.Redirect(w, r, "/loginError/", http.StatusFound)
+		p := loginPage{ErrorMessage: "Account not found or incorrect password"}
+		renderTemplate(w, "login", &p)
 		return
 	}
 	// Get token from login response from backend
 	var credential *http.Cookie
 	if credential, err = getCookieByName(response.Cookies(), "V"); err != nil {
 		log.Println("failed to get cookie from response", err)
-		http.Redirect(w, r, "/loginError/", http.StatusFound)
+		p := loginPage{ErrorMessage: "Internal server error"}
+		renderTemplate(w, "login", &p)
 		return
 	}
 	// Set the cookies to the browser
@@ -420,7 +432,7 @@ func loginSubmitHandler(w http.ResponseWriter, r *http.Request) {
 		Path:     "/",
 		HttpOnly: true}
 	http.SetCookie(w, &Cookie)
-	http.Redirect(w, r, "/privatePage/", http.StatusFound)
+	http.Redirect(w, r, ownAccountURLPath, http.StatusFound)
 	return
 }
 
@@ -546,19 +558,19 @@ func emailSaveHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	client.CloseIdleConnections()
-	http.Redirect(w, r, "/privatePage/", http.StatusFound)
+	http.Redirect(w, r, ownAccountURLPath, http.StatusFound)
 	return
 
 }
 
 //
 func registerHandler(w http.ResponseWriter, r *http.Request) {
-	p := profile{}
+	p := registerPage{}
 	renderTemplate(w, "register", &p)
 }
 
 //
-func privateHandler(w http.ResponseWriter, r *http.Request) {
+func myAccountHandler(w http.ResponseWriter, r *http.Request) {
 	// Read cookie from browser
 	cookie, err := r.Cookie("V")
 	if err != nil {
@@ -608,23 +620,26 @@ func createHandler(w http.ResponseWriter, r *http.Request) {
 	payload, err := instanceToPayLoad(pageInfo)
 	if err != nil {
 		log.Println(err)
-		http.Redirect(w, r, "/login", http.StatusFound)
+		p := registerPage{ErrorMessage: "Internal server error"}
+		renderTemplate(w, "register", &p)
 		return
 	}
 	// Encode data to Json
 	_, err = client.Post(backendURL+"/accounts/", "application/json", payload)
 	if err != nil {
 		log.Println("error occur when creating account", err)
-		http.Redirect(w, r, "/create/", http.StatusFound)
+		p := registerPage{ErrorMessage: "Internal server error"}
+		renderTemplate(w, "register", &p)
 		return
 	}
 	// Send the request to create a new account
-	user := logInfo{pageInfo.Username, pageInfo.Password}
+	user := session{pageInfo.Username, pageInfo.Password}
 	payload, err = instanceToPayLoad(user)
 	response, err := client.Post(backendURL+"/sessions/", "application/json", payload)
 	if err != nil {
 		log.Println(err)
-		http.Redirect(w, r, "/create/", http.StatusFound)
+		p := registerPage{ErrorMessage: "Internal server error"}
+		renderTemplate(w, "register", &p)
 		return
 	}
 	// Log in with newly created account information
@@ -633,7 +648,8 @@ func createHandler(w http.ResponseWriter, r *http.Request) {
 	var credential *http.Cookie
 	if credential, err = getCookieByName(cookies, "V"); err != nil {
 		log.Println("Cannot find V cookie in the response", err)
-		http.Redirect(w, r, "/create/", http.StatusFound)
+		p := registerPage{ErrorMessage: "Internal server error"}
+		renderTemplate(w, "register", &p)
 		return
 	}
 
@@ -645,12 +661,12 @@ func createHandler(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, &Cookie)
 
 	// After log in, redirect to the personal private page
-	http.Redirect(w, r, "/privatePage/", http.StatusFound)
+	http.Redirect(w, r, ownAccountURLPath, http.StatusFound)
 }
 
 // Handle the login page
 func loginHandler(w http.ResponseWriter, r *http.Request) {
-	p := profile{}
+	p := loginPage{}
 	renderTemplate(w, "login", &p)
 }
 
@@ -709,20 +725,25 @@ func main() {
 
 	router := mux.NewRouter()
 
-	router.HandleFunc("/accounts/{id}", accountsHandler)
+	router.HandleFunc("/accounts/{id:[^@]+}", accountHandler).
+		Methods("GET")
 	router.HandleFunc("/edit", editHandler)
 	router.HandleFunc("/save/", saveEditedInfo)
-	router.HandleFunc("/register/", registerHandler)
-	router.HandleFunc("/create/", createHandler)
-	router.HandleFunc("/login", loginSubmitHandler).
+	router.HandleFunc("/register/", registerHandler).
+		Methods("GET")
+	router.HandleFunc("/create/", createHandler).
 		Methods("POST")
-	router.HandleFunc("/login", loginHandler).
+	router.HandleFunc(loginURLPath, loginSubmitHandler).
+		Methods("POST")
+	router.HandleFunc(loginURLPath, loginHandler).
 		Methods("GET")
 	router.HandleFunc("/", homeHandler).
 		Methods("GET")
-	router.HandleFunc("/privatePage/", privateHandler)
-	router.HandleFunc("/logout/", logoutHandler)
-	router.HandleFunc("/loginError/", errorPasswordHandler)
+	router.HandleFunc(ownAccountURLPath, myAccountHandler)
+	router.HandleFunc("/logout/", logoutHandler).
+		Methods("GET")
+	router.HandleFunc("/loginError/", errorPasswordHandler).
+		Methods("GET")
 	router.HandleFunc("/password/", passwordHandler)
 	router.HandleFunc("/passwordsave/", passwordSaveHandler)
 	router.HandleFunc("/editEmail/", editEmailHandler)
