@@ -99,19 +99,15 @@ public class AccountsApiServiceImpl extends AccountsApiService {
     @Override
     public Response updateAccount(String token, String cookieStr, org.openapitools.model.Account account, SecurityContext securityContext)
         throws NotFoundException {
-        final boolean emailStatus = true;
-        Token newToken = identity.getTokenService().newTokenFromString(token);
-        newToken.validate();
-
         HttpCookie cookie = cookieParser.parse(cookieStr)
             .getFirstByName(Cookies.NAME_CREDENTIAL)
             .orElseThrow(() -> new IdentityException(
                 IdentityError.INVALID_CREDENTIAL,
                 "Missing cookie or invalid cookie header"));
 
-        LoggedInSession
-            loggedInSession =
+        LoggedInSession loggedInSession =
             identity.getSessionService().newSessionWithCredential(cookie.getValue());
+        loggedInSession.validateTokenString(token);
 
         AccountUpdate accountUpdate = loggedInSession.sessionAccountUpdate();
 
@@ -128,9 +124,6 @@ public class AccountsApiServiceImpl extends AccountsApiService {
         if (description != null) {
             accountUpdate.setDescription(description);
         }
-
-        accountUpdate.setEmailStatus(emailStatus);
-        accountUpdate.setUpdateTime(Instant.now());
         accountUpdate.update();
 
         return Response.status(Response.Status.NO_CONTENT).entity("Successfully upate the account.").build();

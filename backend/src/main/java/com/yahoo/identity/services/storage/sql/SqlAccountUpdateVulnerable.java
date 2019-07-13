@@ -42,13 +42,6 @@ public class SqlAccountUpdateVulnerable implements AccountUpdate {
         return this;
     }
 
-    @Override
-    @Nonnull
-    public AccountUpdate setUpdateTime(@Nonnull Instant updateTime) {
-        account.setUpdateTs(updateTime.toEpochMilli());
-        return this;
-    }
-
     @Nonnull
     @Override
     public AccountUpdate setDescription(@Nonnull String title) {
@@ -59,6 +52,7 @@ public class SqlAccountUpdateVulnerable implements AccountUpdate {
     @Nonnull
     @Override
     public String update() throws IdentityException {
+        account.setUpdateTs(System.currentTimeMillis());
         try (SqlSession session = sqlSessionFactory.openSession()) {
             AccountMapper mapper = session.getMapper(AccountMapper.class);
             mapper.updateAccount(account);

@@ -14,6 +14,9 @@ yarn-error.log*
 # Unignore all dirs
 !*/
 
+# Unignore docker files
+!*/Dockerfile
+
 # Ignore OS X DS_Store
 .DS_Store
 

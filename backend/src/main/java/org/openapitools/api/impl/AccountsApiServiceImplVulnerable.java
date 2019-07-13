@@ -123,7 +123,6 @@ public class AccountsApiServiceImplVulnerable extends AccountsApiService {
         }
 
         accountUpdate.setEmailStatus(emailStatus);
-        accountUpdate.setUpdateTime(Instant.now());
         accountUpdate.update();
 
         return Response.status(Response.Status.NO_CONTENT).entity("Successfully upate the account.").build();
