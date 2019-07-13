@@ -3,22 +3,21 @@ matrix:
   include:
     - language: go
       go:
-        - “1.12.5”
-        script:
-          - echo “===> start frontend server...”
-          - cd frontend
-          - go run request_handler.go &
-          - cd ..
+        - 1.11.x
+      script:
+        - echo “===> start frontend server...”
+        - cd frontend
+        - go run request_handler.go &
+        - cd ..
     - language: java
       jdk:
         - openjdk8
-      before_install:
+      script:
         - cd backend
         - mkdir .secret
         - bash .scripts/buildDB.sh
         - bash .scripts/initKey.sh
         - cd ..
-      script:
         - echo “===> start backend server...”
         - cd backend
         - mvn clean package spotbugs:check jetty:run &
