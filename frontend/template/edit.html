@@ -14,8 +14,8 @@
     <label for = "description">description</label>
     <input class="form-control" type="text" placeholder= "{{.Description}}" name = "description" required>
     <input class = "form-control" type = "hidden" name = "CSRFToken" placeholder="token" value="{{.Token}}">
-    <div><input class = "btn btn-primary" type="submit" value="Save" style="margin-top: 20px; margin-left: 30px"></div>
-    <div><a class = "btn btn-primary" href = "/password/" role = "button" style="margin-top: 20px; margin-left: 30px">Change Password</a></div>
-    <div><a class = "btn btn-primary" href = "/editEmail/" role = "button" style="margin-top: 20px; margin-left:30px">Change Email</a></div>
+    <div><input class = "btn btn-primary" type="submit" name="save" value="Save" style="margin-top: 20px; margin-left: 30px"></div>
+    <div><a class = "btn btn-primary" href = "/password/" role = "button" style="margin-top: 20px; margin-left: 30px" name="editPassword">Change Password</a></div>
+    <div><a class = "btn btn-primary" href = "/editEmail/" role = "button" style="margin-top: 20px; margin-left:30px" name="editEmail">Change Email</a></div>
 </form>
 </body>

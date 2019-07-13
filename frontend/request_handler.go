@@ -66,15 +66,14 @@ type TokenInfo struct {
 }
 
 const (
-	backendURI        = "/v1"
 	timeoutInSeconds  = 10
 	ownAccountURLPath = "/accounts/@me"
 	loginURLPath      = "/login"
 )
 
 var (
-	backendAddr, backendURL string
-	client                  = &http.Client{
+	backendURL string
+	client     = &http.Client{
 		Timeout: time.Second * timeoutInSeconds,
 	}
 	templates = template.Must(template.ParseGlob("./template/*.html"))
@@ -146,7 +145,6 @@ func readUserProfile(username string) (*publicInfo, error) {
 	return &pageData, err
 }
 
-//
 func accountHandler(w http.ResponseWriter, r *http.Request) {
 	variables := mux.Vars(r)
 	p, err := readUserProfile(variables["id"])
@@ -393,7 +391,6 @@ func passwordSaveHandler(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-//
 func loginSubmitHandler(w http.ResponseWriter, r *http.Request) {
 	// Get user login in information
 	username := r.FormValue("username")
@@ -407,7 +404,7 @@ func loginSubmitHandler(w http.ResponseWriter, r *http.Request) {
 		renderTemplate(w, "login", &p)
 		return
 	}
-	response, err := http.Post("http://localhost:8080/v1/sessions/", "application/json", payload)
+	response, err := http.Post(backendURL+"/sessions/", "application/json", payload)
 	if err != nil || response.StatusCode != http.StatusCreated {
 		log.Println("login Failure", err)
 		p := loginPage{ErrorMessage: "Account not found or incorrect password"}
@@ -509,13 +506,13 @@ func emailSaveHandler(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie("V")
 	if err != nil {
 		log.Println("login expire, log in again", err)
-		http.Redirect(w, r, "/home/", http.StatusFound)
+		http.Redirect(w, r, "/", http.StatusFound)
 		return
 	}
 	originalProfile, err := readMyProfile(cookie)
 	if err != nil {
 		log.Println("login expire, log in again", err)
-		http.Redirect(w, r, "/home/", http.StatusFound)
+		http.Redirect(w, r, "/", http.StatusFound)
 		return
 	}
 	updateEmail := updateEmail{
@@ -557,13 +554,11 @@ func emailSaveHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
-//
 func registerHandler(w http.ResponseWriter, r *http.Request) {
 	p := registerPage{}
 	renderTemplate(w, "register", &p)
 }
 
-//
 func myAccountHandler(w http.ResponseWriter, r *http.Request) {
 	// Read cookie from browser
 	cookie, err := r.Cookie("V")
@@ -593,13 +588,12 @@ func myAccountHandler(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal(bodyBytes, &pageInfo)
 	if err != nil {
 		log.Println(err)
-		http.Redirect(w, r, "/home/", http.StatusFound)
+		http.Redirect(w, r, "/", http.StatusFound)
 		return
 	}
 	renderTemplate(w, "profile", &pageInfo)
 }
 
-//
 func createHandler(w http.ResponseWriter, r *http.Request) {
 	var pageInfo profile
 	pageInfo.Username = r.FormValue("username")
@@ -697,7 +691,6 @@ func renderTemplatePassword(w http.ResponseWriter, tmpl string, p *updatePasswor
 	}
 }
 
-//
 // Handle error when having wrong password and let user to re-enter password
 func errorPasswordHandler(w http.ResponseWriter, r *http.Request) {
 	p := profile{}
@@ -713,17 +706,17 @@ func logoutHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusFound)
 }
 
-//
 func main() {
+	var backendAddr string
 	flag.StringVar(&backendAddr, "backend", "localhost:8080", "backend IP and port")
 	flag.Parse()
-	backendURL = "http://" + backendAddr + backendURI
+	backendURL = "http://" + backendAddr + "/v1"
 
 	router := mux.NewRouter()
 
 	router.HandleFunc("/accounts/{id:[^@]+}", accountHandler).
 		Methods("GET")
-	router.HandleFunc("/edit", editHandler)
+	router.HandleFunc("/edit/", editHandler)
 	router.HandleFunc("/save/", saveEditedInfo)
 	router.HandleFunc("/register/", registerHandler).
 		Methods("GET")
