@@ -1,9 +1,23 @@
 
 matrix:
   include:
+    - language: go
+      go:
+        - “1.12.5”
+        script:
+          - echo “===> start frontend server...”
+          - cd frontend
+          - go run request_handler.go &
+          - cd ..
     - language: java
       jdk:
         - openjdk8
+      before_install:
+        - cd backend
+        - mkdir .secret
+        - bash .scripts/buildDB.sh
+        - bash .scripts/initKey.sh
+        - cd ..
       script:
         - echo “===> start backend server...”
         - cd backend
@@ -12,26 +26,12 @@ matrix:
         - sleep 90
         - bash .scripts/curl.sh
         - cd ..
-    - language: go
-      go:
-        - “1.12.5”
-      script:
-        - echo “===> start frontend server...”
-        - cd frontend
-        - go run request_handler.go &
-        - cd ..
-    - before_install:
-        - cd backend
-        - mkdir .secret
-        - bash .scripts/buildDB.sh
-        - bash .scripts/initKey.sh
-        - cd ..
-    - after_success:
-      - echo “===> git push”
-      - git config --global user.email “travis@travis-ci.org”
-      - git config --global user.name “Travis CI”
-      - git config --global push.default current
-      - git stash
-      - git checkout production
-      - git stash pop
-      - git push https://${GITHUB_TOKEN}@github.com/verizon-media-2019-ais3/identity-backend.git HEAD:production (edited)
+      after_success:
+        - echo “===> git push”
+        - git config --global user.email “travis@travis-ci.org”
+        - git config --global user.name “Travis CI”
+        - git config --global push.default current
+        - git stash
+        - git checkout production
+        - git stash pop
+        - git push https://${GITHUB_TOKEN}@github.com/verizon-media-2019-ais3/identity-backend.git HEAD:production
