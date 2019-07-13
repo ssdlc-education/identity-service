@@ -15,6 +15,7 @@ import java.security.interfaces.RSAPublicKey;
 import javax.annotation.Nonnull;
 
 public class TokenServiceImpl implements TokenService {
+    private static final String KEY_NAME = "identity-token";
 
     private final KeyService keyService;
 
@@ -33,8 +34,8 @@ public class TokenServiceImpl implements TokenService {
     public Token newTokenFromString(@Nonnull String tokenStr) {
         try {
             Algorithm algorithm =
-                Algorithm.RSA256((RSAPublicKey) this.keyService.getPublicKey("token-public.pem", "RSA"),
-                                 (RSAPrivateKey) this.keyService.getPrivateKey("token-private.pem", "RSA"));
+                Algorithm.RSA256((RSAPublicKey) this.keyService.getPublicKey(KEY_NAME, "RSA"),
+                                 (RSAPrivateKey) this.keyService.getPrivateKey(KEY_NAME, "RSA"));
             JWTVerifier verifier = JWT.require(algorithm).build();
 
             DecodedJWT jwt = verifier.verify(tokenStr);

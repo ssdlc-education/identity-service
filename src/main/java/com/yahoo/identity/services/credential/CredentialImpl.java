@@ -15,6 +15,7 @@ import java.util.Date;
 import javax.annotation.Nonnull;
 
 public class CredentialImpl implements Credential {
+    private static final String KEY_NAME = "identity-cookie";
 
     private final KeyService keyService;
     private Instant issueTime;
@@ -75,8 +76,8 @@ public class CredentialImpl implements Credential {
     public String toString() {
         try {
             Algorithm algorithm =
-                Algorithm.RSA256((RSAPublicKey) this.keyService.getPublicKey("cookie-public.pem", "RSA"),
-                                 (RSAPrivateKey) this.keyService.getPrivateKey("cookie-private.pem", "RSA"));
+                Algorithm.RSA256((RSAPublicKey) this.keyService.getPublicKey(KEY_NAME, "RSA"),
+                                 (RSAPrivateKey) this.keyService.getPrivateKey(KEY_NAME, "RSA"));
 
             String cookie = JWT.create()
                 .withExpiresAt(Date.from(getExpireTime()))

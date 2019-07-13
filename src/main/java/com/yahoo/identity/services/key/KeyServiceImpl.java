@@ -12,8 +12,6 @@ import javax.ws.rs.InternalServerErrorException;
 
 public class KeyServiceImpl implements KeyService {
 
-    private final KeyServiceUtils keyServiceUtils = new KeyServiceUtils();
-
     private static String readFileAsString(String fileName) throws Exception {
         return Base64.getEncoder().encodeToString((Files.readAllBytes(Paths.get(fileName))));
     }
@@ -32,9 +30,9 @@ public class KeyServiceImpl implements KeyService {
 
     @Override
     @Nonnull
-    public PublicKey getPublicKey(@Nonnull String publicKeyName, @Nonnull String crpytoScheme) {
+    public PublicKey getPublicKey(@Nonnull String publicKeyName, @Nonnull String cryptoScheme) {
         try {
-            return KeyServiceUtils.readPublicKeyFromFile(".secret/" + publicKeyName, crpytoScheme);
+            return KeyServiceUtils.readPublicKeyFromVault(publicKeyName, cryptoScheme);
         } catch (Exception e) {
             throw new InternalServerErrorException("Unknown error occurs when reading file: " + e.toString());
         }
@@ -42,9 +40,9 @@ public class KeyServiceImpl implements KeyService {
 
     @Override
     @Nonnull
-    public PrivateKey getPrivateKey(@Nonnull String privateKeyName, @Nonnull String crpytoScheme) {
+    public PrivateKey getPrivateKey(@Nonnull String privateKeyName, @Nonnull String cryptoScheme) {
         try {
-            return KeyServiceUtils.readPrivateKeyFromFile(".secret/" + privateKeyName, crpytoScheme);
+            return KeyServiceUtils.readPrivateKeyFromVault(privateKeyName, cryptoScheme);
         } catch (Exception e) {
             throw new InternalServerErrorException("Unknown error occurs when reading file: " + e.toString());
         }

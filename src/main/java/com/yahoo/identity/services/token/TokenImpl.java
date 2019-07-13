@@ -11,12 +11,12 @@ import org.apache.commons.lang3.Validate;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
 import javax.annotation.Nonnull;
 
 public class TokenImpl implements Token {
+    private static final String KEY_NAME = "identity-token";
 
     public static class Builder {
         private Instant issueTime;
@@ -75,8 +75,8 @@ public class TokenImpl implements Token {
     public String toString() {
         try {
             Algorithm algorithm =
-                Algorithm.RSA256((RSAPublicKey) this.keyService.getPublicKey("token-public.pem", "RSA"),
-                                 (RSAPrivateKey) this.keyService.getPrivateKey("token-private.pem", "RSA"));
+                Algorithm.RSA256((RSAPublicKey) this.keyService.getPublicKey(KEY_NAME, "RSA"),
+                                 (RSAPrivateKey) this.keyService.getPrivateKey(KEY_NAME, "RSA"));
             return JWT.create()
                 .withExpiresAt(Date.from(this.expireTime))
                 .withIssuedAt(Date.from(this.issueTime))

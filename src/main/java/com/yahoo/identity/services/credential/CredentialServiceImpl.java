@@ -15,6 +15,7 @@ import java.security.interfaces.RSAPublicKey;
 import javax.annotation.Nonnull;
 
 public class CredentialServiceImpl implements CredentialService {
+    private static final String KEY_NAME = "identity-cookie";
 
     private final KeyService keyService;
     private final Credential credential;
@@ -29,8 +30,8 @@ public class CredentialServiceImpl implements CredentialService {
     public Credential fromString(@Nonnull String credStr) {
         try {
             Algorithm algorithm =
-                Algorithm.RSA256((RSAPublicKey) this.keyService.getPublicKey("cookie-public.pem", "RSA"),
-                                 (RSAPrivateKey) this.keyService.getPrivateKey("cookie-private.pem", "RSA"));
+                Algorithm.RSA256((RSAPublicKey) this.keyService.getPublicKey(KEY_NAME, "RSA"),
+                                 (RSAPrivateKey) this.keyService.getPrivateKey(KEY_NAME, "RSA"));
 
             JWTVerifier verifier = JWT.require(algorithm).acceptExpiresAt(0).build();
 

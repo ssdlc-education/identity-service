@@ -2,9 +2,13 @@ language: java
 jdk:
   - openjdk8
 before_install:
+  - "curl https://releases.hashicorp.com/vault/1.1.3/vault_1.1.3_linux_amd64.zip --output vault.zip"
+  - unzip vault.zip
+  - export PATH=$PATH:$(pwd)
   - mkdir .secret
   - bash .scripts/buildDB.sh
   - bash .scripts/initKey.sh
+  - bash .scripts/initVault.sh
 script:
   - mvn clean package spotbugs:check jetty:run &
   # sleep to wait for jetty service to be ready
