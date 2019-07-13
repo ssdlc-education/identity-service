@@ -10,7 +10,6 @@ public class AccountModel {
     private String email;
     private boolean emailStatus;
     private String passwordHash;
-    private String passwordSalt;
     private String description;
     private long createTs;
     private long updateTs;
@@ -72,14 +71,6 @@ public class AccountModel {
 
     public void setPasswordHash(@Nonnull String passwordHash) {
         this.passwordHash = passwordHash;
-    }
-
-    public String getPasswordSalt() {
-        return this.passwordSalt;
-    }
-
-    public void setPasswordSalt(@Nonnull String passwordSalt) {
-        this.passwordSalt = passwordSalt;
     }
 
     public long getCreateTs() {

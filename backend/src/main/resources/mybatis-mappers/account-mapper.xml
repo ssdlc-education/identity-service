@@ -4,15 +4,14 @@
 <mapper namespace="com.yahoo.identity.services.storage.sql.AccountMapper">
     <insert id="insertAccount" parameterType="AccountModel" keyProperty="account.username" useGeneratedKeys="false">
         INSERT INTO `account` (`username`, `first_name`, `last_name`, `email`, `email_status`, `password_hash`,
-        `password_salt`, `create_ts`, `update_ts`, `description`, `block_until_ts`, `consecutive_fails`)
+        `create_ts`, `update_ts`, `description`, `block_until_ts`, `consecutive_fails`)
         VALUES (
         #{account.username, jdbcType=VARCHAR},
         #{account.firstName, jdbcType=VARCHAR},
         #{account.lastName, jdbcType=VARCHAR},
         #{account.email, jdbcType=VARCHAR},
         #{account.emailStatus, jdbcType=TINYINT},
-        #{account.passwordHash, jdbcType=VARBINARY},
-        #{account.passwordSalt, jdbcType=VARBINARY},
+        #{account.passwordHash, jdbcType=VARCHAR},
         #{account.createTs, jdbcType=BIGINT},
         #{account.updateTs, jdbcType=BIGINT},
         #{account.description, jdbcType=VARCHAR},
@@ -28,7 +27,6 @@
         <result property="email" column="email"/>
         <result property="emailStatus" column="email_status"/>
         <result property="passwordHash" column="password_hash"/>
-        <result property="passwordSalt" column="password_salt"/>
         <result property="createTs" column="create_ts"/>
         <result property="updateTs" column="update_ts"/>
         <result property="description" column="description"/>
@@ -43,7 +41,7 @@
 
 
     <select id="getAccount" resultMap="accountResultMap">
-        SELECT username, first_name, last_name, email, email_status, password_hash, password_salt, create_ts,
+        SELECT username, first_name, last_name, email, email_status, password_hash, create_ts,
         update_ts, description, block_until_ts, consecutive_fails FROM account
         WHERE username = #{username}
     </select>
@@ -62,10 +60,7 @@
             `email_status` = #{account.emailStatus, jdbcType=TINYINT},
         </if>
         <if test="account.passwordHash != null">
-            `password_hash` = #{account.passwordHash, jdbcType=VARBINARY},
-        </if>
-        <if test="account.passwordSalt != null">
-            `password_salt` = #{account.passwordSalt, jdbcType=VARBINARY},
+            `password_hash` = #{account.passwordHash, jdbcType=VARCHAR},
         </if>
         <if test="account.updateTs != null">
             `update_ts` = #{account.updateTs, jdbcType=BIGINT},

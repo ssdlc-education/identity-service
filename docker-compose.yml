@@ -1,0 +1,39 @@
+version: '3'
+services:
+  identity-backend:
+    build:
+      context: ./backend/docker/backend
+    working_dir: /root/code
+    volumes:
+      # Mounts your source code
+      - ./backend:/root/code
+      # Mounts downloaded maven artifacts to make packaging faster
+      - $HOME/.m2:/root/.m2
+    ports:
+      - "127.0.0.1:8080:8080"
+    links:
+      - identity-db
+    networks:
+      - public-net
+      - private-net
+
+  identity-db:
+    build:
+      context: ./backend/docker/db
+    networks:
+      - private-net
+
+  identity-frontend:
+    build:
+      context: ./frontend/docker
+    working_dir: /root/code
+    volumes:
+      # Mounts your source code
+      - ./frontend:/root/code
+    ports:
+      - "127.0.0.1:5000:5000"
+    networks:
+      - public-net
+networks:
+  public-net:
+  private-net:

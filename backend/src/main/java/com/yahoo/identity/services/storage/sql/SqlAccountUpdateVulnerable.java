@@ -38,7 +38,6 @@ public class SqlAccountUpdateVulnerable implements AccountUpdate {
     @Override
     @Nonnull
     public AccountUpdate setPassword(@Nonnull String password) {
-        account.setPasswordSalt("");
         account.setPasswordHash(DigestUtils.md5Hex(password));
         return this;
     }

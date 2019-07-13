@@ -52,8 +52,6 @@ public class AccountImplTest {
             result = Instant.now().toEpochMilli();
             accountModel.getConsecutiveFails();
             result = 0;
-            accountModel.getPasswordSalt();
-            result = salt;
             accountModel.getPasswordHash();
             result = hash;
             salt.getBytes();
@@ -65,8 +63,6 @@ public class AccountImplTest {
         new Expectations() {{
             accountModel.getConsecutiveFails();
             result = 1;
-            accountModel.getPasswordSalt();
-            result = salt;
             accountModel.getPasswordHash();
             result = hash;
             salt.getBytes();
@@ -82,8 +78,6 @@ public class AccountImplTest {
             result = Instant.now().toEpochMilli();
             accountModel.getConsecutiveFails();
             result = fails;
-            accountModel.getPasswordSalt();
-            result = salt;
             accountModel.getPasswordHash();
             result = hash;
             salt.getBytes();

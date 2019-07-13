@@ -60,7 +60,6 @@ public class SqlAccountCreateVulnerable implements AccountCreate {
     @Override
     @Nonnull
     public AccountCreate setPassword(@Nonnull String password) {
-        account.setPasswordSalt("");
         account.setPasswordHash(DigestUtils.md5Hex(password));
         return this;
     }
