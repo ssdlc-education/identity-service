@@ -1,11 +1,7 @@
 # IntelliJ
-.idea/
+.idea/*
 
 # ----------- .gitignore for backend -----------
-# IntelliJ
-backend/.idea/*
-*workspace.xml
-
 # Compiled class file
 *.class
 
@@ -119,6 +115,3 @@ typings/
 
 # next.js build output
 .next
-
-# IntelliJ
-frontend/.idea/
