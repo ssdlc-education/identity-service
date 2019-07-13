@@ -15,15 +15,15 @@ matrix:
       script:
         - cd backend
         - mkdir .secret
-        - bash .scripts/buildDB.sh
-        - bash .scripts/initKey.sh
+        - ./script/buildDB.sh
+        - ./script/initKey.sh
         - cd ..
         - echo “===> start backend server...”
         - cd backend
         - mvn clean package spotbugs:check jetty:run &
         # sleep to wait for jetty service to be ready
         - sleep 90
-        - bash .scripts/curl.sh
+        - ./scripts/curl.sh
         - cd ..
       after_success:
         - echo “===> git push”
