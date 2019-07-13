@@ -12,16 +12,15 @@
 </nav>
 <div class="container">
     <ul class="list-group">
-        <li class="list-group-item">Username: {{.Username}}</li>
-        <li class="list-group-item">FirstName: {{.Firstname}}</li>
-        <li class="list-group-item">LastName: {{.Lastname}}</li>
-        <li class="list-group-item">Email: {{.Email}}</li>
+        <li class="list-group-item" name="username">Username: {{.Username}}</li>
+        <li class="list-group-item" name="firstname">FirstName: {{.Firstname}}</li>
+        <li class="list-group-item" name="lastname">LastName: {{.Lastname}}</li>
+        <li class="list-group-item" name="email">Email: {{.Email}}</li>
 
-        <li class="list-group-item">Description: {{.Description}}</li>
+        <li class="list-group-item" name="description">Description: {{.Description}}</li>
     </ul>
 
-    <a class = "btn btn-primary" href = "/edit" role = "button" style="margin-top: 20px">Edit</a>
-    <a class = "btn btn-primary" href = "/logout/" role = "button" style="margin-top: 20px">Logout current account</a>
+    <a class = "btn btn-primary" href = "/edit/" role = "button" style="margin-top: 20px" name="edit">Edit</a>
+    <a class = "btn btn-primary" href = "/logout/" role = "button" style="margin-top: 20px" name="logout">Logout current account</a>
 </div>
 </body>
-
