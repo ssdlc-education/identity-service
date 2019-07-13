@@ -1,32 +1,31 @@
 
 matrix:
   include:
-    - before_script:
-      language: java
+    - language: java
       jdk:
         - openjdk8
-    - before_script:
-      language: go
+      script:
+        - echo “===> start backend server...”
+        - cd backend
+        - mvn clean package spotbugs:check jetty:run &
+        # sleep to wait for jetty service to be ready
+        - sleep 90
+        - bash .scripts/curl.sh
+        - cd ..
+    - language: go
       go:
         - “1.12.5”
+      script:
+        - echo “===> start frontend server...”
+        - cd frontend
+        - go run request_handler.go &
+        - cd ..
     - before_install:
-      - cd backend
-      - mkdir .secret
-      - bash .scripts/buildDB.sh
-      - bash .scripts/initKey.sh
-      - cd ..
-    - script:
-      - cd frontend
-      - echo “===> start frontend server...”
-      - go run request_handler.go &
-      - cd ..
-      - echo “===> start backend server...”
-      - cd backend
-      - mvn clean package spotbugs:check jetty:run &
-      # sleep to wait for jetty service to be ready
-      - sleep 90
-      - bash .scripts/curl.sh
-      - cd ..
+        - cd backend
+        - mkdir .secret
+        - bash .scripts/buildDB.sh
+        - bash .scripts/initKey.sh
+        - cd ..
     - after_success:
       - echo “===> git push”
       - git config --global user.email “travis@travis-ci.org”
