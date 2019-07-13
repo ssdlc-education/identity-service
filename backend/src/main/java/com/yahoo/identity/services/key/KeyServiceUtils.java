@@ -1,15 +1,19 @@
 package com.yahoo.identity.services.key;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yahoo.identity.IdentityError;
 import com.yahoo.identity.IdentityException;
+import org.apache.commons.io.IOUtils;
 import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemReader;
 
-import java.io.File;
-import java.io.FileInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
@@ -20,18 +24,67 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
 public class KeyServiceUtils {
+    private static final String CMD_READ_PUBLIC_KEY = "vault read -format=json transit/keys/";
+    private static final String CMD_READ_PRIVATE_KEY = "vault read -format=json transit/export/signing-key/";
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
-    private static byte[] parsePEMFile(File pemFile) throws IOException {
-        if (!pemFile.isFile() || !pemFile.exists()) {
+    private static JsonNode getStdoutFromExec(String cmd) {
+        try {
+            Process process = Runtime.getRuntime().exec(cmd);
+            int rc = process.waitFor();
+            if (rc != 0) {
+                throw new IdentityException(IdentityError.INTERNAL_SERVER_ERROR,
+                                            "Exec returned a non-zero code.",
+                                            new Throwable(IOUtils.toString(process.getErrorStream(), "UTF-8")));
+            }
+            return objectMapper.readTree(process.getInputStream());
+
+        } catch (java.io.IOException e) {
             throw new IdentityException(IdentityError.INTERNAL_SERVER_ERROR,
-                                        String.format("The file '%s' doesn't exist.", pemFile.getAbsolutePath()));
+                                        "Exec failed due to I/O error.",
+                                        e);
+        } catch (java.lang.InterruptedException e) {
+            throw new IdentityException(IdentityError.INTERNAL_SERVER_ERROR,
+                                        "The thread was interrupted when waiting for child process to finish execution.",
+                                        e);
         }
-        InputStream inputStream = new FileInputStream(pemFile);
+    }
+
+    private static byte[] PKCS1ToPKCS8(byte[] PKCS1Bytes) {
+        try {
+            Process process = Runtime.getRuntime().exec("openssl pkcs8 -topk8 -nocrypt");
+
+            OutputStream outputStream = process.getOutputStream();
+            outputStream.write(PKCS1Bytes);
+            outputStream.flush();
+            outputStream.close();
+
+            int rc = process.waitFor();
+            if (rc != 0) {
+                throw new IdentityException(IdentityError.INTERNAL_SERVER_ERROR,
+                                            "Exec returned a non-zero code.",
+                                            new Throwable(IOUtils.toString(process.getErrorStream(), "UTF-8")));
+            }
+
+            return IOUtils.toByteArray(process.getInputStream());
+
+        } catch (java.io.IOException e) {
+            throw new IdentityException(IdentityError.INTERNAL_SERVER_ERROR,
+                                        "Exec failed due to I/O error.",
+                                        e);
+        } catch (java.lang.InterruptedException e) {
+            throw new IdentityException(IdentityError.INTERNAL_SERVER_ERROR,
+                                        "The thread was interrupted when waiting for child process to finish execution.",
+                                        e);
+        }
+    }
+
+    private static byte[] parsePEM(byte[] PEMBytes) throws IOException {
+        InputStream inputStream = new ByteArrayInputStream(PEMBytes);
         PemReader reader = new PemReader(new InputStreamReader(inputStream, "UTF-8"));
         PemObject pemObject = reader.readPemObject();
-        byte[] content = pemObject.getContent();
         reader.close();
-        return content;
+        return pemObject.getContent();
     }
 
     private static PublicKey getPublicKey(byte[] keyBytes, String algorithm) {
@@ -70,13 +123,24 @@ public class KeyServiceUtils {
         return privateKey;
     }
 
-    public static PublicKey readPublicKeyFromFile(String filepath, String algorithm) throws IOException {
-        byte[] bytes = KeyServiceUtils.parsePEMFile(new File(filepath));
+    public static PublicKey readPublicKeyFromVault(String keyName, String algorithm) throws IOException {
+        String keyStr = getStdoutFromExec(CMD_READ_PUBLIC_KEY + keyName)
+            .get("data")
+            .get("keys")
+            .get("1")
+            .get("public_key")
+            .asText();
+        byte[] bytes = KeyServiceUtils.parsePEM(keyStr.getBytes(StandardCharsets.UTF_8));
         return KeyServiceUtils.getPublicKey(bytes, algorithm);
     }
 
-    public static PrivateKey readPrivateKeyFromFile(String filepath, String algorithm) throws IOException {
-        byte[] bytes = KeyServiceUtils.parsePEMFile(new File(filepath));
+    public static PrivateKey readPrivateKeyFromVault(String keyName, String algorithm) throws IOException {
+        String keyStr = getStdoutFromExec(CMD_READ_PRIVATE_KEY + keyName)
+            .get("data")
+            .get("keys")
+            .get("1")
+            .asText();
+        byte[] bytes = KeyServiceUtils.parsePEM(PKCS1ToPKCS8(keyStr.getBytes(StandardCharsets.UTF_8)));
         return KeyServiceUtils.getPrivateKey(bytes, algorithm);
     }
 }
