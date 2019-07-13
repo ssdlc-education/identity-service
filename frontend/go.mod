@@ -1,4 +1,4 @@
-module github.com/verizon-media-2019-ais3/identity-frontend
+module github.com/verizon-media-2019-ais3/identity-backend/frontend
 
 go 1.12
 

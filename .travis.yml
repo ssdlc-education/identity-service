@@ -3,7 +3,7 @@ matrix:
   include:
     - language: go
       go:
-        - 1.11.x
+        - 1.12.x
       script:
         - echo “===> start frontend server...”
         - cd frontend
