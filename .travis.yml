@@ -1,12 +1,36 @@
-language: java
-jdk:
-  - openjdk8
-before_install:
-  - mkdir .secret
-  - bash .scripts/buildDB.sh
-  - bash .scripts/initKey.sh
-script:
-  - mvn clean package spotbugs:check jetty:run &
-  # sleep to wait for jetty service to be ready
-  - sleep 90
-  - bash .scripts/curl.sh
+
+matrix:
+  include:
+    - language: go
+      go:
+        - 1.12.x
+      script:
+        - echo “===> start frontend server...”
+        - cd frontend
+        - go run request_handler.go &
+        - cd ..
+    - language: java
+      jdk:
+        - openjdk8
+      script:
+        - cd backend
+        - mkdir .secret
+        - bash .scripts/buildDB.sh
+        - bash .scripts/initKey.sh
+        - cd ..
+        - echo “===> start backend server...”
+        - cd backend
+        - mvn clean package spotbugs:check jetty:run &
+        # sleep to wait for jetty service to be ready
+        - sleep 90
+        - bash .scripts/curl.sh
+        - cd ..
+      after_success:
+        - echo “===> git push”
+        - git config --global user.email “travis@travis-ci.org”
+        - git config --global user.name “Travis CI”
+        - git config --global push.default current
+        - git stash
+        - git checkout production
+        - git stash pop
+        - git push https://${GITHUB_TOKEN}@github.com/verizon-media-2019-ais3/identity-backend.git HEAD:production
