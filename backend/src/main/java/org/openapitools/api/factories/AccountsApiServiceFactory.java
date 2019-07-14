@@ -6,11 +6,7 @@ import org.openapitools.api.impl.AccountsApiServiceImpl;
 
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJerseyServerCodegen", date = "2019-05-14T20:17:48.996+08:00[Asia/Taipei]")
 public class AccountsApiServiceFactory {
-
-    private final static AccountsApiService service =
-        new AccountsApiServiceImpl(SingletonIdentityFactory.get(), new CookieParser());
-
     public static AccountsApiService getAccountsApi() {
-        return service;
+        return SingletonIdentityFactory.accountsApiService;
     }
 }

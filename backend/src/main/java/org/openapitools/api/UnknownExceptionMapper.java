@@ -1,6 +1,6 @@
 package org.openapitools.api;
 
-import com.yahoo.identity.IdentityError;
+import com.verizonmedia.identity.IdentityError;
 import org.openapitools.model.Error;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

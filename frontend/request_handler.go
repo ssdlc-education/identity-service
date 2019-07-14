@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"flag"
-	"html/template"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -146,7 +145,6 @@ var (
 	client     = &http.Client{
 		Timeout: time.Second * timeoutInSeconds,
 	}
-	templates = template.Must(template.ParseGlob("./template/*.html"))
 )
 
 func instanceToPayLoad(info interface{}) (*strings.Reader, error) {
@@ -156,14 +154,6 @@ func instanceToPayLoad(info interface{}) (*strings.Reader, error) {
 	}
 	tokenBuffer := string(tokenData)
 	return strings.NewReader(tokenBuffer), nil
-}
-
-func renderTemplate(w http.ResponseWriter, tmplName string, p interface{}) {
-	err := templates.ExecuteTemplate(w, tmplName, p)
-	if err != nil {
-		log.Printf("failed to execute template: %s", err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
 }
 
 func readMyProfile(cookie *http.Cookie) (*profile, error) {
@@ -368,11 +358,7 @@ func submitAccountLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Set the cookies to the browser
-	Cookie := http.Cookie{Name: "V",
-		Value:    credential.Value,
-		Path:     "/",
-		HttpOnly: true}
-	http.SetCookie(w, &Cookie)
+	http.SetCookie(w, convertCookieForResponse(credential))
 	http.Redirect(w, r, accountPrivateProfileURLPath, http.StatusFound)
 	return
 }
@@ -478,11 +464,7 @@ func submitAccountCreate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Set the cookie to the browser
-	Cookie := http.Cookie{Name: "V",
-		Value:    credential.Value,
-		Path:     "/",
-		HttpOnly: true}
-	http.SetCookie(w, &Cookie)
+	http.SetCookie(w, convertCookieForResponse(credential))
 
 	// After log in, redirect to the personal private page
 	http.Redirect(w, r, accountPrivateProfileURLPath, http.StatusFound)
@@ -536,6 +518,6 @@ func main() {
 		Methods("GET")
 	router.HandleFunc(accountLogoutURLPath, renderLogout).
 		Methods("GET")
-	log.Println("Listening on port 5000...")
+	log.Println("Listening on port http://localhost:5000 ...")
 	log.Println(http.ListenAndServe(":5000", router))
 }

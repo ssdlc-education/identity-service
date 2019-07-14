@@ -1,6 +1,6 @@
 package org.openapitools.api.impl;
 
-import com.yahoo.identity.Identity;
+import com.verizonmedia.identity.Identity;
 import org.apache.commons.text.StringEscapeUtils;
 import org.openapitools.api.CookieParser;
 import org.slf4j.Logger;

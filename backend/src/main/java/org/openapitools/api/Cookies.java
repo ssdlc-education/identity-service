@@ -1,7 +1,7 @@
 package org.openapitools.api;
 
-import com.yahoo.identity.IdentityError;
-import com.yahoo.identity.IdentityException;
+import com.verizonmedia.identity.IdentityError;
+import com.verizonmedia.identity.IdentityException;
 
 import java.net.HttpCookie;
 import java.util.List;
