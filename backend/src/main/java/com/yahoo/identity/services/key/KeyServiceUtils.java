@@ -22,10 +22,12 @@ import java.security.spec.EncodedKeySpec;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.Base64;
 
 public class KeyServiceUtils {
     private static final String CMD_READ_PUBLIC_KEY = "vault read -format=json transit/keys/";
     private static final String CMD_READ_PRIVATE_KEY = "vault read -format=json transit/export/signing-key/";
+    private static final String CMD_READ_HMAC_KEY = "vault read -format=json transit/export/hmac-key/";
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     private static JsonNode getStdoutFromExec(String cmd) {
@@ -79,9 +81,9 @@ public class KeyServiceUtils {
         }
     }
 
-    private static byte[] parsePEM(byte[] PEMBytes) throws IOException {
-        InputStream inputStream = new ByteArrayInputStream(PEMBytes);
-        PemReader reader = new PemReader(new InputStreamReader(inputStream, "UTF-8"));
+    private static byte[] parsePEM(byte[] pemBytes) throws IOException {
+        InputStream inputStream = new ByteArrayInputStream(pemBytes);
+        PemReader reader = new PemReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
         PemObject pemObject = reader.readPemObject();
         reader.close();
         return pemObject.getContent();
@@ -130,8 +132,8 @@ public class KeyServiceUtils {
             .get("1")
             .get("public_key")
             .asText();
-        byte[] bytes = KeyServiceUtils.parsePEM(keyStr.getBytes(StandardCharsets.UTF_8));
-        return KeyServiceUtils.getPublicKey(bytes, algorithm);
+        byte[] bytes = parsePEM(keyStr.getBytes(StandardCharsets.UTF_8));
+        return getPublicKey(bytes, algorithm);
     }
 
     public static PrivateKey readPrivateKeyFromVault(String keyName, String algorithm) throws IOException {
@@ -140,7 +142,16 @@ public class KeyServiceUtils {
             .get("keys")
             .get("1")
             .asText();
-        byte[] bytes = KeyServiceUtils.parsePEM(PKCS1ToPKCS8(keyStr.getBytes(StandardCharsets.UTF_8)));
-        return KeyServiceUtils.getPrivateKey(bytes, algorithm);
+        byte[] bytes = parsePEM(PKCS1ToPKCS8(keyStr.getBytes(StandardCharsets.UTF_8)));
+        return getPrivateKey(bytes, algorithm);
+    }
+
+    public static byte[] readHMACFromVault(String keyName) {
+        String encodedKeyStr = getStdoutFromExec(CMD_READ_HMAC_KEY + keyName)
+            .get("data")
+            .get("keys")
+            .get("1")
+            .asText();
+        return Base64.getDecoder().decode(encodedKeyStr);
     }
 }

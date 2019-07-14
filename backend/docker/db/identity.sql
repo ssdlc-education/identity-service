@@ -9,6 +9,6 @@ CREATE TABLE account(
     create_ts BIGINT NOT NULL,
     update_ts BIGINT NOT NULL,
     description VARCHAR(500) NOT NULL,
-    block_until_ts BIGINT DEFAULT NULL,
+    block_until_ts BIGINT NOT NULL DEFAULT 0,
     consecutive_fails INTEGER NOT NULL DEFAULT 0
 );

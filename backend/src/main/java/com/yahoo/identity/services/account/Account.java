@@ -28,6 +28,4 @@ public interface Account {
     Instant getUpdateTime();
 
     String getDescription();
-
-    boolean verify(@Nonnull String password);
 }

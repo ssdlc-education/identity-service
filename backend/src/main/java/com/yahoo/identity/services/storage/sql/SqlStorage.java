@@ -2,16 +2,10 @@ package com.yahoo.identity.services.storage.sql;
 
 import com.yahoo.identity.IdentityError;
 import com.yahoo.identity.IdentityException;
-import com.yahoo.identity.services.account.Account;
-import com.yahoo.identity.services.account.AccountCreate;
-import com.yahoo.identity.services.account.AccountUpdate;
-import com.yahoo.identity.services.random.RandomService;
-import com.yahoo.identity.services.storage.AccountImpl;
 import com.yahoo.identity.services.storage.AccountModel;
+import com.yahoo.identity.services.storage.AccountModelUpdater;
 import com.yahoo.identity.services.storage.Storage;
 import com.yahoo.identity.services.system.SystemService;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.text.StringEscapeUtils;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
@@ -24,65 +18,77 @@ public class SqlStorage implements Storage {
 
     private final SystemService systemService;
     private final SqlSessionFactory sqlSessionFactory;
-    private final RandomService randomService;
-    private AccountImpl accountImpl;
 
-    public SqlStorage(@Nonnull SystemService systemService, @Nonnull RandomService randomService) {
+    public SqlStorage(@Nonnull SystemService systemService) {
         this.systemService = systemService;
         this.sqlSessionFactory = createSessionFactory();
-        this.randomService = randomService;
     }
 
-    @Nonnull
-    @Override
-    public AccountCreate newAccountCreate() {
-        return new SqlAccountCreate(sqlSessionFactory, randomService, systemService);
-    }
-
-    @Nonnull
-    @Override
-    public Account getAccount(@Nonnull String username) {
-        AccountModel accountModel;
+    public void createAccount(@Nonnull AccountModel account) {
         try (SqlSession session = sqlSessionFactory.openSession()) {
             AccountMapper mapper = session.getMapper(AccountMapper.class);
-            accountModel = mapper.getAccount(username);
-        } catch (Exception e) {
-            throw new IdentityException(IdentityError.INTERNAL_SERVER_ERROR, "Cannot retrieve user account.", e);
+            try {
+                mapper.insertAccount(account);
+                session.commit();
+            } catch (Exception e) {
+                // TODO Should correct distinguish the reason of the failure
+                throw new IdentityException(IdentityError.INVALID_ARGUMENTS,
+                                            "Account already exists", e);
+            }
         }
-        if (accountModel == null) {
-            throw new IdentityException(IdentityError.ACCOUNT_NOT_FOUND,
-                                        "Account \"" + StringEscapeUtils.escapeJava(username) + "\" not found");
-        }
-        this.accountImpl = new AccountImpl(sqlSessionFactory, accountModel);
-        return accountImpl;
     }
 
     @Nonnull
     @Override
-    public Account getPublicAccount(@Nonnull String username) {
-        AccountModel accountModel;
+    public AccountModel getAccount(@Nonnull String username) {
         try (SqlSession session = sqlSessionFactory.openSession()) {
             AccountMapper mapper = session.getMapper(AccountMapper.class);
-            accountModel = mapper.getPublicAccount(username);
+            return mapper.getAccount(username);
         } catch (Exception e) {
-            throw new IdentityException(IdentityError.INTERNAL_SERVER_ERROR, "Cannot retrieve user account.", e);
+            // TODO Should correct distinguish the reason of the failure
+            throw new IdentityException(IdentityError.INTERNAL_SERVER_ERROR,
+                                        "Cannot retrieve user account.", e);
         }
-        if (accountModel == null) {
-            throw new IdentityException(IdentityError.ACCOUNT_NOT_FOUND,
-                                        "Account \"" + StringEscapeUtils.escapeJava(username) + "\" not found");
+    }
+
+    @Override
+    @Nonnull
+    public AccountModel getAndUpdateAccount(@Nonnull String username,
+                                            @Nonnull AccountModelUpdater updater) {
+        try (SqlSession session = sqlSessionFactory.openSession()) {
+            AccountMapper mapper = session.getMapper(AccountMapper.class);
+            AccountModel accountModel = updater.update(mapper.getAccountForUpdate(username));
+            mapper.updateAccount(accountModel);
+            return accountModel;
+        } catch (Exception e) {
+            // TODO Should correct distinguish the reason of the failure
+            throw new IdentityException(IdentityError.INTERNAL_SERVER_ERROR,
+                                        "Failed to update the account", e);
         }
-        this.accountImpl = new AccountImpl(sqlSessionFactory, accountModel);
-        return accountImpl;
     }
 
     @Nonnull
     @Override
-    public AccountUpdate newAccountUpdate(@Nonnull String username) {
-        return new SqlAccountUpdate(
-            sqlSessionFactory,
-            randomService,
-            systemService,
-            username);
+    public AccountModel getPublicAccount(@Nonnull String username) {
+        try (SqlSession session = sqlSessionFactory.openSession()) {
+            AccountMapper mapper = session.getMapper(AccountMapper.class);
+            return mapper.getPublicAccount(username);
+        } catch (Exception e) {
+            // TODO Should correct distinguish the reason of the failure
+            throw new IdentityException(IdentityError.INTERNAL_SERVER_ERROR,
+                                        "Cannot retrieve user account.", e);
+        }
+    }
+
+    @Override
+    public void updateAccount(@Nonnull AccountModel accountModel) {
+        try (SqlSession session = sqlSessionFactory.openSession()) {
+            AccountMapper mapper = session.getMapper(AccountMapper.class);
+            mapper.updateAccount(accountModel);
+            session.commit();
+        } catch (Exception e) {
+            throw new IdentityException(IdentityError.INTERNAL_SERVER_ERROR, "Failed to update account", e);
+        }
     }
 
     @Nonnull
@@ -94,9 +100,5 @@ public class SqlStorage implements Storage {
         } catch (Exception e) {
             throw new IdentityException(IdentityError.INTERNAL_SERVER_ERROR, "Fail to create session factory", e);
         }
-    }
-
-    public boolean verify(@Nonnull String password) {
-        return this.accountImpl.verify(password);
     }
 }

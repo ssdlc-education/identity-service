@@ -1,5 +1,8 @@
 package org.openapitools.api;
 
+import com.yahoo.identity.IdentityError;
+import com.yahoo.identity.IdentityException;
+
 import java.net.HttpCookie;
 import java.util.List;
 import java.util.Optional;
@@ -23,5 +26,13 @@ public class Cookies {
             }
         }
         return Optional.empty();
+    }
+
+    @Nonnull
+    public String getCredential() {
+        return getFirstByName("V").orElseThrow(() -> new IdentityException(
+            IdentityError.INVALID_CREDENTIAL,
+            "Missing cookie or invalid cookie header"))
+            .getValue();
     }
 }

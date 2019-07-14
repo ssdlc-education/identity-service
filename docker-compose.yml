@@ -10,7 +10,10 @@ services:
       # Mounts downloaded maven artifacts to make packaging faster
       - $HOME/.m2:/root/.m2
     ports:
+      # Backend server
       - "127.0.0.1:8080:8080"
+      # Hashicorp vault ui
+      - "127.0.0.1:8200:8200"
     links:
       - identity-db
     networks:

@@ -11,5 +11,5 @@ public interface Session {
     Account getAccount(@Nonnull String username);
 
     @Nonnull
-    AccountCreate sessionAccountCreate();
+    AccountCreate newAccountCreate();
 }

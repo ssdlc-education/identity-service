@@ -2,8 +2,6 @@ package com.yahoo.identity.services.account;
 
 import com.yahoo.identity.IdentityException;
 
-import java.time.Instant;
-
 import javax.annotation.Nonnull;
 
 public interface AccountCreate {

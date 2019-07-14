@@ -17,4 +17,6 @@ public interface AccountService {
 
     @Nonnull
     AccountUpdate newAccountUpdate(@Nonnull String id);
+
+    void verifyAccountPassword(@Nonnull String username, @Nonnull String password);
 }

@@ -8,7 +8,7 @@ import javax.annotation.Nonnull;
 public interface KeyService {
 
     @Nonnull
-    String getSecret(@Nonnull String name);
+    byte[] getHMACKey(@Nonnull String name);
 
     @Nonnull
     PublicKey getPublicKey(@Nonnull String publicKeyName, @Nonnull String crpytoScheme);

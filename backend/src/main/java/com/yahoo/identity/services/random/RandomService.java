@@ -5,5 +5,5 @@ import javax.annotation.Nonnull;
 public interface RandomService {
 
     @Nonnull
-    byte[] getRandomBytes(@Nonnull byte[] buffer);
+    byte[] getRandomBytes(int size);
 }

@@ -89,7 +89,7 @@ public class AccountModel {
         this.updateTs = updateTs;
     }
 
-    public Long getBlockUntilTs() {
+    public long getBlockUntilTs() {
         return this.blockUntilTs;
     }
 

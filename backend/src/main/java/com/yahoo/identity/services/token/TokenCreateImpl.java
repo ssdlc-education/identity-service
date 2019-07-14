@@ -1,9 +1,8 @@
 package com.yahoo.identity.services.token;
 
-import com.yahoo.identity.services.key.KeyService;
+import com.auth0.jwt.algorithms.Algorithm;
 
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 
 import javax.annotation.Nonnull;
 
@@ -11,9 +10,9 @@ public class TokenCreateImpl implements TokenCreate {
 
     private final TokenImpl.Builder tokenBuilder;
 
-    public TokenCreateImpl(@Nonnull KeyService keyService) {
+    public TokenCreateImpl(@Nonnull Algorithm algorithm) {
         this.tokenBuilder = new TokenImpl.Builder()
-            .setKeyService(keyService);
+            .setAlgorithm(algorithm);
     }
 
     @Override
