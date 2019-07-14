@@ -9,13 +9,11 @@ import com.yahoo.identity.IdentityException;
 import com.yahoo.identity.services.account.AccountCreate;
 import com.yahoo.identity.services.random.RandomService;
 import com.yahoo.identity.services.storage.AccountModel;
+import com.yahoo.identity.services.system.SystemService;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
-import java.time.Instant;
-import java.util.Base64;
 
 import javax.annotation.Nonnull;
 
@@ -24,12 +22,17 @@ public class SqlAccountCreate implements AccountCreate {
 
     private final RandomService randomService;
     private final SqlSessionFactory sqlSessionFactory;
+    private final SystemService systemService;
     private final AccountModel account = new AccountModel();
 
 
-    public SqlAccountCreate(@Nonnull SqlSessionFactory sqlSessionFactory, @Nonnull RandomService randomService) {
+    public SqlAccountCreate(
+        @Nonnull SqlSessionFactory sqlSessionFactory,
+        @Nonnull RandomService randomService,
+        @Nonnull SystemService systemService) {
         this.sqlSessionFactory = sqlSessionFactory;
         this.randomService = randomService;
+        this.systemService = systemService;
     }
 
     @Override
@@ -62,34 +65,12 @@ public class SqlAccountCreate implements AccountCreate {
 
     @Override
     @Nonnull
-    public AccountCreate setEmailStatus(@Nonnull boolean emailStatus) {
-        account.setEmailStatus(emailStatus);
-        return this;
-    }
-
-    @Override
-    @Nonnull
     public AccountCreate setPassword(@Nonnull String password) {
-
         byte[] saltBytes = new byte[64];
         this.randomService.getRandomBytes(saltBytes);
 
         Jargon2.Hasher hasher = jargon2Hasher();
         account.setPasswordHash(hasher.salt(saltBytes).password(password.getBytes(StandardCharsets.UTF_8)).encodedHash());
-        return this;
-    }
-
-    @Override
-    @Nonnull
-    public AccountCreate setCreateTime(@Nonnull Instant createTime) {
-        account.setCreateTs(createTime.toEpochMilli());
-        return this;
-    }
-
-    @Override
-    @Nonnull
-    public AccountCreate setUpdateTime(@Nonnull Instant updateTime) {
-        account.setUpdateTs(updateTime.toEpochMilli());
         return this;
     }
 
@@ -103,6 +84,9 @@ public class SqlAccountCreate implements AccountCreate {
     @Nonnull
     @Override
     public String create() throws IdentityException {
+        account.setCreateTs(systemService.currentTimeMillis());
+        account.setUpdateTs(systemService.currentTimeMillis());
+        account.setEmailVerified(false);
         try (SqlSession session = sqlSessionFactory.openSession()) {
             AccountMapper mapper = session.getMapper(AccountMapper.class);
             try {

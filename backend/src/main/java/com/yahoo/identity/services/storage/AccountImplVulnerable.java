@@ -55,7 +55,7 @@ public class AccountImplVulnerable implements Account {
 
     @Override
     public boolean isEmailVerified() {
-        return this.accountModel.getEmailStatus();
+        return this.accountModel.isEmailVerified();
     }
 
     @Nonnull

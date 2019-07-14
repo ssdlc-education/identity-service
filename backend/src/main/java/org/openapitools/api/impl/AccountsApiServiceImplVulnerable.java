@@ -63,7 +63,6 @@ public class AccountsApiServiceImplVulnerable extends AccountsApiService {
 
     @Override
     public Response createAccount(Account account, SecurityContext securityContext) throws NotFoundException {
-        final boolean emailStatus = true;
         Session session = identity.getSessionService().newAnonymousSession();
 
         AccountCreate accountCreate = session.sessionAccountCreate();
@@ -72,10 +71,7 @@ public class AccountsApiServiceImplVulnerable extends AccountsApiService {
         accountCreate.setFirstName(account.getFirstName());
         accountCreate.setLastName(account.getLastName());
         accountCreate.setEmail(account.getEmail());
-        accountCreate.setEmailStatus(emailStatus);
         accountCreate.setPassword(account.getPassword());
-        accountCreate.setCreateTime(Instant.now());
-        accountCreate.setUpdateTime(Instant.now());
         accountCreate.setDescription(account.getDescription());
         accountCreate.create();
 

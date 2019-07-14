@@ -4,33 +4,34 @@ import static com.kosprov.jargon2.api.Jargon2.jargon2Hasher;
 import static org.apache.commons.text.StringEscapeUtils.escapeHtml4;
 
 import com.kosprov.jargon2.api.Jargon2;
-import com.yahoo.identity.IdentityError;
 import com.yahoo.identity.IdentityException;
 import com.yahoo.identity.services.account.AccountUpdate;
 import com.yahoo.identity.services.random.RandomService;
 import com.yahoo.identity.services.storage.AccountModel;
+import com.yahoo.identity.services.system.SystemService;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
-import java.time.Instant;
-import java.util.Base64;
 
 import javax.annotation.Nonnull;
 
 public class SqlAccountUpdate implements AccountUpdate {
 
     private final RandomService randomService;
+    private final SystemService systemService;
     private final AccountModel account;
     private final SqlSessionFactory sqlSessionFactory;
 
 
-    public SqlAccountUpdate(@Nonnull SqlSessionFactory sqlSessionFactory, @Nonnull RandomService randomService,
+    public SqlAccountUpdate(@Nonnull SqlSessionFactory sqlSessionFactory,
+                            @Nonnull RandomService randomService,
+                            @Nonnull SystemService systemService,
                             @Nonnull String username) {
         this.account = new AccountModel();
         this.sqlSessionFactory = sqlSessionFactory;
         this.randomService = randomService;
+        this.systemService = systemService;
         this.account.setUsername(username);
     }
 
@@ -43,8 +44,8 @@ public class SqlAccountUpdate implements AccountUpdate {
 
     @Override
     @Nonnull
-    public AccountUpdate setEmailStatus(@Nonnull boolean emailStatus) {
-        account.setEmailStatus(emailStatus);
+    public AccountUpdate setEmailStatus(boolean emailStatus) {
+        account.setEmailVerified(emailStatus);
         return this;
     }
 
@@ -63,14 +64,14 @@ public class SqlAccountUpdate implements AccountUpdate {
     @Nonnull
     @Override
     public AccountUpdate setDescription(@Nonnull String title) {
-        account.setDescription(escapeHtml4(title));
+        account.setDescription(title);
         return this;
     }
 
     @Nonnull
     @Override
     public String update() throws IdentityException {
-        account.setUpdateTs(System.currentTimeMillis());
+        account.setUpdateTs(systemService.currentTimeMillis());
         try (SqlSession session = sqlSessionFactory.openSession()) {
             AccountMapper mapper = session.getMapper(AccountMapper.class);
             mapper.updateAccount(account);

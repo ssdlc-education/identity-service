@@ -21,16 +21,7 @@ public interface AccountCreate {
     AccountCreate setEmail(@Nonnull String email);
 
     @Nonnull
-    AccountCreate setEmailStatus(@Nonnull boolean emailStatus);
-
-    @Nonnull
     AccountCreate setPassword(@Nonnull String password);
-
-    @Nonnull
-    AccountCreate setCreateTime(@Nonnull Instant createTime);
-
-    @Nonnull
-    AccountCreate setUpdateTime(@Nonnull Instant updateTime);
 
     @Nonnull
     AccountCreate setDescription(@Nonnull String description);
