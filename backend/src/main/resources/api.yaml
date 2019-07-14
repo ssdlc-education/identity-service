@@ -376,20 +376,6 @@ components:
         description:
           type: "string"
           maxLength: 500
-        emails:
-          type: "array"
-          items:
-            $ref: '#/components/schemas/Email'
-    Email:
-      type: "object"
-      properties:
-        value:
-          type: "string"
-          maxLength: 256
-        verified:
-          type: "boolean"
-      required:
-        - "value"
     Session:
       type: "object"
       properties:
