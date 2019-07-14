@@ -9,6 +9,8 @@ public interface AccountMapper {
 
     AccountModel getAccount(@Param("username") String username);
 
+    AccountModel getAccountForUpdate(@Param("username") String username);
+
     AccountModel getPublicAccount(@Param("username") String username);
 
     int updateAccount(@Param("account") AccountModel account);

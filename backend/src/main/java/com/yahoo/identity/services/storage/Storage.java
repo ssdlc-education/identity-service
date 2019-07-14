@@ -1,22 +1,20 @@
 package com.yahoo.identity.services.storage;
 
-import com.yahoo.identity.services.account.Account;
-import com.yahoo.identity.services.account.AccountCreate;
-import com.yahoo.identity.services.account.AccountUpdate;
-
 import javax.annotation.Nonnull;
 
 public interface Storage {
 
-    @Nonnull
-    AccountCreate newAccountCreate();
+    void createAccount(@Nonnull AccountModel account);
 
     @Nonnull
-    Account getAccount(@Nonnull String id);
+    AccountModel getAccount(@Nonnull String username);
 
     @Nonnull
-    Account getPublicAccount(@Nonnull String id);
+    AccountModel getPublicAccount(@Nonnull String username);
+
+    void updateAccount(@Nonnull AccountModel accountModel);
 
     @Nonnull
-    AccountUpdate newAccountUpdate(@Nonnull String id);
+    AccountModel getAndUpdateAccount(@Nonnull String username,
+                                     @Nonnull AccountModelUpdater updater);
 }

@@ -4,6 +4,7 @@ import org.apache.ibatis.io.Resources;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Instant;
 
 import javax.annotation.Nonnull;
 
@@ -14,6 +15,11 @@ public class SystemService {
 
     public long currentTimeMillis() {
         return System.currentTimeMillis();
+    }
+
+    @Nonnull
+    public Instant now() {
+        return Instant.now();
     }
 
     @Nonnull

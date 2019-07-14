@@ -19,10 +19,12 @@ public interface LoggedInSession {
     String getUsername();
 
     @Nonnull
-    AccountUpdate sessionAccountUpdate();
+    AccountUpdate newAccountUpdate();
 
     @Nonnull
     Token createToken();
+
+    void verifyPassword(@Nonnull String password);
 
     void validateTokenString(@Nonnull String tokenStr);
 }

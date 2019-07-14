@@ -2,13 +2,10 @@ package com.yahoo.identity.services.credential;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.exceptions.JWTCreationException;
 import com.yahoo.identity.IdentityError;
 import com.yahoo.identity.IdentityException;
-import com.yahoo.identity.services.key.KeyService;
+import com.yahoo.identity.Validate;
 
-import java.security.interfaces.RSAPrivateKey;
-import java.security.interfaces.RSAPublicKey;
 import java.time.Instant;
 import java.util.Date;
 
@@ -16,15 +13,56 @@ import javax.annotation.Nonnull;
 
 public class CredentialImpl implements Credential {
 
-    private static final String KEY_NAME = "identity-cookie";
-    private final KeyService keyService;
-    private Instant issueTime;
-    private Instant expireTime;
-    private String subject;
-    private int status;
+    public static class Builder {
+        private Instant issueTime;
+        private Instant expireTime;
+        private String subject;
+        private Algorithm algorithm;
 
-    public CredentialImpl(@Nonnull KeyService keyService) {
-        this.keyService = keyService;
+        @Nonnull
+        public Builder setAlgorithm(@Nonnull Algorithm algorithm) {
+            this.algorithm = algorithm;
+            return this;
+        }
+
+        @Nonnull
+        public Builder setIssueTime(@Nonnull Instant issueTime) {
+            this.issueTime = issueTime;
+            return this;
+        }
+
+        @Nonnull
+        public Builder setExpireTime(@Nonnull Instant expireTime) {
+            this.expireTime = expireTime;
+            return this;
+        }
+
+        @Nonnull
+        public Builder setSubject(@Nonnull String subject) {
+            this.subject = subject;
+            return this;
+        }
+
+        @Nonnull
+        public CredentialImpl build() {
+            Validate.notNull(issueTime, "Issue time is required");
+            Validate.notNull(expireTime, "Expiry time is required");
+            Validate.notNull(subject, "Subject is required");
+            Validate.notNull(algorithm, "Algorithm is required");
+            return new CredentialImpl(this);
+        }
+    }
+
+    private final Algorithm algorithm;
+    private final Instant issueTime;
+    private final Instant expireTime;
+    private final String subject;
+
+    private CredentialImpl(@Nonnull Builder builder) {
+        algorithm = builder.algorithm;
+        issueTime = builder.issueTime;
+        expireTime = builder.expireTime;
+        subject = builder.subject;
     }
 
     @Override
@@ -34,19 +72,9 @@ public class CredentialImpl implements Credential {
     }
 
     @Override
-    public void setIssueTime(@Nonnull Instant issueTime) {
-        this.issueTime = issueTime;
-    }
-
-    @Override
     @Nonnull
     public Instant getExpireTime() {
         return this.expireTime;
-    }
-
-    @Override
-    public void setExpireTime(@Nonnull Instant expireTime) {
-        this.expireTime = expireTime;
     }
 
     @Override
@@ -56,41 +84,13 @@ public class CredentialImpl implements Credential {
     }
 
     @Override
-    public void setSubject(@Nonnull String subject) {
-        this.subject = subject;
-    }
-
-    @Override
-    @Nonnull
-    public int getStatus() {
-        return this.status;
-    }
-
-    @Override
-    public void setStatus(boolean status) {
-        this.status = status ? 1 : 0;
-    }
-
-    @Override
     @Nonnull
     public String toString() {
-        try {
-            Algorithm algorithm =
-                Algorithm.RSA256((RSAPublicKey) this.keyService.getPublicKey(KEY_NAME, "RSA"),
-                                 (RSAPrivateKey) this.keyService.getPrivateKey(KEY_NAME, "RSA"));
-
-            String cookie = JWT.create()
-                .withExpiresAt(Date.from(getExpireTime()))
-                .withIssuedAt(Date.from(getIssueTime()))
-                .withClaim("sta", getStatus())
-                .withSubject(getSubject())
-                .sign(algorithm);
-
-            return cookie;
-
-        } catch (JWTCreationException e) {
-            throw new IdentityException(IdentityError.INVALID_CREDENTIAL, "JWT verification does not succeed.", e);
-        }
+        return JWT.create()
+            .withExpiresAt(Date.from(getExpireTime()))
+            .withIssuedAt(Date.from(getIssueTime()))
+            .withSubject(getSubject())
+            .sign(algorithm);
     }
 
     @Override

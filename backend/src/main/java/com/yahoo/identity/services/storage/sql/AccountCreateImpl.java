@@ -1,27 +1,29 @@
 package com.yahoo.identity.services.storage.sql;
 
-import com.yahoo.identity.IdentityError;
 import com.yahoo.identity.IdentityException;
+import com.yahoo.identity.Validate;
 import com.yahoo.identity.services.account.AccountCreate;
+import com.yahoo.identity.services.password.PasswordService;
 import com.yahoo.identity.services.storage.AccountModel;
+import com.yahoo.identity.services.storage.Storage;
 import com.yahoo.identity.services.system.SystemService;
-import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.ibatis.session.SqlSession;
-import org.apache.ibatis.session.SqlSessionFactory;
 
 import javax.annotation.Nonnull;
 
 
-public class SqlAccountCreateVulnerable implements AccountCreate {
+public class AccountCreateImpl implements AccountCreate {
 
-    private final SqlSessionFactory sqlSessionFactory;
+    private final Storage storage;
     private final SystemService systemService;
+    private final PasswordService passwordService;
     private final AccountModel account = new AccountModel();
 
-    public SqlAccountCreateVulnerable(
-        @Nonnull SqlSessionFactory sqlSessionFactory,
+    public AccountCreateImpl(
+        @Nonnull Storage storage,
+        @Nonnull PasswordService passwordService,
         @Nonnull SystemService systemService) {
-        this.sqlSessionFactory = sqlSessionFactory;
+        this.storage = storage;
+        this.passwordService = passwordService;
         this.systemService = systemService;
     }
 
@@ -56,7 +58,7 @@ public class SqlAccountCreateVulnerable implements AccountCreate {
     @Override
     @Nonnull
     public AccountCreate setPassword(@Nonnull String password) {
-        account.setPasswordHash(DigestUtils.md5Hex(password));
+        account.setPasswordHash(passwordService.createPasswordHash(password));
         return this;
     }
 
@@ -70,18 +72,18 @@ public class SqlAccountCreateVulnerable implements AccountCreate {
     @Nonnull
     @Override
     public String create() throws IdentityException {
+        Validate.notNull(account.getUsername(), "username must be set");
+        Validate.notNull(account.getFirstName(), "first name must be set");
+        Validate.notNull(account.getLastName(), "last name must be set");
+        Validate.notNull(account.getPasswordHash(), "password must be set");
+        Validate.notNull(account.getEmail(), "email must be set");
+        Validate.notNull(account.getDescription(), "description must be set");
+
         account.setCreateTs(systemService.currentTimeMillis());
         account.setUpdateTs(systemService.currentTimeMillis());
         account.setEmailVerified(false);
-        try (SqlSession session = sqlSessionFactory.openSession()) {
-            AccountMapper mapper = session.getMapper(AccountMapper.class);
-            try {
-                mapper.insertAccount(account);
-                session.commit();
-            } catch (Exception e) {
-                throw new IdentityException(IdentityError.INVALID_ARGUMENTS, "Account already exists.", e);
-            }
-        }
+
+        storage.createAccount(account);
         return account.getUsername();
     }
 }

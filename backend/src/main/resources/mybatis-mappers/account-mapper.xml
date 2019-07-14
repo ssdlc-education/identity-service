@@ -46,6 +46,12 @@
         WHERE username = #{username}
     </select>
 
+    <select id="getAccountForUpdate" resultMap="accountResultMap">
+        SELECT username, first_name, last_name, email, email_verified, password_hash, create_ts,
+        update_ts, description, block_until_ts, consecutive_fails FROM account
+        WHERE username = #{username} FOR UPDATE
+    </select>
+
     <select id="getPublicAccount" resultMap="publicAccountResultMap">
         SELECT username, description FROM account
         WHERE username = #{username}
