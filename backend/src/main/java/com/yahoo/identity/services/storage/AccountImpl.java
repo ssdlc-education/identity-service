@@ -102,7 +102,6 @@ public class AccountImpl implements Account {
 
             Jargon2.Verifier verifier = jargon2Verifier();
             boolean isVerified = verifier
-                .salt(this.accountModel.getPasswordSalt().getBytes("UTF-8"))
                 .hash(this.accountModel.getPasswordHash())
                 .password(password.getBytes("UTF-8"))
                 .verifyEncoded();

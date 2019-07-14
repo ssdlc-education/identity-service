@@ -23,4 +23,6 @@ public interface LoggedInSession {
 
     @Nonnull
     Token createToken();
+
+    void validateTokenString(@Nonnull String tokenStr);
 }

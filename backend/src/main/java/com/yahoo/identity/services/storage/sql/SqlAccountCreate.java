@@ -13,6 +13,7 @@ import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Base64;
 
@@ -73,14 +74,8 @@ public class SqlAccountCreate implements AccountCreate {
         byte[] saltBytes = new byte[64];
         this.randomService.getRandomBytes(saltBytes);
 
-        account.setPasswordSalt(Base64.getEncoder().encodeToString(saltBytes));
-
         Jargon2.Hasher hasher = jargon2Hasher();
-        try {
-            account.setPasswordHash(hasher.salt(saltBytes).password(password.getBytes("UTF-8")).encodedHash());
-        } catch (UnsupportedEncodingException e) {
-            throw new IdentityException(IdentityError.INTERNAL_SERVER_ERROR, "Unsupported encoding standard.", e);
-        }
+        account.setPasswordHash(hasher.salt(saltBytes).password(password.getBytes(StandardCharsets.UTF_8)).encodedHash());
         return this;
     }
 

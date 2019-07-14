@@ -404,7 +404,7 @@ func loginSubmitHandler(w http.ResponseWriter, r *http.Request) {
 		renderTemplate(w, "login", &p)
 		return
 	}
-	response, err := http.Post(backendURL+"/sessions/", "application/json", payload)
+	response, err := http.Post(backendURL+"/sessions", "application/json", payload)
 	if err != nil || response.StatusCode != http.StatusCreated {
 		log.Println("login Failure", err)
 		p := loginPage{ErrorMessage: "Account not found or incorrect password"}
@@ -568,7 +568,7 @@ func myAccountHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	client := &http.Client{}
-	req, err := http.NewRequest("GET", "http://localhost:8080/v1/accounts/@me", nil)
+	req, err := http.NewRequest("GET", backendURL+"/accounts/@me", nil)
 	if err != nil {
 		log.Println(err)
 		http.Redirect(w, r, "/loginError/", http.StatusFound)
@@ -708,9 +708,10 @@ func logoutHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	var backendAddr string
-	flag.StringVar(&backendAddr, "backend", "localhost:8080", "backend IP and port")
+	flag.StringVar(&backendAddr, "backend", "identity-backend:8080", "backend IP and port")
 	flag.Parse()
 	backendURL = "http://" + backendAddr + "/v1"
+	log.Printf("Backend URL: %s", backendURL)
 
 	router := mux.NewRouter()
 

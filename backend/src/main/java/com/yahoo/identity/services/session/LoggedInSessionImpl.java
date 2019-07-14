@@ -83,8 +83,7 @@ public class LoggedInSessionImpl implements LoggedInSession {
     @Override
     @Nonnull
     public AccountUpdate sessionAccountUpdate() {
-        AccountUpdate accountUpdate = this.accountService.newAccountUpdate(this.username);
-        return accountUpdate;
+        return accountService.newAccountUpdate(this.username);
     }
 
     @Nonnull
@@ -94,5 +93,11 @@ public class LoggedInSessionImpl implements LoggedInSession {
             .setExpireTime(credential.getExpireTime())
             .setUsername(getUsername())
             .create();
+    }
+
+    @Override
+    public void validateTokenString(@Nonnull String tokenStr) {
+        Token token = tokenService.newTokenFromString(tokenStr);
+        token.validate();
     }
 }

@@ -1,7 +1,6 @@
 # IntelliJ
 .idea/*
 
-# ----------- .gitignore for backend -----------
 # Compiled class file
 *.class
 
