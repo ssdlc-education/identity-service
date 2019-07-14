@@ -1,3 +1,4 @@
+<html>
 <head>
     <title>Login</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
@@ -11,7 +12,7 @@
         <h1 style="color: #FFFFFF"> Login </h1>
     </nav>
     <div style="background: red; width: 100%; text-align: center; vertical-align: middle;" name="errormsg">{{.ErrorMessage}}</div>
-    <form action="/login" method = "POST">
+    <form action="{{.AccountLoginURLPath}}" method = "POST">
         <div class="container" style="margin-top: 10px">
 
             <div class = "container">
@@ -30,11 +31,11 @@
 
                 <div style="margin-top: 20px">
                     <input class = "btn btn-primary" type="submit" value="Login" name="login">
-                    <a class = "btn btn-primary" href = "/register/" role = "button" name="create">Create new account</a>
+                    <a class = "btn btn-primary" href = "{{.AccountRegisterURLPath}}" role = "button" name="create">Create new account</a>
                 </div>
-                <a class = "btn btn-primary" style="margin-top: 20px" href = "/forget/" role = "button" name="forget">Forget Password?</a>
             </div>
         </div>
     </form>
 </div>
 </body>
+</html>

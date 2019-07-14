@@ -1,3 +1,4 @@
+<html>
 <head>
     <title>Edit My Profile</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
@@ -8,14 +9,16 @@
 <body>
 <nav class="navbar navbar-expand-lg navbar-primary bg-primary">
     <a class="navbar-brand" href="#" style="color: #FFFFFF">Change Profile</a>
+    <a style="float: right" class = "btn btn-primary" href = "{{.HomeURLPath}}" role = "button">Home</a>
 </nav>
-
-<form action="/save/" method="POST">
-    <label for = "description">description</label>
-    <input class="form-control" type="text" placeholder= "{{.Description}}" name = "description" required>
-    <input class = "form-control" type = "hidden" name = "CSRFToken" placeholder="token" value="{{.Token}}">
-    <div><input class = "btn btn-primary" type="submit" name="save" value="Save" style="margin-top: 20px; margin-left: 30px"></div>
-    <div><a class = "btn btn-primary" href = "/password/" role = "button" style="margin-top: 20px; margin-left: 30px" name="editPassword">Change Password</a></div>
-    <div><a class = "btn btn-primary" href = "/editEmail/" role = "button" style="margin-top: 20px; margin-left:30px" name="editEmail">Change Email</a></div>
-</form>
+<div style="background: red; width: 100%; text-align: center; vertical-align: middle;" name="errormsg">{{.ErrorMessage}}</div>
+<div class="container">
+    <form action="{{.AccountEditURLPath}}" method="POST">
+        <label for = "description">description</label>
+        <input class="form-control" type="text" placeholder= "{{.Description}}" name = "description" required>
+        <input class = "form-control" type = "hidden" name = "token" placeholder="token" value="{{.Token}}">
+        <div><input class = "btn btn-primary" type="submit" name="save" value="Save" style="margin-top: 20px; margin-left: 30px"></div>
+    </form>
+</div>
 </body>
+</html>

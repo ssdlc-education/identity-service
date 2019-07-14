@@ -8,38 +8,121 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 
 	"github.com/gorilla/mux"
 )
 
-type loginPage struct {
+const (
+	timeoutInSeconds = 10
+	homeURLPath      = "/"
+
+	accountPublicProfileURLPath  = "/account/view/{id:[^@]+}"
+	accountPrivateProfileURLPath = "/account/view"
+	accountLoginURLPath          = "/account/login"
+	accountEditURLPath           = "/account/edit"
+	accountRegisterURLPath       = "/account/register"
+	accountLogoutURLPath         = "/account/logout"
+	accountPasswordUpdateURLPath = "/account/update_password"
+	accountEmailUpdateURLPath    = "/account/update_email"
+
+	accountEditTemplate           = "edit.html"
+	accountLoginTemplate          = "login.html"
+	accountPrivateProfileTemplate = "profile.html"
+	accountPublicProfileTemplate  = "publicProfile.html"
+	accountRegisterTemplate       = "register.html"
+)
+
+type pageMeta struct {
+	HomeURLPath                  string
+	AccountPublicProfileURLPath  string
+	AccountPrivateProfileURLPath string
+	AccountLoginURLPath          string
+	AccountEditURLPath           string
+	AccountRegisterURLPath       string
+	AccountLogoutURLPath         string
+	AccountPasswordUpdateURLPath string
+	AccountEmailUpdateURLPath    string
+}
+
+func NewPageMeta() *pageMeta {
+	return &pageMeta{
+		HomeURLPath:                  homeURLPath,
+		AccountPublicProfileURLPath:  accountPublicProfileURLPath,
+		AccountPrivateProfileURLPath: accountPrivateProfileURLPath,
+		AccountLoginURLPath:          accountLoginURLPath,
+		AccountEditURLPath:           accountEditURLPath,
+		AccountRegisterURLPath:       accountRegisterURLPath,
+		AccountLogoutURLPath:         accountLogoutURLPath,
+		AccountPasswordUpdateURLPath: accountPasswordUpdateURLPath,
+		AccountEmailUpdateURLPath:    accountEmailUpdateURLPath,
+	}
+}
+
+type accountLoginPage struct {
+	*pageMeta
 	ErrorMessage string
 }
-type registerPage struct {
-	ErrorMessage string
+
+func renderLoginPageWithError(w http.ResponseWriter, errMessage string) {
+	page := accountLoginPage{pageMeta: NewPageMeta(), ErrorMessage: errMessage}
+	renderTemplate(w, accountLoginTemplate, &page)
 }
+
+type accountRegisterPage struct {
+	*pageMeta
+	ErrorMessage string
+	Username     string
+	Firstname    string
+	Lastname     string
+	Email        string
+	Description  string
+}
+
+func renderRegisterPageWithError(w http.ResponseWriter, p *profile, errMessage string) {
+	page := accountRegisterPage{
+		pageMeta:     NewPageMeta(),
+		ErrorMessage: errMessage,
+		Username:     *p.Username,
+		Firstname:    *p.Firstname,
+		Lastname:     *p.Lastname,
+		Email:        *p.Email,
+		Description:  *p.Description,
+	}
+	renderTemplate(w, accountRegisterTemplate, &page)
+}
+
+type accountProfilePage struct {
+	*pageMeta
+	Username    string
+	Firstname   string
+	Lastname    string
+	Email       string
+	Description string
+}
+
+type accountPublicProfilePage struct {
+	*pageMeta
+	Username    string
+	Description string
+}
+
 type profile struct {
-	Username    string `json:"username"`
-	Firstname   string `json:"firstName"`
-	Lastname    string `json:"lastName"`
-	Email       string `json:"email"`
-	Description string `json:"description"`
-	Password    string `json:"password"`
-	Verified    string `json:"verified"`
+	Username    *string `json:"username,omitempty"`
+	Firstname   *string `json:"firstName,omitempty"`
+	Lastname    *string `json:"lastName,omitempty"`
+	Email       *string `json:"email,omitempty"`
+	Description *string `json:"description,omitempty"`
+	Password    *string `json:"password,omitempty"`
 }
 
-type updateDescription struct {
-	Username    string `json:"username"`
-	Description string `json:"description"`
-	Token       string `json:"token"`
-}
-
-type updateEmail struct {
-	Username string `json:"username"`
-	Email    string `json:"email"`
-	Token    string `json:"token"`
+type profileEditPage struct {
+	*pageMeta
+	Description  string
+	Token        string
+	ErrorMessage string
 }
 
 type publicInfo struct {
@@ -52,24 +135,11 @@ type session struct {
 	Password string `json:"password"`
 }
 
-//UpdatePassword Wrap up info to update password with CSRF token
-type updatePassword struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
-	Token    string `json:"token"`
-}
-
 //TokenInfo to store the token value and type
 type TokenInfo struct {
 	Value string `json:"value"`
 	Type  string `json:"type"`
 }
-
-const (
-	timeoutInSeconds  = 10
-	ownAccountURLPath = "/accounts/@me"
-	loginURLPath      = "/login"
-)
 
 var (
 	backendURL string
@@ -89,7 +159,7 @@ func instanceToPayLoad(info interface{}) (*strings.Reader, error) {
 }
 
 func renderTemplate(w http.ResponseWriter, tmplName string, p interface{}) {
-	err := templates.ExecuteTemplate(w, tmplName+".html", p)
+	err := templates.ExecuteTemplate(w, tmplName, p)
 	if err != nil {
 		log.Printf("failed to execute template: %s", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -124,8 +194,8 @@ func readMyProfile(cookie *http.Cookie) (*profile, error) {
 
 // Function to read public information without login and render the web pages
 func readUserProfile(username string) (*publicInfo, error) {
-	url := backendURL + "/accounts/" + username
-	resp, err := client.Get(url)
+	backendUrl := backendURL + "/accounts/" + url.PathEscape(username)
+	resp, err := client.Get(backendUrl)
 	if err != nil {
 		return nil, err
 	}
@@ -145,33 +215,34 @@ func readUserProfile(username string) (*publicInfo, error) {
 	return &pageData, err
 }
 
-func accountHandler(w http.ResponseWriter, r *http.Request) {
+func renderPublicProfile(w http.ResponseWriter, r *http.Request) {
 	variables := mux.Vars(r)
-	p, err := readUserProfile(variables["id"])
+	profile, err := readUserProfile(variables["id"])
 	if err != nil {
 		log.Println("account does not exist", err)
-		http.Redirect(w, r, "/loginError/", http.StatusFound)
+		http.Redirect(w, r, homeURLPath, http.StatusFound)
 		return
 	}
 
-	page := profile{Username: p.Username,
-		Description: p.Description}
-	renderTemplate(w, "publicProfile", &page)
+	page := accountPublicProfilePage{}
+	page.Username = profile.Username
+	page.Description = profile.Description
+	renderTemplate(w, accountPublicProfileTemplate, &page)
 }
 
 // Render the edit information page
-func editHandler(w http.ResponseWriter, r *http.Request) {
+func renderProfileEdit(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie("V")
 	if err != nil || cookie == nil {
 		log.Println("May log out or cookie expire", err)
-		renderTemplate(w, "login", &loginPage{ErrorMessage: "Please login again"})
+		http.Redirect(w, r, accountLoginURLPath, http.StatusFound)
 		return
 	}
 	// Prefetch from backend API
-	p, err := readMyProfile(cookie)
+	profile, err := readMyProfile(cookie)
 	if err != nil {
 		log.Println("error happened when getting profile", err)
-		renderTemplate(w, "login", &loginPage{ErrorMessage: "Failed to get account information"})
+		http.Redirect(w, r, accountLoginURLPath, http.StatusFound)
 		return
 	}
 	client := &http.Client{}
@@ -180,7 +251,7 @@ func editHandler(w http.ResponseWriter, r *http.Request) {
 	tokenPayload, err := instanceToPayLoad(token)
 	if err != nil {
 		log.Println("error when decoding JSON", err)
-		renderTemplate(w, "login", &loginPage{ErrorMessage: "Internal server error"})
+		http.Redirect(w, r, accountLoginURLPath, http.StatusFound)
 		return
 	}
 	// Get token request
@@ -188,210 +259,90 @@ func editHandler(w http.ResponseWriter, r *http.Request) {
 	request, err := http.NewRequest("POST", getTokenURL, tokenPayload)
 	if err != nil {
 		log.Println("error when building request ", err)
-		renderTemplate(w, "login", &loginPage{ErrorMessage: "Internal server error"})
+		http.Redirect(w, r, accountLoginURLPath, http.StatusFound)
 		return
 	}
 	request.Header.Add("Content-Type", "application/json")
 	request.AddCookie(cookie)
 	response, err := client.Do(request)
 	if err != nil {
-		renderTemplate(w, "login", &loginPage{ErrorMessage: "Internal server error"})
+		http.Redirect(w, r, accountLoginURLPath, http.StatusFound)
 		return
 	}
 	defer response.Body.Close()
 	bodyBytes, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		log.Println("error occurred when reading response", err)
-		renderTemplate(w, "login", &loginPage{ErrorMessage: "Internal server error"})
+		http.Redirect(w, r, accountLoginURLPath, http.StatusFound)
 		return
 	}
 	err = json.Unmarshal(bodyBytes, &token)
 	if err != nil {
 		log.Println("Decode response error", err)
-		renderTemplate(w, "login", &loginPage{ErrorMessage: "Internal server error"})
+		http.Redirect(w, r, accountLoginURLPath, http.StatusFound)
 		return
 	}
-	updateNormal := updateDescription{p.Username, p.Description, token.Value}
-	renderTemplateDescription(w, "edit", &updateNormal)
+	page := profileEditPage{
+		pageMeta:    NewPageMeta(),
+		Description: *profile.Description,
+		Token:       token.Value,
+	}
+	renderTemplate(w, accountEditTemplate, &page)
 }
 
 // The Function to save the edited information
-func saveEditedInfo(w http.ResponseWriter, r *http.Request) {
-	description := r.FormValue("description")
-	token := r.FormValue("CSRFToken")
+func submitProfileEdit(w http.ResponseWriter, r *http.Request) {
+	editPage := profileEditPage{
+		pageMeta:    NewPageMeta(),
+		Description: r.FormValue("description"),
+		Token:       r.FormValue("token"),
+	}
 	// Get cookie from browser
 	cookie, err := r.Cookie("V")
 	if err != nil {
 		log.Println(err)
-		http.Redirect(w, r, "/loginError/", http.StatusFound)
-		return
-	}
-	originalPage, err := readMyProfile(cookie)
-	if err != nil {
-		log.Println("cookie may expire and need to login again ", err)
-		http.Redirect(w, r, "/loginError/", http.StatusFound)
+		http.Redirect(w, r, accountLoginURLPath, http.StatusFound)
 		return
 	}
 	// Get the standard token to change the regular information
 	client := &http.Client{}
-	// Change the information from preloaded information
-	updateInfo := updateDescription{Description: description,
-		Username: originalPage.Username,
-		Token:    ""}
-	// Json format transformation
-	payload, err := instanceToPayLoad(updateInfo)
+
+	profileToUpdate := profile{
+		Description: &editPage.Description,
+	}
+
+	payload, err := instanceToPayLoad(profileToUpdate)
 	if err != nil {
 		log.Println(err)
-		http.Redirect(w, r, "/loginError/", http.StatusFound)
+		editPage.ErrorMessage = "Internal server error"
+		renderTemplate(w, accountEditTemplate, editPage)
 		return
 	}
 	// Send http request
-	link := backendURL + "/accounts/@me?token=" + token
+	link := backendURL + "/accounts/@me?token=" + url.QueryEscape(editPage.Token)
 	request, err := http.NewRequest("PUT", link, payload)
 	if err != nil {
 		log.Println(err)
-		http.Redirect(w, r, "/loginError/", http.StatusFound)
+		editPage.ErrorMessage = "Internal server error"
+		renderTemplate(w, accountEditTemplate, editPage)
 		return
 	}
 	request.Header.Add("Content-Type", "application/json")
 	request.AddCookie(cookie)
-	_, err = client.Do(request)
-	if err != nil {
-		log.Println("empty response:", err)
-		http.Redirect(w, r, "/loginError/", http.StatusFound)
+	resp, err := client.Do(request)
+	if err != nil || resp.StatusCode != http.StatusNoContent {
+		log.Printf("Failed to update account: %s", err)
+		editPage.ErrorMessage = "Internal server error"
+		renderTemplate(w, accountEditTemplate, editPage)
 		return
 	}
 	client.CloseIdleConnections()
+
 	// After edited it redirect to the private information page
-	http.Redirect(w, r, ownAccountURLPath, http.StatusFound)
+	http.Redirect(w, r, accountPrivateProfileURLPath, http.StatusFound)
 }
 
-func passwordHandler(w http.ResponseWriter, r *http.Request) {
-	// Get cookie
-	cookie, err := r.Cookie("V")
-	if err != nil {
-		log.Println("cookie may expire login again", err)
-		// When refactoring the code, a more specific page may needed
-		http.Redirect(w, r, "/loginError/", http.StatusFound)
-		return
-	}
-	// Prefetch info to render pages from backend API
-	p, err := readMyProfile(cookie)
-	if err != nil {
-		log.Println("cookie may expire login again", err)
-		// When refactoring the code, a more specific page may needed
-		http.Redirect(w, r, "/loginError/", http.StatusFound)
-		return
-	}
-	client := &http.Client{}
-	// Set token struct to get token
-	token := TokenInfo{}
-	token.Type = "CRITICAL"
-	token.Value = ""
-	tokenPayload, err := instanceToPayLoad(token)
-	if err != nil {
-		log.Println(err)
-		http.Redirect(w, r, "/loginError/", http.StatusFound)
-		return
-	}
-	// Get token request
-	getTokenURL := backendURL + "/tokens/"
-	request, err := http.NewRequest("POST", getTokenURL, tokenPayload)
-	if err != nil {
-		log.Println(err)
-		http.Redirect(w, r, "/loginError/", http.StatusFound)
-		return
-	}
-	request.Header.Add("Content-Type", "application/json")
-	request.AddCookie(cookie)
-	response, err := client.Do(request)
-	if err != nil {
-		log.Println(err)
-		http.Redirect(w, r, "/loginError/", http.StatusFound)
-		return
-	}
-	defer response.Body.Close()
-	bodyBytes, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		log.Println(err)
-		http.Redirect(w, r, "/loginError/", http.StatusFound)
-		return
-	}
-	err = json.Unmarshal(bodyBytes, &token)
-	defer client.CloseIdleConnections()
-	if err != nil {
-		log.Println(err)
-		http.Redirect(w, r, "/loginError/", http.StatusFound)
-		return
-	}
-	updatePassword := updatePassword{}
-	updatePassword.Username = p.Username
-	updatePassword.Password = ""
-	updatePassword.Token = token.Value
-	renderTemplatePassword(w, "changePassword", &updatePassword)
-}
-
-func passwordSaveHandler(w http.ResponseWriter, r *http.Request) {
-	newPassword := r.FormValue("newpassword")
-	passwordConfirm := r.FormValue("passwordconfirm")
-	token := r.FormValue("token")
-	// Get cookie from browser
-	cookie, err := r.Cookie("V")
-	if err != nil {
-		log.Println("login expire, log in again", err)
-		http.Redirect(w, r, "/login", http.StatusFound)
-		return
-	}
-	originalProfile, err := readMyProfile(cookie)
-	if err != nil {
-		log.Println("login expire, log in again", err)
-		http.Redirect(w, r, "/login", http.StatusFound)
-		return
-	}
-	if newPassword != passwordConfirm {
-		log.Println("password does not match")
-		http.Redirect(w, r, "/password/", http.StatusFound)
-		return
-	}
-	updatePassword := updatePassword{
-		Username: originalProfile.Username,
-		Password: newPassword,
-		Token:    token}
-	client := &http.Client{}
-	// Struct to JSON payload
-	payload, err := instanceToPayLoad(updatePassword)
-	if err != nil {
-		log.Println("Json transfer failure", err)
-		http.Redirect(w, r, "/password/", http.StatusFound)
-		return
-	}
-	// Send http request
-	link := backendURL + "/accounts/@me?token=" + token
-	request, err := http.NewRequest("PUT", link, payload)
-	if err != nil {
-		log.Println("request failed", err)
-		http.Redirect(w, r, "/password/", http.StatusFound)
-		return
-	}
-	request.AddCookie(cookie)
-	request.Header.Add("Content-Type", "application/json")
-	response, err := client.Do(request)
-	if err != nil {
-		log.Println("request failed", err)
-		http.Redirect(w, r, "/password/", http.StatusFound)
-		return
-	}
-	if response.StatusCode == 500 {
-		log.Println("Error Occur when changing password", err)
-		http.Redirect(w, r, "/password/", http.StatusFound)
-		return
-	}
-	client.CloseIdleConnections()
-	http.Redirect(w, r, ownAccountURLPath, http.StatusFound)
-	return
-}
-
-func loginSubmitHandler(w http.ResponseWriter, r *http.Request) {
+func submitAccountLogin(w http.ResponseWriter, r *http.Request) {
 	// Get user login in information
 	username := r.FormValue("username")
 	password := r.FormValue("password")
@@ -400,23 +351,20 @@ func loginSubmitHandler(w http.ResponseWriter, r *http.Request) {
 	payload, err := instanceToPayLoad(user)
 	if err != nil {
 		log.Println("Json decode error", err)
-		p := loginPage{ErrorMessage: "Internal server error"}
-		renderTemplate(w, "login", &p)
+		renderLoginPageWithError(w, "Internal server error")
 		return
 	}
 	response, err := http.Post(backendURL+"/sessions", "application/json", payload)
 	if err != nil || response.StatusCode != http.StatusCreated {
 		log.Println("login Failure", err)
-		p := loginPage{ErrorMessage: "Account not found or incorrect password"}
-		renderTemplate(w, "login", &p)
+		renderLoginPageWithError(w, "Account not found or incorrect password")
 		return
 	}
 	// Get token from login response from backend
 	var credential *http.Cookie
 	if credential, err = getCookieByName(response.Cookies(), "V"); err != nil {
 		log.Println("failed to get cookie from response", err)
-		p := loginPage{ErrorMessage: "Internal server error"}
-		renderTemplate(w, "login", &p)
+		renderLoginPageWithError(w, "Internal server error")
 		return
 	}
 	// Set the cookies to the browser
@@ -425,7 +373,7 @@ func loginSubmitHandler(w http.ResponseWriter, r *http.Request) {
 		Path:     "/",
 		HttpOnly: true}
 	http.SetCookie(w, &Cookie)
-	http.Redirect(w, r, ownAccountURLPath, http.StatusFound)
+	http.Redirect(w, r, accountPrivateProfileURLPath, http.StatusFound)
 	return
 }
 
@@ -438,208 +386,94 @@ func getCookieByName(cookies []*http.Cookie, name string) (*http.Cookie, error) 
 	return nil, errors.New("No cookie with name \"" + name + "\"")
 }
 
-func editEmailHandler(w http.ResponseWriter, r *http.Request) {
-	cookie, err := r.Cookie("V")
-	if err != nil {
-		log.Println("cookie may expire login again", err)
-		// When refactoring the code, a more specific page may needed
-		http.Redirect(w, r, "/loginError/", http.StatusFound)
-		return
+func renderAccountCreate(w http.ResponseWriter, r *http.Request) {
+	p := accountRegisterPage{
+		pageMeta: NewPageMeta(),
 	}
-	// Prefetch info to render pages from backend API
-	p, err := readMyProfile(cookie)
-	if err != nil {
-		log.Println("cookie may expire login again", err)
-		// When refactoring the code, a more specific page may needed
-		http.Redirect(w, r, "/loginError/", http.StatusFound)
-		return
-	}
-	client := &http.Client{}
-	// Set token struct to get token
-	token := TokenInfo{}
-	token.Type = "CRITICAL"
-	token.Value = ""
-	tokenPayload, err := instanceToPayLoad(token)
-	if err != nil {
-		log.Println(err)
-		http.Redirect(w, r, "/loginError/", http.StatusFound)
-		return
-	}
-	// Get token request
-	getTokenURL := backendURL + "/tokens/"
-	request, err := http.NewRequest("POST", getTokenURL, tokenPayload)
-	if err != nil {
-		log.Println(err)
-		http.Redirect(w, r, "/loginError/", http.StatusFound)
-		return
-	}
-	request.Header.Add("Content-Type", "application/json")
-	request.AddCookie(cookie)
-	response, err := client.Do(request)
-	if err != nil {
-		log.Println(err)
-		http.Redirect(w, r, "/loginError/", http.StatusFound)
-		return
-	}
-	defer response.Body.Close()
-	bodyBytes, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		log.Println(err)
-		http.Redirect(w, r, "/loginError/", http.StatusFound)
-		return
-	}
-	err = json.Unmarshal(bodyBytes, &token)
-	defer client.CloseIdleConnections()
-	if err != nil {
-		log.Println(err)
-		http.Redirect(w, r, "/loginError/", http.StatusFound)
-		return
-	}
-	updateEmail := updateEmail{p.Username, p.Email, token.Value}
-	renderTemplateEmail(w, "editEmail", &updateEmail)
+	renderTemplate(w, accountRegisterTemplate, &p)
 }
 
-func emailSaveHandler(w http.ResponseWriter, r *http.Request) {
-	newEmail := r.FormValue("email")
-	token := r.FormValue("CSRFToken")
-	// Get cookie from browser
-	cookie, err := r.Cookie("V")
-	if err != nil {
-		log.Println("login expire, log in again", err)
-		http.Redirect(w, r, "/", http.StatusFound)
-		return
-	}
-	originalProfile, err := readMyProfile(cookie)
-	if err != nil {
-		log.Println("login expire, log in again", err)
-		http.Redirect(w, r, "/", http.StatusFound)
-		return
-	}
-	updateEmail := updateEmail{
-		Username: originalProfile.Username,
-		Email:    newEmail,
-		Token:    ""}
-	client := &http.Client{}
-	// Struct to JSON payload
-	payload, err := instanceToPayLoad(updateEmail)
-	if err != nil {
-		log.Println("Json transfer failure", err)
-		http.Redirect(w, r, "/editEmail/", http.StatusFound)
-		return
-	}
-	// Send http request
-	link := backendURL + "/accounts/@me?token=" + token
-	request, err := http.NewRequest("PUT", link, payload)
-	if err != nil {
-		log.Println("request failed", err)
-		http.Redirect(w, r, "/editEmail/", http.StatusFound)
-		return
-	}
-	request.AddCookie(cookie)
-	request.Header.Add("Content-Type", "application/json")
-	response, err := client.Do(request)
-	if err != nil {
-		log.Println("request failed", err)
-		http.Redirect(w, r, "/editEmail/", http.StatusFound)
-		return
-	}
-	if response.StatusCode == 500 {
-		log.Println("Error Occur when changing email", err)
-		http.Redirect(w, r, "/editEmail/", http.StatusFound)
-		return
-	}
-	client.CloseIdleConnections()
-	http.Redirect(w, r, ownAccountURLPath, http.StatusFound)
-	return
-
-}
-
-func registerHandler(w http.ResponseWriter, r *http.Request) {
-	p := registerPage{}
-	renderTemplate(w, "register", &p)
-}
-
-func myAccountHandler(w http.ResponseWriter, r *http.Request) {
+func renderPrivateProfile(w http.ResponseWriter, r *http.Request) {
 	// Read cookie from browser
 	cookie, err := r.Cookie("V")
 	if err != nil {
-		log.Println(err)
-		http.Redirect(w, r, "/loginError/", http.StatusFound)
+		log.Println("no cookie is provided", err)
+		http.Redirect(w, r, accountLoginURLPath, http.StatusFound)
 		return
 	}
 	client := &http.Client{}
 	req, err := http.NewRequest("GET", backendURL+"/accounts/@me", nil)
 	if err != nil {
-		log.Println(err)
-		http.Redirect(w, r, "/loginError/", http.StatusFound)
+		log.Println("failed to build request", err)
+		http.Redirect(w, r, accountLoginURLPath, http.StatusFound)
 		return
 	}
 	req.AddCookie(cookie)
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Println(err)
-		http.Redirect(w, r, "/loginError/", http.StatusFound)
+		log.Println("failed to get account", err)
+		http.Redirect(w, r, accountLoginURLPath, http.StatusFound)
 		return
 	}
 	defer resp.Body.Close()
 	// Read personal profile data from backend and transform to our data format
 	bodyBytes, err := ioutil.ReadAll(resp.Body)
-	var pageInfo = profile{}
-	err = json.Unmarshal(bodyBytes, &pageInfo)
+	var profile = profile{}
+	err = json.Unmarshal(bodyBytes, &profile)
 	if err != nil {
 		log.Println(err)
-		http.Redirect(w, r, "/", http.StatusFound)
+		http.Redirect(w, r, accountLoginURLPath, http.StatusFound)
 		return
 	}
-	renderTemplate(w, "profile", &pageInfo)
+	page := accountProfilePage{}
+	page.pageMeta = NewPageMeta()
+	page.Username = *profile.Username
+	page.Firstname = *profile.Firstname
+	page.Lastname = *profile.Lastname
+	page.Email = *profile.Email
+	page.Description = *profile.Description
+	renderTemplate(w, accountPrivateProfileTemplate, &page)
 }
 
-func createHandler(w http.ResponseWriter, r *http.Request) {
-	var pageInfo profile
-	pageInfo.Username = r.FormValue("username")
-	pageInfo.Firstname = r.FormValue("firstname")
-	pageInfo.Lastname = r.FormValue("lastname")
-	pageInfo.Description = r.FormValue("description")
-	pageInfo.Password = r.FormValue("password")
-	pageInfo.Email = r.FormValue("email")
+func submitAccountCreate(w http.ResponseWriter, r *http.Request) {
+	var profile profile
+	username := r.FormValue("username")
+	firstName := r.FormValue("firstname")
+	lastName := r.FormValue("lastname")
+	description := r.FormValue("description")
+	password := r.FormValue("password")
+	email := r.FormValue("email")
 
-	payload, err := instanceToPayLoad(pageInfo)
+	profile.Username = &username
+	profile.Firstname = &firstName
+	profile.Lastname = &lastName
+	profile.Description = &description
+	profile.Password = &password
+	profile.Email = &email
+
+	payload, err := instanceToPayLoad(profile)
 	if err != nil {
 		log.Println(err)
-		p := registerPage{ErrorMessage: "Internal server error"}
-		renderTemplate(w, "register", &p)
+		renderRegisterPageWithError(w, &profile, "Internal server error")
 		return
 	}
 	resp, err := client.Post(backendURL+"/accounts", "application/json", payload)
 	if err != nil || resp.StatusCode != http.StatusCreated {
 		log.Println("error occur when creating account", err)
-		var p registerPage
 		if err == nil && resp.StatusCode == http.StatusBadRequest {
-			p = registerPage{ErrorMessage: "Invalid data"}
+			renderRegisterPageWithError(w, &profile, "Invalid data")
 		} else {
-			p = registerPage{ErrorMessage: "Internal server error"}
+			renderRegisterPageWithError(w, &profile, "Internal server error")
 		}
-		renderTemplate(w, "register", &p)
-		return
-	}
-	// Send the request to create a new account
-	user := session{pageInfo.Username, pageInfo.Password}
-	payload, err = instanceToPayLoad(user)
-	response, err := client.Post(backendURL+"/sessions/", "application/json", payload)
-	if err != nil {
-		log.Println(err)
-		p := registerPage{ErrorMessage: "Internal server error"}
-		renderTemplate(w, "register", &p)
 		return
 	}
 	// Log in with newly created account information
 	// Get credential from login response of backend
-	cookies := response.Cookies()
+	cookies := resp.Cookies()
 	var credential *http.Cookie
 	if credential, err = getCookieByName(cookies, "V"); err != nil {
 		log.Println("Cannot find V cookie in the response: ", err)
-		p := registerPage{ErrorMessage: "Internal server error"}
-		renderTemplate(w, "register", &p)
+		renderRegisterPageWithError(w, &profile, "Internal server error")
 		return
 	}
 
@@ -651,54 +485,21 @@ func createHandler(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, &Cookie)
 
 	// After log in, redirect to the personal private page
-	http.Redirect(w, r, ownAccountURLPath, http.StatusFound)
+	http.Redirect(w, r, accountPrivateProfileURLPath, http.StatusFound)
 }
 
 // Handle the login page
-func loginHandler(w http.ResponseWriter, r *http.Request) {
-	p := loginPage{}
-	renderTemplate(w, "login", &p)
+func renderAccountLogin(w http.ResponseWriter, r *http.Request) {
+	p := accountLoginPage{pageMeta: NewPageMeta()}
+	renderTemplate(w, accountLoginTemplate, &p)
 }
 
-func homeHandler(w http.ResponseWriter, r *http.Request) {
-	http.Redirect(w, r, "/login", http.StatusFound)
-}
-
-func renderTemplateDescription(w http.ResponseWriter, tmpl string, p *updateDescription) {
-	err := templates.ExecuteTemplate(w, tmpl+".html", p)
-	if err != nil {
-		log.Println(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-}
-
-func renderTemplateEmail(w http.ResponseWriter, tmpl string, p *updateEmail) {
-	err := templates.ExecuteTemplate(w, tmpl+".html", p)
-	if err != nil {
-		log.Println(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-}
-
-func renderTemplatePassword(w http.ResponseWriter, tmpl string, p *updatePassword) {
-	err := templates.ExecuteTemplate(w, tmpl+".html", p)
-	if err != nil {
-		log.Println(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-}
-
-// Handle error when having wrong password and let user to re-enter password
-func errorPasswordHandler(w http.ResponseWriter, r *http.Request) {
-	p := profile{}
-	renderTemplate(w, "loginError", &p)
+func renderHome(w http.ResponseWriter, r *http.Request) {
+	http.Redirect(w, r, accountLoginURLPath, http.StatusFound)
 }
 
 // When user need to log out, this handler would erase the cookie to clean up the log in status.
-func logoutHandler(w http.ResponseWriter, r *http.Request) {
+func renderLogout(w http.ResponseWriter, r *http.Request) {
 	logOutCookie := http.Cookie{Name: "V",
 		Path:   "/",
 		MaxAge: -1}
@@ -715,29 +516,26 @@ func main() {
 
 	router := mux.NewRouter()
 
-	router.HandleFunc("/accounts/{id:[^@]+}", accountHandler).
+	router.HandleFunc(accountPublicProfileURLPath, renderPublicProfile).
 		Methods("GET")
-	router.HandleFunc("/edit/", editHandler)
-	router.HandleFunc("/save/", saveEditedInfo)
-	router.HandleFunc("/register/", registerHandler).
+	router.HandleFunc(accountEditURLPath, renderProfileEdit).
 		Methods("GET")
-	router.HandleFunc("/create/", createHandler).
+	router.HandleFunc(accountEditURLPath, submitProfileEdit).
 		Methods("POST")
-	router.HandleFunc(loginURLPath, loginSubmitHandler).
+	router.HandleFunc(accountRegisterURLPath, renderAccountCreate).
+		Methods("GET")
+	router.HandleFunc(accountRegisterURLPath, submitAccountCreate).
 		Methods("POST")
-	router.HandleFunc(loginURLPath, loginHandler).
+	router.HandleFunc(accountLoginURLPath, submitAccountLogin).
+		Methods("POST")
+	router.HandleFunc(accountLoginURLPath, renderAccountLogin).
 		Methods("GET")
-	router.HandleFunc("/", homeHandler).
+	router.HandleFunc(homeURLPath, renderHome).
 		Methods("GET")
-	router.HandleFunc(ownAccountURLPath, myAccountHandler)
-	router.HandleFunc("/logout/", logoutHandler).
+	router.HandleFunc(accountPrivateProfileURLPath, renderPrivateProfile).
 		Methods("GET")
-	router.HandleFunc("/loginError/", errorPasswordHandler).
+	router.HandleFunc(accountLogoutURLPath, renderLogout).
 		Methods("GET")
-	router.HandleFunc("/password/", passwordHandler)
-	router.HandleFunc("/passwordsave/", passwordSaveHandler)
-	router.HandleFunc("/editEmail/", editEmailHandler)
-	router.HandleFunc("/emailSave/", emailSaveHandler)
 	log.Println("Listening on port 5000...")
 	log.Println(http.ListenAndServe(":5000", router))
 }

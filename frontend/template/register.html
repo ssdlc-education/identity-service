@@ -1,3 +1,4 @@
+<html>
 <head>
   <title>Register New User</title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
@@ -8,23 +9,25 @@
 <body>
 <nav class="navbar navbar-primary bg-primary">
   <h1 style="color: #FFFFFF">Register</h1>
+  <a style="float: right" class = "btn btn-primary" href = "{{.HomeURLPath}}" role = "button">Home</a>
 </nav>
 <div style="background: red; width: 100%; text-align: center; vertical-align: middle;">{{.ErrorMessage}}</div>
-<form action="/create/" method="POST" class="col-md-10 col-lg-6 col-xl-6">
+<form action="{{.AccountRegisterURLPath}}" method="POST" class="col-md-10 col-lg-6 col-xl-6">
   <div class = "form-group">
     <label for = "Username">Username</label>
-    <input class="form-control" type="text" placeholder="Username" name = "username" required>
+    <input class="form-control" type="text" placeholder="Username" name = "username" value="{{.Username}}" required>
     <label for = "Email">Email</label>
-    <input class="form-control" type="text" placeholder="Email" name = "email" required>
+    <input class="form-control" type="text" placeholder="Email" name = "email" value="{{.Email}}" required>
     <label for = "Firstname">Firstname</label>
-    <input class="form-control" type="text" placeholder="Your Firstname" name = "firstname" required>
+    <input class="form-control" type="text" placeholder="Your Firstname" name = "firstname" value="{{.Firstname}}" required>
     <label for = "Lastname">Lastname</label>
-    <input class="form-control" type="text" placeholder="Your Lastname" name = "lastname" required>
+    <input class="form-control" type="text" placeholder="Your Lastname" name = "lastname" value="{{.Lastname}}" required>
     <label for = "psw">Password</label>
     <input class="form-control" type="password" placeholder="Enter Password" name = "password" required>
     <label for = "description">Description</label>
-    <input class="form-control" type="text" placeholder="Self Description" name = "description" required>
+    <input class="form-control" type="text" placeholder="Self Description" name = "description" value="{{.Description}}" required>
   </div>
   <div><input class = "btn btn-primary" type="submit" name="register" value="Register" style="margin-top: 20px; margin-left: 30px"></div>
 </form>
 </body>
+</html>
