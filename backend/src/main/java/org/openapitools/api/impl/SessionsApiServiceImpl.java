@@ -1,8 +1,8 @@
 package org.openapitools.api.impl;
 
-import com.yahoo.identity.Identity;
-import com.yahoo.identity.IdentityException;
-import com.yahoo.identity.services.session.LoggedInSession;
+import com.verizonmedia.identity.Identity;
+import com.verizonmedia.identity.services.session.LoggedInSession;
+import org.openapitools.api.Cookies;
 import org.openapitools.api.NotFoundException;
 import org.openapitools.api.SessionsApiService;
 import org.openapitools.model.Session;
@@ -23,12 +23,11 @@ public class SessionsApiServiceImpl extends SessionsApiService {
 
     @Override
     public Response createSession(Session session, SecurityContext securityContext) throws NotFoundException {
-        LoggedInSession
-            loggedInSession =
+        LoggedInSession loggedInSession =
             identity.getSessionService().newSessionWithPassword(session.getUsername(), session.getPassword());
 
         String cookieStr = loggedInSession.getCredential().toString();
-        NewCookie cookie = new NewCookie("V", cookieStr);
+        NewCookie cookie = new NewCookie(Cookies.NAME_CREDENTIAL, cookieStr);
 
         return Response.status(Response.Status.CREATED).entity("The session is created successfully").cookie(cookie)
             .build();

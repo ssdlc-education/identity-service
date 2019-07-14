@@ -1,6 +1,6 @@
 package org.openapitools.api.impl;
 
-import com.yahoo.identity.Identity;
+import com.verizonmedia.identity.Identity;
 import org.openapitools.api.ApiResponseMessage;
 import org.openapitools.api.NotFoundException;
 import org.openapitools.api.VerificationsApiService;
@@ -22,12 +22,14 @@ public class VerificationsApiServiceImpl extends VerificationsApiService {
     @Override
     public Response createVerification(Verification verification, SecurityContext securityContext)
         throws NotFoundException {
+        // TODO Not yet implemented
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
 
     @Override
     public Response updateVerification(Verification verification, SecurityContext securityContext)
         throws NotFoundException {
+        // TODO Not yet implemented
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
 }

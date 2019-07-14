@@ -1,9 +1,9 @@
 package org.openapitools.api.impl;
 
-import com.yahoo.identity.Identity;
-import com.yahoo.identity.IdentityError;
-import com.yahoo.identity.IdentityException;
-import com.yahoo.identity.services.session.LoggedInSession;
+import com.verizonmedia.identity.Identity;
+import com.verizonmedia.identity.IdentityError;
+import com.verizonmedia.identity.IdentityException;
+import com.verizonmedia.identity.services.session.LoggedInSession;
 import org.openapitools.api.CookieParser;
 import org.openapitools.api.Cookies;
 import org.openapitools.api.NotFoundException;
@@ -29,14 +29,10 @@ public class TokensApiServiceImpl extends TokensApiService {
 
     @Override
     public Response createToken(String cookieStr, Token tokenModel, SecurityContext securityContext) throws NotFoundException {
-        HttpCookie cookie = cookieParser.parse(cookieStr)
-            .getFirstByName(Cookies.NAME_CREDENTIAL)
-            .orElseThrow(() -> new IdentityException(
-                IdentityError.INVALID_CREDENTIAL,
-                "Missing cookie or invalid cookie header"));
+        String credential = cookieParser.parse(cookieStr).getCredential();
         LoggedInSession loggedInSession =
-            identity.getSessionService().newSessionWithCredential(cookie.getValue());
-        com.yahoo.identity.services.token.Token token = loggedInSession.createToken();
+            identity.getSessionService().newSessionWithCredential(credential);
+        com.verizonmedia.identity.services.token.Token token = loggedInSession.createToken();
         tokenModel.setValue(token.toString());
 
         return Response.status(Response.Status.CREATED).entity(tokenModel).build();

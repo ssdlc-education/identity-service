@@ -1,11 +1,11 @@
 package org.openapitools.api.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.yahoo.identity.Identity;
-import com.yahoo.identity.services.account.Account;
-import com.yahoo.identity.services.account.AccountUpdate;
-import com.yahoo.identity.services.session.LoggedInSession;
-import com.yahoo.identity.services.session.Session;
+import com.verizonmedia.identity.Identity;
+import com.verizonmedia.identity.services.account.Account;
+import com.verizonmedia.identity.services.account.AccountUpdate;
+import com.verizonmedia.identity.services.session.LoggedInSession;
+import com.verizonmedia.identity.services.session.Session;
 import org.openapitools.api.AccountsApiService;
 import org.openapitools.api.CookieParser;
 import org.openapitools.api.Cookies;
@@ -52,7 +52,7 @@ public class AccountsApiServiceImpl extends AccountsApiService {
         final boolean emailStatus = true;
         String credStr = cookieParser.parse(cookieStr).getCredential();
         LoggedInSession loggedInSession = identity.getSessionService().newSessionWithCredential(credStr);
-        com.yahoo.identity.services.account.Account account = loggedInSession.getAccount();
+        Account account = loggedInSession.getAccount();
 
         org.openapitools.model.Account accountModel = new org.openapitools.model.Account();
         accountModel.setUsername(account.getUsername());
@@ -106,9 +106,9 @@ public class AccountsApiServiceImpl extends AccountsApiService {
         String credStr = cookieParser.parse(cookieStr).getCredential();
         LoggedInSession loggedInSession =
             identity.getSessionService().newSessionWithCredential(credStr);
-        loggedInSession.validateTokenString(token);
 
-        AccountUpdate accountUpdate = loggedInSession.newAccountUpdate();
+        AccountUpdate accountUpdate = loggedInSession.newAccountUpdate()
+            .setToken(token);
 
         String email = account.getEmail();
         String password = account.getPassword();

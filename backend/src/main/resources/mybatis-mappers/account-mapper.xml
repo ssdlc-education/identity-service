@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTd Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 
-<mapper namespace="com.yahoo.identity.services.storage.sql.AccountMapper">
+<mapper namespace="com.verizonmedia.identity.services.storage.sql.AccountMapper">
     <insert id="insertAccount" parameterType="AccountModel" keyProperty="account.username" useGeneratedKeys="false">
         INSERT INTO `account` (`username`, `first_name`, `last_name`, `email`, `email_verified`, `password_hash`,
         `create_ts`, `update_ts`, `description`, `block_until_ts`, `consecutive_fails`)
         VALUES (
-        #{account.username, jdbcType=VARCHAR},
-        #{account.firstName, jdbcType=VARCHAR},
-        #{account.lastName, jdbcType=VARCHAR},
-        #{account.email, jdbcType=VARCHAR},
+        "${account.username}",
+        "${account.firstName}",
+        "${account.lastName}",
+        "${account.email}",
         #{account.emailVerified, jdbcType=BOOLEAN},
-        #{account.passwordHash, jdbcType=VARCHAR},
+        "${account.passwordHash}",
         #{account.createTs, jdbcType=BIGINT},
         #{account.updateTs, jdbcType=BIGINT},
-        #{account.description, jdbcType=VARCHAR},
+        "${account.description}",
         #{account.blockUntilTs, jdbcType=BIGINT},
         #{account.consecutiveFails, jdbcType=INTEGER}
         )
@@ -43,36 +43,36 @@
     <select id="getAccount" resultMap="accountResultMap">
         SELECT username, first_name, last_name, email, email_verified, password_hash, create_ts,
         update_ts, description, block_until_ts, consecutive_fails FROM account
-        WHERE username = #{username}
+        WHERE username = "${username}"
     </select>
 
     <select id="getAccountForUpdate" resultMap="accountResultMap">
         SELECT username, first_name, last_name, email, email_verified, password_hash, create_ts,
         update_ts, description, block_until_ts, consecutive_fails FROM account
-        WHERE username = #{username} FOR UPDATE
+        WHERE username = "${username}" FOR UPDATE
     </select>
 
     <select id="getPublicAccount" resultMap="publicAccountResultMap">
         SELECT username, description FROM account
-        WHERE username = #{username}
+        WHERE username = "${username}"
     </select>
 
     <update id="updateAccount" parameterType="AccountModel" keyProperty="account.username" useGeneratedKeys="false">
         Update `account` SET
         <if test="account.email != null">
-            `email` = #{account.email, jdbcType=VARCHAR},
+            `email` = "${account.email}",
         </if>
         <if test="account.emailVerified != null">
             `email_verified` = #{account.emailVerified, jdbcType=BOOLEAN},
         </if>
         <if test="account.passwordHash != null">
-            `password_hash` = #{account.passwordHash, jdbcType=VARCHAR},
+            `password_hash` = "${account.passwordHash}",
         </if>
         <if test="account.updateTs != null">
             `update_ts` = #{account.updateTs, jdbcType=BIGINT},
         </if>
         <if test="account.description != null">
-            `description` = #{account.description, jdbcType=VARCHAR},
+            `description` = "${account.description}",
         </if>
         <if test="account.blockUntilTs != null">
             `block_until_ts` = #{account.blockUntilTs, jdbcType=BIGINT},
@@ -81,6 +81,6 @@
             `consecutive_fails` = #{account.consecutiveFails, jdbcType=INTEGER}
         </if>
         WHERE
-        `username` = #{account.username, jdbcType=VARCHAR}
+        `username` = "${account.username}"
     </update>
 </mapper>
