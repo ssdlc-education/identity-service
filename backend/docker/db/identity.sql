@@ -4,7 +4,7 @@ CREATE TABLE account(
     first_name VARCHAR(10) NOT NULL,
     last_name VARCHAR(10) NOT NULL,
     email VARCHAR(256) NOT NULL,
-    email_status TINYINT NOT NULL,
+    email_verified BOOLEAN NOT NULL,
     password_hash VARCHAR(512) NOT NULL,
     create_ts BIGINT NOT NULL,
     update_ts BIGINT NOT NULL,

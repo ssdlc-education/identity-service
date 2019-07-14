@@ -8,7 +8,7 @@ public class AccountModel {
     private String firstName;
     private String lastName;
     private String email;
-    private boolean emailStatus;
+    private boolean emailVerified;
     private String passwordHash;
     private String description;
     private long createTs;
@@ -49,12 +49,12 @@ public class AccountModel {
         this.email = email;
     }
 
-    public boolean getEmailStatus() {
-        return this.emailStatus;
+    public boolean isEmailVerified() {
+        return this.emailVerified;
     }
 
-    public void setEmailStatus(@Nonnull boolean emailStatus) {
-        this.emailStatus = emailStatus;
+    public void setEmailVerified(boolean emailVerified) {
+        this.emailVerified = emailVerified;
     }
 
     public String getDescription() {
@@ -85,7 +85,7 @@ public class AccountModel {
         return this.updateTs;
     }
 
-    public void setUpdateTs(@Nonnull long updateTs) {
+    public void setUpdateTs(long updateTs) {
         this.updateTs = updateTs;
     }
 
@@ -93,7 +93,7 @@ public class AccountModel {
         return this.blockUntilTs;
     }
 
-    public void setBlockUntilTs(@Nonnull long blockUntilTs) {
+    public void setBlockUntilTs(long blockUntilTs) {
         this.blockUntilTs = blockUntilTs;
     }
 
@@ -101,7 +101,7 @@ public class AccountModel {
         return this.consecutiveFails;
     }
 
-    public void setConsecutiveFails(@Nonnull int consecutiveFails) {
+    public void setConsecutiveFails(int consecutiveFails) {
         this.consecutiveFails = consecutiveFails;
     }
 }

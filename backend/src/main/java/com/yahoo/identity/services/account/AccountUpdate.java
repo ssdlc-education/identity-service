@@ -10,10 +10,10 @@ import javax.annotation.Nullable;
 public interface AccountUpdate {
 
     @Nonnull
-    AccountUpdate setEmail(@Nullable String email);
+    AccountUpdate setEmail(@Nonnull String email);
 
     @Nonnull
-    AccountUpdate setEmailStatus(@Nonnull boolean emailStatus);
+    AccountUpdate setEmailStatus(boolean emailStatus);
 
     @Nonnull
     AccountUpdate setPassword(@Nonnull String password);

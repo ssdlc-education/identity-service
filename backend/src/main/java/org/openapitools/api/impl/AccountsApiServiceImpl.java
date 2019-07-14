@@ -68,7 +68,6 @@ public class AccountsApiServiceImpl extends AccountsApiService {
 
     @Override
     public Response createAccount(org.openapitools.model.Account account, SecurityContext securityContext) throws NotFoundException {
-        final boolean emailStatus = true;
         Session session = identity.getSessionService().newAnonymousSession();
 
         session.sessionAccountCreate()
@@ -76,10 +75,7 @@ public class AccountsApiServiceImpl extends AccountsApiService {
             .setFirstName(account.getFirstName())
             .setLastName(account.getLastName())
             .setEmail(account.getEmail())
-            .setEmailStatus(emailStatus)
             .setPassword(account.getPassword())
-            .setCreateTime(Instant.now())
-            .setUpdateTime(Instant.now())
             .setDescription(account.getDescription())
             .create();
 

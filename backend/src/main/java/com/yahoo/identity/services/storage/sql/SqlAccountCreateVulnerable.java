@@ -4,11 +4,10 @@ import com.yahoo.identity.IdentityError;
 import com.yahoo.identity.IdentityException;
 import com.yahoo.identity.services.account.AccountCreate;
 import com.yahoo.identity.services.storage.AccountModel;
+import com.yahoo.identity.services.system.SystemService;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
-
-import java.time.Instant;
 
 import javax.annotation.Nonnull;
 
@@ -16,10 +15,14 @@ import javax.annotation.Nonnull;
 public class SqlAccountCreateVulnerable implements AccountCreate {
 
     private final SqlSessionFactory sqlSessionFactory;
+    private final SystemService systemService;
     private final AccountModel account = new AccountModel();
 
-    public SqlAccountCreateVulnerable(@Nonnull SqlSessionFactory sqlSessionFactory) {
+    public SqlAccountCreateVulnerable(
+        @Nonnull SqlSessionFactory sqlSessionFactory,
+        @Nonnull SystemService systemService) {
         this.sqlSessionFactory = sqlSessionFactory;
+        this.systemService = systemService;
     }
 
     @Override
@@ -52,29 +55,8 @@ public class SqlAccountCreateVulnerable implements AccountCreate {
 
     @Override
     @Nonnull
-    public AccountCreate setEmailStatus(@Nonnull boolean emailStatus) {
-        account.setEmailStatus(emailStatus);
-        return this;
-    }
-
-    @Override
-    @Nonnull
     public AccountCreate setPassword(@Nonnull String password) {
         account.setPasswordHash(DigestUtils.md5Hex(password));
-        return this;
-    }
-
-    @Override
-    @Nonnull
-    public AccountCreate setCreateTime(@Nonnull Instant createTime) {
-        account.setCreateTs(createTime.toEpochMilli());
-        return this;
-    }
-
-    @Override
-    @Nonnull
-    public AccountCreate setUpdateTime(@Nonnull Instant updateTime) {
-        account.setUpdateTs(updateTime.toEpochMilli());
         return this;
     }
 
@@ -88,6 +70,9 @@ public class SqlAccountCreateVulnerable implements AccountCreate {
     @Nonnull
     @Override
     public String create() throws IdentityException {
+        account.setCreateTs(systemService.currentTimeMillis());
+        account.setUpdateTs(systemService.currentTimeMillis());
+        account.setEmailVerified(false);
         try (SqlSession session = sqlSessionFactory.openSession()) {
             AccountMapper mapper = session.getMapper(AccountMapper.class);
             try {

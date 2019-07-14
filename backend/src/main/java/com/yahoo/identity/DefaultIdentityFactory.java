@@ -27,6 +27,6 @@ public class DefaultIdentityFactory implements IdentityFactory {
         TokenService tokenService = new TokenServiceImpl(keyService);
         SessionService sessionService = new SessionServiceImpl(sqlStorage, keyService, tokenService);
 
-        return new Identity(sessionService, tokenService);
+        return new Identity(sessionService);
     }
 }

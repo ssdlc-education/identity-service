@@ -7,8 +7,6 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 
-import java.time.Instant;
-
 import javax.annotation.Nonnull;
 
 public class SqlAccountUpdateVulnerable implements AccountUpdate {
@@ -31,7 +29,7 @@ public class SqlAccountUpdateVulnerable implements AccountUpdate {
     @Override
     @Nonnull
     public AccountUpdate setEmailStatus(@Nonnull boolean emailStatus) {
-        account.setEmailStatus(emailStatus);
+        account.setEmailVerified(emailStatus);
         return this;
     }
 
