@@ -63,8 +63,8 @@ public class AccountCreateImpl implements AccountCreate {
 
     @Nonnull
     @Override
-    public AccountCreate setDescription(@Nonnull String title) {
-        account.setDescription(title);
+    public AccountCreate setDescription(@Nonnull String description) {
+        account.setDescription(description);
         return this;
     }
 
@@ -78,8 +78,9 @@ public class AccountCreateImpl implements AccountCreate {
         Validate.notNull(account.getEmail(), "email must be set");
         Validate.notNull(account.getDescription(), "description must be set");
 
-        account.setCreateTs(systemService.currentTimeMillis());
-        account.setUpdateTs(systemService.currentTimeMillis());
+        long nowMs = systemService.currentTimeMillis();
+        account.setCreateTs(nowMs);
+        account.setUpdateTs(nowMs);
         account.setEmailVerified(false);
 
         storage.createAccount(account);
