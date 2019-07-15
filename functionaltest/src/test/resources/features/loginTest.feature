@@ -19,8 +19,8 @@ Feature: Login account
     And I see in the field "lastname" there is "<lastname>"
     Examples:
     | username | password | usrname | firstname | lastname | email | description |
-    | Alice    | PASSWORD | Username: Alice   | Firstname: Alice     | Lastname: Demo     | Email: alice@gmail.com | Description: Test account for Alice |
-    | Bob    | PASSWORD | Username: Bob   | Firstname: Bob     | Lastname: Demo     | Email: Bob@gmail.com | Description: Test account for Bob |
+    | Alice    | PASSWORD | Username: Alice   | FirstName: Alice     | LastName: Demo     | Email: alice@gmail.com | Description: Test account for Alice |
+    | Bob    | PASSWORD | Username: Bob   | FirstName: Bob     | LastName: Demo     | Email: bob@gmail.com | Description: Test account for Bob |
 
   Scenario: Failed Login
     When I fill in "username" with "Alice"
@@ -35,7 +35,7 @@ Feature: Login account
     And I should be on the page with URL "http://localhost:5000/account/view"
     And I click on the "logout" button
     Then I should be on the page with URL "http://localhost:5000/account/login"
-#
+
 #  Scenario: Blocked Login
 #    When I fill in "username" with "Alice"
 #    And I fill in "password" with "PASS"
@@ -55,9 +55,5 @@ Feature: Login account
 #    When I fill in "username" with "Alice"
 #    And I fill in "password" with "PASS"
 #    And I click on the "login" button
-#    When I fill in "username" with "Alice"
-#    And I fill in "password" with "PASSWORD"
-#    And I click on the "login" button
 #    Then I should be on the page with URL "http://localhost:5000/account/login"
 #    Then I see the error message "Account not found or incorrect password"
-
