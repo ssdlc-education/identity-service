@@ -41,8 +41,8 @@ docker-compose exec identity-frontend /bin/bash
 ```
 Build and run the frontend server
 ```
-go build ./request_handler.go
-./request_handler
+go build
+./frontend
 ```
 When you are done, stop the container.
 ```
