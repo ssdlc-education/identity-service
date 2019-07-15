@@ -13,8 +13,6 @@ import org.openapitools.api.impl.SessionsApiServiceImpl;
 import org.openapitools.api.impl.TokensApiServiceImpl;
 import org.openapitools.api.impl.VerificationsApiServiceImpl;
 
-import javax.annotation.Nonnull;
-
 public class SingletonIdentityFactory {
 
     public static final AccountsApiService accountsApiService;
