@@ -56,12 +56,9 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public void verifyAccountPassword(@Nonnull String username, @Nonnull String password) {
-        AccountPasswordVerifier verifier = new AccountPasswordVerifier(
-            password,
-            passwordService,
-            systemService);
-        storage.getAndUpdateAccount(username, verifier);
-        if (!verifier.isVerified()) {
+        AccountModel account = storage.getAccount(username);
+        boolean verified = passwordService.verifyPasswordHash(password, account.getPasswordHash());
+        if (!verified) {
             throw new IdentityException(IdentityError.INVALID_PASSWORD, "Invalid password");
         }
     }

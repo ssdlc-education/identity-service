@@ -14,7 +14,6 @@ public interface Storage {
 
     void updateAccount(@Nonnull AccountModel accountModel);
 
-    @Nonnull
-    AccountModel getAndUpdateAccount(@Nonnull String username,
+    void getAndUpdateAccount(@Nonnull String username,
                                      @Nonnull AccountModelUpdater updater);
 }
