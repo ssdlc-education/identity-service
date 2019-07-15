@@ -52,14 +52,12 @@ public class SqlStorage implements Storage {
     }
 
     @Override
-    @Nonnull
-    public AccountModel getAndUpdateAccount(@Nonnull String username,
+    public void getAndUpdateAccount(@Nonnull String username,
                                             @Nonnull AccountModelUpdater updater) {
         try (SqlSession session = sqlSessionFactory.openSession()) {
             AccountMapper mapper = session.getMapper(AccountMapper.class);
-            AccountModel accountModel = updater.update(mapper.getAccountForUpdate(username));
-            mapper.updateAccount(accountModel);
-            return accountModel;
+            updater.update(mapper.getAccountForUpdate(username))
+                .ifPresent(mapper::updateAccount);
         } catch (Exception e) {
             // TODO Should correct distinguish the reason of the failure
             throw new IdentityException(IdentityError.INTERNAL_SERVER_ERROR,
