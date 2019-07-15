@@ -18,10 +18,10 @@ import javax.annotation.Nonnull;
 public class CredentialServiceImpl implements CredentialService {
 
     private static final String KEY_NAME = "identity-cookie";
-    private static final int EXPIRY_SEC = 86400;
-    private final AccountService accountService;
-    private final SystemService systemService;
-    private final Algorithm algorithm;
+    static final int EXPIRY_SEC = 86400;
+    final AccountService accountService;
+    final SystemService systemService;
+    final Algorithm algorithm;
 
     public CredentialServiceImpl(
         @Nonnull KeyService keyService,
@@ -46,7 +46,6 @@ public class CredentialServiceImpl implements CredentialService {
             .setAlgorithm(algorithm)
             .setSubject(username)
             .setIssueTime(now)
-            .setExpireTime(now.plusSeconds(EXPIRY_SEC))
             .build();
     }
 
@@ -54,22 +53,26 @@ public class CredentialServiceImpl implements CredentialService {
     @Nonnull
     public Credential fromString(@Nonnull String credStr) {
         try {
-            JWTVerifier verifier = JWT.require(algorithm)
-                .build();
-
+            JWTVerifier verifier = createVerifier();
             DecodedJWT jwt = verifier.verify(credStr);
-
-            Credential credential = new CredentialImpl.Builder()
-                .setAlgorithm(algorithm)
-                .setSubject(jwt.getSubject())
-                .setIssueTime(jwt.getIssuedAt().toInstant())
-                .setExpireTime(jwt.getExpiresAt().toInstant())
-                .build();
-            credential.validate();
-            return credential;
-
+            return buildCredentialFromJWT(jwt);
         } catch (JWTVerificationException e) {
             throw new IdentityException(IdentityError.INVALID_CREDENTIAL, "JWT verification does not succeed.", e);
         }
+    }
+
+    @Nonnull
+    private JWTVerifier createVerifier() {
+        return JWT.require(algorithm)
+            .build();
+    }
+
+    @Nonnull
+    Credential buildCredentialFromJWT(@Nonnull DecodedJWT jwt) {
+        return new CredentialImpl.Builder()
+            .setAlgorithm(algorithm)
+            .setSubject(jwt.getSubject())
+            .setIssueTime(jwt.getIssuedAt().toInstant())
+            .build();
     }
 }
