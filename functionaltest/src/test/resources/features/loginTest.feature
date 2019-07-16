@@ -5,13 +5,13 @@ Feature: Login account
   In order to see my personal information
 
   Background: Navigate to login page
-    Given I go to the page with URL "http://localhost:5000"
+    Given I go to the page with URL "http://identity-frontend:5000"
 
   Scenario Outline: Successful Login
     When I fill in "username" with "<username>"
     And I fill in "password" with "<password>"
     And I click on the "login" button
-    Then I should be on the page with URL "http://localhost:5000/account/view"
+    Then I should be on the page with URL "http://identity-frontend:5000/account/view"
     And I see in the field "username" there is "<usrname>"
     And I see in the field "email" there is "<email>"
     And I see in the field "description" there is "<description>"
@@ -32,9 +32,9 @@ Feature: Login account
     When I fill in "username" with "Alice"
     And I fill in "password" with "PASSWORD"
     And I click on the "login" button
-    And I should be on the page with URL "http://localhost:5000/account/view"
+    And I should be on the page with URL "http://identity-frontend:5000/account/view"
     And I click on the "logout" button
-    Then I should be on the page with URL "http://localhost:5000/account/login"
+    Then I should be on the page with URL "http://identity-frontend:5000/account/login"
 
 #  Scenario: Blocked Login
 #    When I fill in "username" with "Alice"
@@ -55,5 +55,5 @@ Feature: Login account
 #    When I fill in "username" with "Alice"
 #    And I fill in "password" with "PASS"
 #    And I click on the "login" button
-#    Then I should be on the page with URL "http://localhost:5000/account/login"
+#    Then I should be on the page with URL "http://identity-frontend:5000/account/login"
 #    Then I see the error message "Account not found or incorrect password"

@@ -41,7 +41,8 @@ services:
   identity-functest:
     build:
       context: ./functionaltest/docker
-    network_mode: "host"
+    networks:
+      - public-net
     working_dir: /root/code
     volumes:
       - ./functionaltest:/root/code

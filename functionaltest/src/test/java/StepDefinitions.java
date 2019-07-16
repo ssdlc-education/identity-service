@@ -4,15 +4,40 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 
 public class StepDefinitions {
+    private static final Logger logger = LoggerFactory.getLogger(StepDefinitions.class);
     private WebDriver driver;
+
+    private static final String SERVICE_URL = "http://identity-frontend:5000";
 
     @Before
     public void before() {
         driver = RunCucumberTest.getWebDriver();
     }
+
+    private String pageNameToURL(String pageName) {
+        String path;
+        switch (pageName) {
+            case "home":
+                path = "";
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid page name " + pageName);
+        }
+        return SERVICE_URL + path;
+    }
+
+    @When("^I go to \"([^\"]*)\" page$")
+    public void goToPage(String pageName) {
+        String url = pageNameToURL(pageName);
+        driver.get(url);
+        logger.info("Go to page {}", url);
+    }
+
 
     @Given("^I go to the page with URL \"([^\"]*)\"$")
     public void i_go_to_the_page_with_URL(String url) {
@@ -46,4 +71,5 @@ public class StepDefinitions {
     public void i_should_be_on_the_page_with_URL(String url) {
         Assert.assertEquals(driver.getCurrentUrl(), url);
     }
+
 }
