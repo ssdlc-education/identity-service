@@ -8,21 +8,26 @@ import cucumber.api.java.en.When;
 import java.util.concurrent.TimeUnit;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.testng.Assert;
 
 public class step {
     public static WebDriver driver;
     @Before
     public void setup() {
-        System.setProperty("webdriver.gecko.driver","/usr/local/bin/geckodriver");
-        driver = new FirefoxDriver();
+        ChromeOptions chromeOptions = new ChromeOptions();
+        chromeOptions.setBinary("/usr/bin/google-chrome");
+        chromeOptions.addArguments("--headless");
+        System.setProperty("webdriver.chrome.driver","/usr/bin/chromedriver");
+        driver = new ChromeDriver(chromeOptions);
         driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
     }
 
     @Given("^I go to the page with URL \"([^\"]*)\"$")
     public void i_go_to_the_page_with_URL(String url) {
         driver.get(url);
+        System.out.println(driver.getCurrentUrl());
     }
 
     @When("^I fill in \"([^\"]*)\" with \"([^\"]*)\"$")

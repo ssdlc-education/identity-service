@@ -23,6 +23,6 @@ Feature: Sign up new account
     Examples:
       | username  | password | firstname | lastname | email               | description            | user                | first            | last           | mail                       | desc                                |
       | test_user | PASSWORD | test      | user     | test_user@gmail.com | Test account           | Username: test_user | FirstName: test  | LastName: user | Email: test_user@gmail.com | Description: Test account           |
-#      | Alice     | PASSWORD | Alice     | Demo     | alice@gmail.com     | Test account for Alice | Username: Alice     | FirstName: Alice | LastName: Demo | Email: alice@gmail.com     | Description: Test account for Alice |
-#      | Bob       | PASSWORD | Bob       | Demo     | bob@gmail.com       | Test account for Bob   | Username: Bob       | FirstName: Bob   | LastName: Demo | Email: bob@gmail.com       | Description: Test account for Bob   |
+      | Alice     | PASSWORD | Alice     | Demo     | alice@gmail.com     | Test account for Alice | Username: Alice     | FirstName: Alice | LastName: Demo | Email: alice@gmail.com     | Description: Test account for Alice |
+      | Bob       | PASSWORD | Bob       | Demo     | bob@gmail.com       | Test account for Bob   | Username: Bob       | FirstName: Bob   | LastName: Demo | Email: bob@gmail.com       | Description: Test account for Bob   |
 

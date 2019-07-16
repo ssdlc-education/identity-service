@@ -15,3 +15,6 @@ script:
   - docker-compose exec -d identity-frontend ./server
   - sleep 30
   - echo [TODO] Run functional test
+  - docker-compose exec -d identity-functest mvn test -Dcucumber.options="--tags @registerTest"
+  - docker-compose exec -d identity-functest mvn test -Dcucumber.options="--tags @loginTest,@updateTest"
+  - sleep 10
