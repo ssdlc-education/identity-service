@@ -15,8 +15,8 @@ import javax.annotation.Nonnull;
 public class TokenServiceImpl implements TokenService {
 
     private static final String KEY_NAME = "identity-token";
-    private final Algorithm algorithm;
-    private final SystemService systemService;
+    final Algorithm algorithm;
+    final SystemService systemService;
 
     public TokenServiceImpl(@Nonnull KeyService keyService, @Nonnull SystemService systemService) {
         this.algorithm = createAlgorithm(keyService);
@@ -40,17 +40,20 @@ public class TokenServiceImpl implements TokenService {
         try {
             JWTVerifier verifier = JWT.require(algorithm).build();
             DecodedJWT jwt = verifier.verify(tokenStr);
-            Token token = new TokenImpl.Builder()
-                .setSystemService(systemService)
-                .setAlgorithm(algorithm)
-                .setSubject(jwt.getSubject())
-                .setIssueTime(jwt.getIssuedAt().toInstant())
-                .setExpireTime(jwt.getExpiresAt().toInstant())
-                .build();
-            token.validate();
-            return token;
+            return createTokenFromJWT(jwt);
         } catch (JWTVerificationException e) {
             throw new IdentityException(IdentityError.INVALID_CREDENTIAL, "JWT verification does not succeed.", e);
         }
+    }
+
+    @Nonnull
+    Token createTokenFromJWT(@Nonnull DecodedJWT jwt) {
+        return new TokenImpl.Builder()
+            .setSystemService(systemService)
+            .setAlgorithm(algorithm)
+            .setSubject(jwt.getSubject())
+            .setIssueTime(jwt.getIssuedAt().toInstant())
+            .setExpireTime(jwt.getIssuedAt().toInstant())
+            .build();
     }
 }

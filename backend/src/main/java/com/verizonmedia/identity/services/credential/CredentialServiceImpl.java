@@ -46,6 +46,7 @@ public class CredentialServiceImpl implements CredentialService {
             .setAlgorithm(algorithm)
             .setSubject(username)
             .setIssueTime(now)
+            .setExpireTime(now.plusSeconds(EXPIRY_SEC))
             .build();
     }
 
@@ -73,6 +74,7 @@ public class CredentialServiceImpl implements CredentialService {
             .setAlgorithm(algorithm)
             .setSubject(jwt.getSubject())
             .setIssueTime(jwt.getIssuedAt().toInstant())
+            .setExpireTime(jwt.getIssuedAt().toInstant())
             .build();
     }
 }

@@ -262,7 +262,7 @@ func renderProfileEdit(w http.ResponseWriter, r *http.Request) {
 	}
 	defer response.Body.Close()
 	bodyBytes, err := ioutil.ReadAll(response.Body)
-	if err != nil {
+	if err != nil || response.StatusCode != http.StatusCreated {
 		log.Println("error occurred when reading response", err)
 		http.Redirect(w, r, accountLoginURLPath, http.StatusFound)
 		return
