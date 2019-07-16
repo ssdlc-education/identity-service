@@ -15,6 +15,7 @@ public class CredentialImpl implements Credential {
 
     public static class Builder {
         private Instant issueTime;
+        private Instant expireTime;
         private String subject;
         private Algorithm algorithm;
 
@@ -31,6 +32,12 @@ public class CredentialImpl implements Credential {
         }
 
         @Nonnull
+        public Builder setExpireTime(@Nonnull Instant expireTime) {
+            this.expireTime = expireTime;
+            return this;
+        }
+
+        @Nonnull
         public Builder setSubject(@Nonnull String subject) {
             this.subject = subject;
             return this;
@@ -39,6 +46,7 @@ public class CredentialImpl implements Credential {
         @Nonnull
         public CredentialImpl build() {
             Validate.notNull(issueTime, "Issue time is required");
+            Validate.notNull(expireTime, "Expiry time is required");
             Validate.notNull(subject, "Subject is required");
             Validate.notNull(algorithm, "Algorithm is required");
             return new CredentialImpl(this);
@@ -47,30 +55,32 @@ public class CredentialImpl implements Credential {
 
     private final Algorithm algorithm;
     private final Instant issueTime;
+    private final Instant expireTime;
     private final String subject;
 
     private CredentialImpl(@Nonnull Builder builder) {
         algorithm = builder.algorithm;
         issueTime = builder.issueTime;
         subject = builder.subject;
+        expireTime = builder.expireTime;
     }
 
     @Override
     @Nonnull
     public Instant getIssueTime() {
-        return this.issueTime;
+        return issueTime;
     }
 
     @Override
     @Nonnull
     public Instant getExpireTime() {
-        return Instant.MAX;
+        return expireTime;
     }
 
     @Override
     @Nonnull
     public String getSubject() {
-        return this.subject;
+        return subject;
     }
 
     @Override
