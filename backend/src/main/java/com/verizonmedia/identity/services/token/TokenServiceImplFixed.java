@@ -1,6 +1,7 @@
 package com.verizonmedia.identity.services.token;
 
 import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.verizonmedia.identity.services.key.KeyService;
 import com.verizonmedia.identity.services.system.SystemService;
 
@@ -24,4 +25,14 @@ public class TokenServiceImplFixed extends TokenServiceImpl {
                                 (RSAPrivateKey) keyService.getPrivateKey(KEY_NAME, "RSA"));
     }
 
+    @Nonnull
+    Token createTokenFromJWT(@Nonnull DecodedJWT jwt) {
+        return new TokenImpl.Builder()
+            .setSystemService(systemService)
+            .setAlgorithm(algorithm)
+            .setSubject(jwt.getSubject())
+            .setIssueTime(jwt.getIssuedAt().toInstant())
+            .setExpireTime(jwt.getExpiresAt().toInstant())
+            .build();
+    }
 }

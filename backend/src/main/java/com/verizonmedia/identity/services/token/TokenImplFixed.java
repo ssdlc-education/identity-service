@@ -13,14 +13,14 @@ import java.util.Date;
 
 import javax.annotation.Nonnull;
 
-public class TokenImpl implements Token {
+public class TokenImplFixed implements Token {
 
     public static class Builder {
-        Instant issueTime;
-        Instant expireTime;
-        String subject;
-        Algorithm algorithm;
-        SystemService systemService;
+        private Instant issueTime;
+        private Instant expireTime;
+        private String subject;
+        private Algorithm algorithm;
+        private SystemService systemService;
 
         @Nonnull
         public Builder setIssueTime(@Nonnull Instant issueTime) {
@@ -53,13 +53,13 @@ public class TokenImpl implements Token {
         }
 
         @Nonnull
-        public TokenImpl build() {
+        public TokenImplFixed build() {
             Validate.notNull(issueTime, "Issue time cannot be null");
             Validate.notNull(expireTime, "Expiration time cannot be null");
             Validate.notNull(subject, "Subject cannot be null");
             Validate.notNull(algorithm, "Algorithm cannot be null");
             Validate.notNull(systemService, "System service cannot be null");
-            return new TokenImpl(this);
+            return new TokenImplFixed(this);
         }
     }
 
@@ -69,7 +69,7 @@ public class TokenImpl implements Token {
     private final String subject;
     private final SystemService systemService;
 
-    private TokenImpl(@Nonnull Builder builder) {
+    private TokenImplFixed(@Nonnull Builder builder) {
         this.algorithm = builder.algorithm;
         this.issueTime = builder.issueTime;
         this.expireTime = builder.expireTime;
@@ -82,6 +82,7 @@ public class TokenImpl implements Token {
     public String toString() {
         try {
             return JWT.create()
+                .withExpiresAt(Date.from(this.expireTime))
                 .withIssuedAt(Date.from(this.issueTime))
                 .withSubject(this.subject)
                 .sign(algorithm);
