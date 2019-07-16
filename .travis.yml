@@ -16,6 +16,6 @@ script:
   - sleep 30
   - echo Run functional test
   - docker-compose exec identity-functest mvn clean
-  - docker-compose exec identity-functest mvn verify -Dcucumber.options="--tags @registerTest"
-  - docker-compose exec identity-functest mvn verify -Dcucumber.options="--tags @loginTest,@updateTest"
+  - docker-compose exec identity-functest mvn test -Dcucumber.options="--tags @registerTest"
+  - docker-compose exec identity-functest mvn test -Dcucumber.options="--tags @loginTest,@updateTest"
   - sleep 10

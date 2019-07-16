@@ -1,27 +1,17 @@
-package stepdefs;
-
-import cucumber.api.java.After;
-import cucumber.api.java.Before;
-import cucumber.api.java.en.Given;
-import cucumber.api.java.en.Then;
-import cucumber.api.java.en.When;
-import java.util.concurrent.TimeUnit;
+import io.cucumber.java.Before;
+import io.cucumber.java.en.Given;
+import io.cucumber.java.en.Then;
+import io.cucumber.java.en.When;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
 import org.testng.Assert;
 
-public class step {
-    public static WebDriver driver;
+public class StepDefinitions {
+    private WebDriver driver;
+
     @Before
-    public void setup() {
-        ChromeOptions chromeOptions = new ChromeOptions();
-        chromeOptions.setBinary("/usr/bin/google-chrome");
-        chromeOptions.addArguments("--headless");
-        System.setProperty("webdriver.chrome.driver","/usr/bin/chromedriver");
-        driver = new ChromeDriver(chromeOptions);
-        driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+    public void before() {
+        driver = RunCucumberTest.getWebDriver();
     }
 
     @Given("^I go to the page with URL \"([^\"]*)\"$")
@@ -55,10 +45,5 @@ public class step {
     @When("^I should be on the page with URL \"([^\"]*)\"$")
     public void i_should_be_on_the_page_with_URL(String url) {
         Assert.assertEquals(driver.getCurrentUrl(), url);
-    }
-
-    @After
-    public void finish() {
-        driver.quit();
     }
 }
