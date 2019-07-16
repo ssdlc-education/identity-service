@@ -2,17 +2,18 @@ package com.verizonmedia.identity.services.account;
 
 import static java.time.temporal.ChronoUnit.SECONDS;
 
+import com.verizonmedia.identity.services.storage.AccountModelUpdater;
 import com.verizonmedia.identity.IdentityError;
 import com.verizonmedia.identity.IdentityException;
 import com.verizonmedia.identity.services.password.PasswordService;
 import com.verizonmedia.identity.services.storage.AccountModel;
-import com.verizonmedia.identity.services.storage.AccountModelUpdater;
 import com.verizonmedia.identity.services.system.SystemService;
 import org.apache.commons.text.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.Instant;
+import java.util.Optional;
 
 import javax.annotation.Nonnull;
 
@@ -41,7 +42,7 @@ public class AccountPasswordVerifier implements AccountModelUpdater {
 
     @Nonnull
     @Override
-    public AccountModel update(@Nonnull AccountModel accountModel) {
+    public Optional<AccountModel> update(@Nonnull AccountModel accountModel) {
         verified = false;
         AccountModel newAccountModel = new AccountModel();
         long blockUntilTs = accountModel.getBlockUntilTs();
@@ -70,6 +71,6 @@ public class AccountPasswordVerifier implements AccountModelUpdater {
                 newAccountModel.setBlockUntilTs(0);
             }
         }
-        return newAccountModel;
+        return Optional.of(newAccountModel);
     }
 }

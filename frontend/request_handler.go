@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -491,7 +492,9 @@ func renderLogout(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	var backendAddr string
+	var listenPort int
 	flag.StringVar(&backendAddr, "backend", "identity-backend:8080", "backend IP and port")
+	flag.IntVar(&listenPort, "port", 5000, "Port to listen")
 	flag.Parse()
 	backendURL = "http://" + backendAddr + "/v1"
 	log.Printf("Backend URL: %s", backendURL)
@@ -518,6 +521,7 @@ func main() {
 		Methods("GET")
 	router.HandleFunc(accountLogoutURLPath, renderLogout).
 		Methods("GET")
-	log.Println("Listening on port http://localhost:5000 ...")
-	log.Println(http.ListenAndServe(":5000", router))
+	listenAddr := fmt.Sprintf(":%d", listenPort)
+	log.Printf("Listening on http://0.0.0.0:%d ...", listenPort)
+	log.Println(http.ListenAndServe(listenAddr, router))
 }
