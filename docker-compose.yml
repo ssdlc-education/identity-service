@@ -37,6 +37,16 @@ services:
       - "127.0.0.1:5000:5000"
     networks:
       - public-net
+
+  identity-functest:
+    build:
+      context: ./functionaltest/docker
+    network_mode: "host"
+    working_dir: /root/code
+    volumes:
+      - ./functionaltest:/root/code
+      - $HOME/.m2:/root/.m2
+      - /dev/shm:/dev/shm
 networks:
   public-net:
   private-net:
