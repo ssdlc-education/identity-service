@@ -2,8 +2,6 @@ package com.verizonmedia.identity.services.credential;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.verizonmedia.identity.IdentityError;
-import com.verizonmedia.identity.IdentityException;
 import com.verizonmedia.identity.Validate;
 
 import java.time.Instant;
@@ -11,10 +9,11 @@ import java.util.Date;
 
 import javax.annotation.Nonnull;
 
-public class CredentialImpl implements Credential {
+public class CredentialImplFixed implements Credential {
 
     public static class Builder {
         private Instant issueTime;
+        private Instant expireTime;
         private String subject;
         private Algorithm algorithm;
 
@@ -31,27 +30,36 @@ public class CredentialImpl implements Credential {
         }
 
         @Nonnull
+        public Builder setExpireTime(@Nonnull Instant expireTime) {
+            this.expireTime = expireTime;
+            return this;
+        }
+
+        @Nonnull
         public Builder setSubject(@Nonnull String subject) {
             this.subject = subject;
             return this;
         }
 
         @Nonnull
-        public CredentialImpl build() {
+        public CredentialImplFixed build() {
             Validate.notNull(issueTime, "Issue time is required");
+            Validate.notNull(expireTime, "Expiry time is required");
             Validate.notNull(subject, "Subject is required");
             Validate.notNull(algorithm, "Algorithm is required");
-            return new CredentialImpl(this);
+            return new CredentialImplFixed(this);
         }
     }
 
     private final Algorithm algorithm;
     private final Instant issueTime;
+    private final Instant expireTime;
     private final String subject;
 
-    private CredentialImpl(@Nonnull Builder builder) {
+    private CredentialImplFixed(@Nonnull CredentialImplFixed.Builder builder) {
         algorithm = builder.algorithm;
         issueTime = builder.issueTime;
+        expireTime = builder.expireTime;
         subject = builder.subject;
     }
 
@@ -64,7 +72,7 @@ public class CredentialImpl implements Credential {
     @Override
     @Nonnull
     public Instant getExpireTime() {
-        return Instant.MAX;
+        return this.expireTime;
     }
 
     @Override
@@ -77,6 +85,7 @@ public class CredentialImpl implements Credential {
     @Nonnull
     public String toString() {
         return JWT.create()
+            .withExpiresAt(Date.from(getExpireTime()))
             .withIssuedAt(Date.from(getIssueTime()))
             .withSubject(getSubject())
             .sign(algorithm);
