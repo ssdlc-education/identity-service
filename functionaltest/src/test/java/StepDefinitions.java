@@ -4,6 +4,9 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.support.ui.ExpectedCondition;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
@@ -11,12 +14,14 @@ import org.testng.Assert;
 public class StepDefinitions {
     private static final Logger logger = LoggerFactory.getLogger(StepDefinitions.class);
     private WebDriver driver;
+    private WebDriverWait driverWait;
 
     private static final String SERVICE_URL = "http://identity-frontend:5000";
 
     @Before
     public void before() {
         driver = RunCucumberTest.getWebDriver();
+        driverWait = RunCucumberTest.getWebDriverWait();
     }
 
     private String pageNameToURL(String pageName) {
@@ -69,7 +74,7 @@ public class StepDefinitions {
 
     @When("^I should be on the page with URL \"([^\"]*)\"$")
     public void i_should_be_on_the_page_with_URL(String url) {
-        Assert.assertEquals(driver.getCurrentUrl(), url);
+        Assert.assertTrue(driverWait.until(ExpectedConditions.urlToBe(url)));
     }
 
 }
