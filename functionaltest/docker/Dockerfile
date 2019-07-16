@@ -1,4 +1,4 @@
-FROM selenium/node-chrome:3.141.59-selenium
+FROM selenium/standalone-chrome:3.141.59
 
 USER root
 ENV HOME /root

@@ -18,9 +18,9 @@ Feature: Login account
     And I see in the field "firstname" there is "<firstname>"
     And I see in the field "lastname" there is "<lastname>"
     Examples:
-    | username | password | usrname | firstname | lastname | email | description |
-    | Alice    | PASSWORD | Username: Alice   | FirstName: Alice     | LastName: Demo     | Email: alice@gmail.com | Description: Test account for Alice |
-    | Bob    | PASSWORD | Username: Bob   | FirstName: Bob     | LastName: Demo     | Email: bob@gmail.com | Description: Test account for Bob |
+      | username | password | usrname           | firstname        | lastname       | email                  | description                         |
+      | Alice    | PASSWORD | Username: Alice   | FirstName: Alice | LastName: Demo | Email: alice@gmail.com | Description: Test account for Alice |
+      | Bob      | PASSWORD | Username: Bob     | FirstName: Bob   | LastName: Demo | Email: bob@gmail.com   | Description: Test account for Bob   |
 
   Scenario: Failed Login
     When I fill in "username" with "Alice"
