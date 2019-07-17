@@ -3,18 +3,17 @@ jdk:
   - openjdk8
 services:
   - docker
+addons:
+  apt:
+    packages:
+      - expect
 install:
   - echo "Skip installation"
 script:
   - docker-compose build
   - docker-compose up -d
-  - sleep 10
-  - docker-compose exec identity-backend mvn clean package spotbugs:check
-  - docker-compose exec identity-frontend go build -o server
-  - docker-compose exec -d identity-backend mvn jetty:run
-  - docker-compose exec -d identity-frontend ./server
-  - sleep 60
-  - echo Run functional test
+  - ./start_server_background.sh
+  - echo "=== Running functional test ==="
   - docker-compose exec identity-functest mvn clean
   - docker-compose exec identity-functest mvn test -Dcucumber.options="--tags @registerTest"
   - docker-compose exec identity-functest mvn test -Dcucumber.options="--tags @loginTest,@updateTest"
