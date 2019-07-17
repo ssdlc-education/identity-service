@@ -13,9 +13,8 @@ script:
   - docker-compose exec identity-frontend go build -o server
   - docker-compose exec -d identity-backend mvn jetty:run
   - docker-compose exec -d identity-frontend ./server
-  - sleep 30
+  - sleep 60
   - echo Run functional test
   - docker-compose exec identity-functest mvn clean
   - docker-compose exec identity-functest mvn test -Dcucumber.options="--tags @registerTest"
   - docker-compose exec identity-functest mvn test -Dcucumber.options="--tags @loginTest,@updateTest"
-  - sleep 10
