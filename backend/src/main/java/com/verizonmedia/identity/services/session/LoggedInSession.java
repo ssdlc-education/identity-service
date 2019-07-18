@@ -4,6 +4,7 @@ import com.verizonmedia.identity.services.account.Account;
 import com.verizonmedia.identity.services.account.AccountUpdate;
 import com.verizonmedia.identity.services.credential.Credential;
 import com.verizonmedia.identity.services.token.Token;
+import com.verizonmedia.identity.services.token.TokenType;
 
 import javax.annotation.Nonnull;
 
@@ -19,10 +20,10 @@ public interface LoggedInSession {
     String getUsername();
 
     @Nonnull
-    AccountUpdate newAccountUpdate();
+    SessionAccountUpdate newAccountUpdate();
 
     @Nonnull
-    Token createToken();
+    Token createToken(@Nonnull TokenType tokenType);
 
     void verifyPassword(@Nonnull String password);
 }

@@ -7,6 +7,9 @@ import javax.annotation.Nonnull;
 public interface AccountUpdate {
 
     @Nonnull
+    String getUsername();
+
+    @Nonnull
     AccountUpdate setEmail(@Nonnull String email);
 
     @Nonnull
@@ -14,9 +17,6 @@ public interface AccountUpdate {
 
     @Nonnull
     AccountUpdate setDescription(@Nonnull String description);
-
-    @Nonnull
-    AccountUpdate setToken(@Nonnull String token);
 
     @Nonnull
     void update() throws IdentityException;

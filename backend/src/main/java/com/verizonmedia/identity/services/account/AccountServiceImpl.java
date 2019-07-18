@@ -7,7 +7,6 @@ import com.verizonmedia.identity.services.storage.AccountImpl;
 import com.verizonmedia.identity.services.storage.AccountModel;
 import com.verizonmedia.identity.services.storage.Storage;
 import com.verizonmedia.identity.services.system.SystemService;
-import com.verizonmedia.identity.services.token.TokenService;
 
 import javax.annotation.Nonnull;
 
@@ -16,16 +15,13 @@ public class AccountServiceImpl implements AccountService {
     final Storage storage;
     final PasswordService passwordService;
     final SystemService systemService;
-    final TokenService tokenService;
 
     public AccountServiceImpl(@Nonnull Storage storage,
                               @Nonnull PasswordService passwordService,
-                              @Nonnull TokenService tokenService,
                               @Nonnull SystemService systemService) {
         this.storage = storage;
         this.passwordService = passwordService;
         this.systemService = systemService;
-        this.tokenService = tokenService;
     }
 
     @Override
@@ -51,7 +47,10 @@ public class AccountServiceImpl implements AccountService {
     @Override
     @Nonnull
     public AccountUpdate newAccountUpdate(@Nonnull String username) {
-        return new AccountUpdateImpl(username, storage, systemService, passwordService, tokenService);
+        return new AccountUpdateImpl(username,
+                                     storage,
+                                     systemService,
+                                     passwordService);
     }
 
     @Override

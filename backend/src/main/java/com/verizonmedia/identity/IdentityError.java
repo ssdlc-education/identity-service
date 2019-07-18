@@ -15,6 +15,8 @@ public enum IdentityError {
 
     ACCOUNT_NOT_FOUND(404001),
 
+    RELOGIN_REQUIRED(409001),
+
     INTERNAL_SERVER_ERROR(500000);
 
     private int code;

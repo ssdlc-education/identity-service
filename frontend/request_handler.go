@@ -65,6 +65,7 @@ func NewPageMeta() *pageMeta {
 type accountLoginPage struct {
 	*pageMeta
 	ErrorMessage string
+	DoneURL      string
 }
 
 func renderLoginPageWithError(w http.ResponseWriter, errMessage string) {
@@ -349,7 +350,7 @@ func renderPasswordEdit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	client := &http.Client{}
-	token := TokenInfo{"", "CRITICAL"}
+	token := TokenInfo{Type: "CRITICAL"}
 	tokenPayload, err := instanceToPayLoad(token)
 	if err != nil {
 		log.Println("error when decoding JSON", err)
@@ -374,8 +375,17 @@ func renderPasswordEdit(w http.ResponseWriter, r *http.Request) {
 	defer response.Body.Close()
 	bodyBytes, err := ioutil.ReadAll(response.Body)
 	if err != nil || response.StatusCode != http.StatusCreated {
-		log.Println("error occurred when reading response", err)
-		http.Redirect(w, r, accountLoginURLPath, http.StatusFound)
+		if response.StatusCode == http.StatusConflict {
+			// Need to login again
+			log.Print("Session too old, need to login again")
+			loginURL := accountLoginURLPath +
+				"?.done=" + url.QueryEscape(accountPasswordUpdateURLPath) +
+				"&error=" + url.QueryEscape("Please login again")
+			http.Redirect(w, r, loginURL, http.StatusFound)
+		} else {
+			log.Println("error occurred when reading response", err)
+			http.Redirect(w, r, accountLoginURLPath, http.StatusFound)
+		}
 		return
 	}
 	err = json.Unmarshal(bodyBytes, &token)
@@ -436,15 +446,28 @@ func submitPasswordEdit(w http.ResponseWriter, r *http.Request) {
 	}
 	request.Header.Add("Content-Type", "application/json")
 	request.AddCookie(cookie)
-	resp, err := client.Do(request)
-	if err != nil || resp.StatusCode != http.StatusNoContent {
+	var resp *http.Response
+	if resp, err = client.Do(request); err != nil {
+		page.ErrorMessage = "Internal server error"
+		renderTemplate(w, passwordEditTemplate, page)
+		return
+	}
+	if resp.StatusCode != http.StatusNoContent {
 		log.Printf("Failed to update password: %s", err)
 		if err == nil && resp.StatusCode == http.StatusBadRequest {
 			page.ErrorMessage = "Password length must be >= 6 and <= 30"
+			renderTemplate(w, passwordEditTemplate, page)
+		} else if resp.StatusCode == http.StatusConflict {
+			// Need to login again
+			log.Print("Session too old, need to login again")
+			loginURL := accountLoginURLPath +
+				"?.done=" + url.QueryEscape(accountPasswordUpdateURLPath) +
+				"&error=" + url.QueryEscape("Please login again")
+			http.Redirect(w, r, loginURL, http.StatusFound)
 		} else {
 			page.ErrorMessage = "Internal server error"
+			renderTemplate(w, passwordEditTemplate, page)
 		}
-		renderTemplate(w, passwordEditTemplate, page)
 		return
 	}
 	client.CloseIdleConnections()
@@ -457,6 +480,7 @@ func submitAccountLogin(w http.ResponseWriter, r *http.Request) {
 	// Get user login in information
 	username := r.FormValue("username")
 	password := r.FormValue("password")
+	doneURLStr := r.FormValue("doneurl")
 	// Encode the log in data to the json format payload
 	user := session{username, password}
 	payload, err := instanceToPayLoad(user)
@@ -480,7 +504,13 @@ func submitAccountLogin(w http.ResponseWriter, r *http.Request) {
 	}
 	// Set the cookies to the browser
 	http.SetCookie(w, convertCookieForResponse(credential))
-	http.Redirect(w, r, accountPrivateProfileURLPath, http.StatusFound)
+
+	// If done URL is specified, redirect to that url
+	if doneURL, err := url.Parse(doneURLStr); err == nil && len(doneURLStr) > 0 {
+		http.Redirect(w, r, doneURL.String(), http.StatusFound)
+	} else {
+		http.Redirect(w, r, accountPrivateProfileURLPath, http.StatusFound)
+	}
 	return
 }
 
@@ -593,8 +623,16 @@ func submitAccountCreate(w http.ResponseWriter, r *http.Request) {
 
 // Handle the login page
 func renderAccountLogin(w http.ResponseWriter, r *http.Request) {
-	p := accountLoginPage{pageMeta: NewPageMeta()}
-	renderTemplate(w, accountLoginTemplate, &p)
+	page := accountLoginPage{pageMeta: NewPageMeta()}
+	queries := r.URL.Query()
+	if doneUrls, ok := queries[".done"]; ok && len(doneUrls) > 0 {
+		page.DoneURL = doneUrls[0]
+	}
+	if errStr, ok := queries["error"]; ok && len(errStr) > 0 {
+		page.ErrorMessage = errStr[0]
+	}
+
+	renderTemplate(w, accountLoginTemplate, &page)
 }
 
 func renderHome(w http.ResponseWriter, r *http.Request) {

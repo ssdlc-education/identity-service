@@ -11,7 +11,7 @@ import com.verizonmedia.identity.services.password.PasswordServiceImplFixed;
 import com.verizonmedia.identity.services.random.RandomService;
 import com.verizonmedia.identity.services.random.RandomServiceImplFixed;
 import com.verizonmedia.identity.services.session.SessionService;
-import com.verizonmedia.identity.services.session.SessionServiceImpl;
+import com.verizonmedia.identity.services.session.SessionServiceImplFixed;
 import com.verizonmedia.identity.services.storage.Storage;
 import com.verizonmedia.identity.services.storage.sql.SqlStorage;
 import com.verizonmedia.identity.services.system.SystemService;
@@ -32,10 +32,10 @@ public class DefaultIdentityFactoryFixed implements IdentityFactory {
         TokenService tokenService = new TokenServiceImplFixed(keyService, systemService);
         PasswordService passwordService = new PasswordServiceImplFixed(randomService);
         AccountService
-            accountService = new AccountServiceImplFixed(storage, passwordService, tokenService, systemService);
+            accountService = new AccountServiceImplFixed(storage, passwordService, systemService);
         CredentialService credentialService = new CredentialServiceImplFixed(keyService, accountService, systemService);
 
-        SessionService sessionService = new SessionServiceImpl(
+        SessionService sessionService = new SessionServiceImplFixed(
             tokenService,
             accountService,
             credentialService,

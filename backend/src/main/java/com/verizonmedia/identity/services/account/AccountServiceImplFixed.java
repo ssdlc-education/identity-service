@@ -13,15 +13,8 @@ public class AccountServiceImplFixed extends AccountServiceImpl {
 
     public AccountServiceImplFixed(@Nonnull Storage storage,
                                    @Nonnull PasswordService passwordService,
-                                   @Nonnull TokenService tokenService,
                                    @Nonnull SystemService systemService) {
-        super(storage, passwordService, tokenService, systemService);
-    }
-
-    @Override
-    @Nonnull
-    public AccountUpdate newAccountUpdate(@Nonnull String username) {
-        return new AccountUpdateImplFixed(username, storage, systemService, passwordService, tokenService);
+        super(storage, passwordService, systemService);
     }
 
     @Override
