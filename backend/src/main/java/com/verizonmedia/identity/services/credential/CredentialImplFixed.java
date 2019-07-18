@@ -9,7 +9,7 @@ import java.util.Date;
 
 import javax.annotation.Nonnull;
 
-public class CredentialImpl implements Credential {
+public class CredentialImplFixed implements Credential {
 
     public static class Builder {
         private Instant issueTime;
@@ -42,12 +42,12 @@ public class CredentialImpl implements Credential {
         }
 
         @Nonnull
-        public CredentialImpl build() {
+        public CredentialImplFixed build() {
             Validate.notNull(issueTime, "Issue time is required");
             Validate.notNull(expireTime, "Expiry time is required");
             Validate.notNull(subject, "Subject is required");
             Validate.notNull(algorithm, "Algorithm is required");
-            return new CredentialImpl(this);
+            return new CredentialImplFixed(this);
         }
     }
 
@@ -56,35 +56,36 @@ public class CredentialImpl implements Credential {
     private final Instant expireTime;
     private final String subject;
 
-    private CredentialImpl(@Nonnull Builder builder) {
+    private CredentialImplFixed(@Nonnull CredentialImplFixed.Builder builder) {
         algorithm = builder.algorithm;
         issueTime = builder.issueTime;
-        subject = builder.subject;
         expireTime = builder.expireTime;
+        subject = builder.subject;
     }
 
     @Override
     @Nonnull
     public Instant getIssueTime() {
-        return issueTime;
+        return this.issueTime;
     }
 
     @Override
     @Nonnull
     public Instant getExpireTime() {
-        return expireTime;
+        return this.expireTime;
     }
 
     @Override
     @Nonnull
     public String getSubject() {
-        return subject;
+        return this.subject;
     }
 
     @Override
     @Nonnull
     public String toString() {
         return JWT.create()
+            .withExpiresAt(Date.from(getExpireTime()))
             .withIssuedAt(Date.from(getIssueTime()))
             .withSubject(getSubject())
             .sign(algorithm);

@@ -7,12 +7,12 @@ import java.time.Instant;
 
 import javax.annotation.Nonnull;
 
-public class TokenCreateImpl implements TokenCreate {
+public class TokenCreateImplFixed implements TokenCreate {
 
-    private final TokenImpl.Builder tokenBuilder;
+    private final TokenImplFixed.Builder tokenBuilder;
 
-    public TokenCreateImpl(@Nonnull Algorithm algorithm, @Nonnull SystemService systemService) {
-        this.tokenBuilder = new TokenImpl.Builder()
+    public TokenCreateImplFixed(@Nonnull Algorithm algorithm, @Nonnull SystemService systemService) {
+        this.tokenBuilder = new TokenImplFixed.Builder()
             .setAlgorithm(algorithm)
             .setSystemService(systemService);
     }

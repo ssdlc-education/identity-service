@@ -1,36 +1,39 @@
 package com.verizonmedia.identity;
 
 import com.verizonmedia.identity.services.account.AccountService;
-import com.verizonmedia.identity.services.account.AccountServiceImpl;
+import com.verizonmedia.identity.services.account.AccountServiceImplFixed;
 import com.verizonmedia.identity.services.credential.CredentialService;
-import com.verizonmedia.identity.services.credential.CredentialServiceImpl;
+import com.verizonmedia.identity.services.credential.CredentialServiceImplFixed;
 import com.verizonmedia.identity.services.key.KeyService;
 import com.verizonmedia.identity.services.key.KeyServiceImpl;
 import com.verizonmedia.identity.services.password.PasswordService;
-import com.verizonmedia.identity.services.password.PasswordServiceImpl;
+import com.verizonmedia.identity.services.password.PasswordServiceImplFixed;
+import com.verizonmedia.identity.services.random.RandomService;
+import com.verizonmedia.identity.services.random.RandomServiceImplFixed;
 import com.verizonmedia.identity.services.session.SessionService;
 import com.verizonmedia.identity.services.session.SessionServiceImpl;
 import com.verizonmedia.identity.services.storage.Storage;
 import com.verizonmedia.identity.services.storage.sql.SqlStorage;
 import com.verizonmedia.identity.services.system.SystemService;
 import com.verizonmedia.identity.services.token.TokenService;
-import com.verizonmedia.identity.services.token.TokenServiceImpl;
+import com.verizonmedia.identity.services.token.TokenServiceImplFixed;
 
 import javax.annotation.Nonnull;
 
-public class DefaultIdentityFactory implements IdentityFactory {
+public class DefaultIdentityFactoryFixed implements IdentityFactory {
 
     @Nonnull
     @Override
     public Identity create() {
         SystemService systemService = new SystemService();
         Storage storage = new SqlStorage(systemService);
+        RandomService randomService = new RandomServiceImplFixed();
         KeyService keyService = new KeyServiceImpl();
-        TokenService tokenService = new TokenServiceImpl(keyService, systemService);
-        PasswordService passwordService = new PasswordServiceImpl();
-        AccountService accountService = new AccountServiceImpl(storage, passwordService, tokenService, systemService);
-        CredentialService credentialService = new CredentialServiceImpl(keyService, accountService, systemService);
-
+        TokenService tokenService = new TokenServiceImplFixed(keyService, systemService);
+        PasswordService passwordService = new PasswordServiceImplFixed(randomService);
+        AccountService
+            accountService = new AccountServiceImplFixed(storage, passwordService, tokenService, systemService);
+        CredentialService credentialService = new CredentialServiceImplFixed(keyService, accountService, systemService);
 
         SessionService sessionService = new SessionServiceImpl(
             tokenService,

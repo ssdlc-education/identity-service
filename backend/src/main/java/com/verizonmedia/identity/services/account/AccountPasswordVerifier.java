@@ -2,11 +2,11 @@ package com.verizonmedia.identity.services.account;
 
 import static java.time.temporal.ChronoUnit.SECONDS;
 
-import com.verizonmedia.identity.services.storage.AccountModelUpdater;
 import com.verizonmedia.identity.IdentityError;
 import com.verizonmedia.identity.IdentityException;
 import com.verizonmedia.identity.services.password.PasswordService;
 import com.verizonmedia.identity.services.storage.AccountModel;
+import com.verizonmedia.identity.services.storage.AccountModelUpdater;
 import com.verizonmedia.identity.services.system.SystemService;
 import org.apache.commons.text.StringEscapeUtils;
 import org.slf4j.Logger;

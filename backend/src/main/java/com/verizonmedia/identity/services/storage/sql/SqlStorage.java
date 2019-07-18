@@ -56,8 +56,15 @@ public class SqlStorage implements Storage {
                                             @Nonnull AccountModelUpdater updater) {
         try (SqlSession session = sqlSessionFactory.openSession()) {
             AccountMapper mapper = session.getMapper(AccountMapper.class);
-            updater.update(mapper.getAccountForUpdate(username))
+            AccountModel account = mapper.getAccountForUpdate(username);
+            if (account == null) {
+                throw new IdentityException(IdentityError.ACCOUNT_NOT_FOUND, "Account not found");
+            }
+            updater.update(account)
                 .ifPresent(mapper::updateAccount);
+            session.commit();
+        } catch (IdentityException ex) {
+            throw ex;
         } catch (Exception e) {
             // TODO Should correct distinguish the reason of the failure
             throw new IdentityException(IdentityError.INTERNAL_SERVER_ERROR,
