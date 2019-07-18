@@ -4,6 +4,7 @@ import com.verizonmedia.identity.Identity;
 import com.verizonmedia.identity.IdentityError;
 import com.verizonmedia.identity.IdentityException;
 import com.verizonmedia.identity.services.session.LoggedInSession;
+import com.verizonmedia.identity.services.token.TokenType;
 import org.openapitools.api.CookieParser;
 import org.openapitools.api.Cookies;
 import org.openapitools.api.NotFoundException;
@@ -29,12 +30,23 @@ public class TokensApiServiceImpl extends TokensApiService {
 
     @Override
     public Response createToken(String cookieStr, Token tokenModel, SecurityContext securityContext) throws NotFoundException {
+        TokenType tokenType = convertTokenType(tokenModel.getType());
         String credential = cookieParser.parse(cookieStr).getCredential();
         LoggedInSession loggedInSession =
             identity.getSessionService().newSessionWithCredential(credential);
-        com.verizonmedia.identity.services.token.Token token = loggedInSession.createToken();
+        com.verizonmedia.identity.services.token.Token token = loggedInSession.createToken(tokenType);
         tokenModel.setValue(token.toString());
 
         return Response.status(Response.Status.CREATED).entity(tokenModel).build();
+    }
+
+    @Nonnull
+    private TokenType convertTokenType(@Nonnull Token.TypeEnum tokenType) {
+        switch (tokenType) {
+            case CRITICAL:
+                return TokenType.CRITICAL;
+            default:
+                return TokenType.STANDARD;
+        }
     }
 }

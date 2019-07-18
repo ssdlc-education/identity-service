@@ -10,10 +10,10 @@ import javax.annotation.Nonnull;
 
 public class SessionServiceImpl implements SessionService {
 
-    private final TokenService tokenService;
-    private final AccountService accountService;
-    private final CredentialService credentialService;
-    private final SystemService systemService;
+    final TokenService tokenService;
+    final AccountService accountService;
+    final CredentialService credentialService;
+    final SystemService systemService;
 
     public SessionServiceImpl(
         @Nonnull TokenService tokenService,

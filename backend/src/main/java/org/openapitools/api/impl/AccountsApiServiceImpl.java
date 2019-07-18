@@ -6,6 +6,7 @@ import com.verizonmedia.identity.services.account.Account;
 import com.verizonmedia.identity.services.account.AccountUpdate;
 import com.verizonmedia.identity.services.session.LoggedInSession;
 import com.verizonmedia.identity.services.session.Session;
+import com.verizonmedia.identity.services.session.SessionAccountUpdate;
 import org.openapitools.api.AccountsApiService;
 import org.openapitools.api.CookieParser;
 import org.openapitools.api.Cookies;
@@ -107,7 +108,7 @@ public class AccountsApiServiceImpl extends AccountsApiService {
         LoggedInSession loggedInSession =
             identity.getSessionService().newSessionWithCredential(credStr);
 
-        AccountUpdate accountUpdate = loggedInSession.newAccountUpdate()
+        SessionAccountUpdate accountUpdate = loggedInSession.newAccountUpdate()
             .setToken(token);
 
         String email = account.getEmail();

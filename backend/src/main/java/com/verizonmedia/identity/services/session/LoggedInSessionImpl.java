@@ -1,5 +1,7 @@
 package com.verizonmedia.identity.services.session;
 
+import com.verizonmedia.identity.IdentityError;
+import com.verizonmedia.identity.IdentityException;
 import com.verizonmedia.identity.services.account.Account;
 import com.verizonmedia.identity.services.account.AccountService;
 import com.verizonmedia.identity.services.account.AccountUpdate;
@@ -7,15 +9,20 @@ import com.verizonmedia.identity.services.credential.Credential;
 import com.verizonmedia.identity.services.system.SystemService;
 import com.verizonmedia.identity.services.token.Token;
 import com.verizonmedia.identity.services.token.TokenService;
+import com.verizonmedia.identity.services.token.TokenType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.time.Duration;
 
 import javax.annotation.Nonnull;
 
 public class LoggedInSessionImpl implements LoggedInSession {
 
-    private final AccountService accountService;
-    private final TokenService tokenService;
-    private final Credential credential;
-    private final SystemService systemService;
+    final AccountService accountService;
+    final TokenService tokenService;
+    final Credential credential;
+    final SystemService systemService;
 
     public LoggedInSessionImpl(
         @Nonnull Credential credential,
@@ -52,13 +59,21 @@ public class LoggedInSessionImpl implements LoggedInSession {
 
     @Override
     @Nonnull
-    public AccountUpdate newAccountUpdate() {
-        return accountService.newAccountUpdate(getUsername());
+    public SessionAccountUpdate newAccountUpdate() {
+        AccountUpdate accountUpdate = accountService.newAccountUpdate(getUsername());
+        return new SessionAccountUpdateImpl(
+            accountUpdate,
+            tokenService
+        );
     }
 
     @Nonnull
     @Override
-    public Token createToken() {
+    public Token createToken(@Nonnull TokenType tokenType) {
+        Duration sessionAge = Duration.between(credential.getIssueTime(), systemService.now());
+        if (tokenType.needRelogin(sessionAge)) {
+            throw new IdentityException(IdentityError.RELOGIN_REQUIRED, "Need to login again to get token");
+        }
         return tokenService.newTokenCreate()
             .setIssueTime(systemService.now())
             .setExpireTime(credential.getExpireTime())

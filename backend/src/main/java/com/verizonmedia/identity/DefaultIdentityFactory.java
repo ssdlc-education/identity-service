@@ -28,9 +28,8 @@ public class DefaultIdentityFactory implements IdentityFactory {
         KeyService keyService = new KeyServiceImpl();
         TokenService tokenService = new TokenServiceImpl(keyService, systemService);
         PasswordService passwordService = new PasswordServiceImpl();
-        AccountService accountService = new AccountServiceImpl(storage, passwordService, tokenService, systemService);
+        AccountService accountService = new AccountServiceImpl(storage, passwordService, systemService);
         CredentialService credentialService = new CredentialServiceImpl(keyService, accountService, systemService);
-
 
         SessionService sessionService = new SessionServiceImpl(
             tokenService,
