@@ -1,4 +1,4 @@
-# Identity Management Service
+# Extremely Simple Identity Service
 
 [![Build Status](https://travis-ci.com/verizon-media-2019-ais3/identity-service.svg?branch=master)](https://travis-ci.com/verizon-media-2019-ais3/identity-service)
 
