@@ -2,8 +2,6 @@ package com.verizonmedia.identity.services.credential;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.verizonmedia.identity.IdentityError;
-import com.verizonmedia.identity.IdentityException;
 import com.verizonmedia.identity.Validate;
 
 import java.time.Instant;

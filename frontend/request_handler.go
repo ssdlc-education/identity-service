@@ -29,6 +29,7 @@ const (
 	accountEmailUpdateURLPath    = "/account/update_email"
 
 	accountEditTemplate           = "edit.html"
+	passwordEditTemplate          = "editPassword.html"
 	accountLoginTemplate          = "login.html"
 	accountPrivateProfileTemplate = "profile.html"
 	accountPublicProfileTemplate  = "publicProfile.html"
@@ -118,9 +119,15 @@ type profile struct {
 	Password    *string `json:"password,omitempty"`
 }
 
-type profileEditPage struct {
+type profileUpdatePage struct {
 	*pageMeta
 	Description  string
+	Token        string
+	ErrorMessage string
+}
+
+type passwordUpdatePage struct {
+	*pageMeta
 	Token        string
 	ErrorMessage string
 }
@@ -273,7 +280,7 @@ func renderProfileEdit(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, accountLoginURLPath, http.StatusFound)
 		return
 	}
-	page := profileEditPage{
+	page := profileUpdatePage{
 		pageMeta:    NewPageMeta(),
 		Description: *profile.Description,
 		Token:       token.Value,
@@ -283,7 +290,7 @@ func renderProfileEdit(w http.ResponseWriter, r *http.Request) {
 
 // The Function to save the edited information
 func submitProfileEdit(w http.ResponseWriter, r *http.Request) {
-	editPage := profileEditPage{
+	editPage := profileUpdatePage{
 		pageMeta:    NewPageMeta(),
 		Description: r.FormValue("description"),
 		Token:       r.FormValue("token"),
@@ -325,6 +332,119 @@ func submitProfileEdit(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Failed to update account: %s", err)
 		editPage.ErrorMessage = "Internal server error"
 		renderTemplate(w, accountEditTemplate, editPage)
+		return
+	}
+	client.CloseIdleConnections()
+
+	// After edited it redirect to the private information page
+	http.Redirect(w, r, accountPrivateProfileURLPath, http.StatusFound)
+}
+
+// Render the edit information page
+func renderPasswordEdit(w http.ResponseWriter, r *http.Request) {
+	cookie, err := r.Cookie("V")
+	if err != nil || cookie == nil {
+		log.Println("May log out or cookie expire", err)
+		http.Redirect(w, r, accountLoginURLPath, http.StatusFound)
+		return
+	}
+	client := &http.Client{}
+	token := TokenInfo{"", "CRITICAL"}
+	tokenPayload, err := instanceToPayLoad(token)
+	if err != nil {
+		log.Println("error when decoding JSON", err)
+		http.Redirect(w, r, accountLoginURLPath, http.StatusFound)
+		return
+	}
+	// Get token request
+	getTokenURL := backendURL + "/tokens/"
+	request, err := http.NewRequest("POST", getTokenURL, tokenPayload)
+	if err != nil {
+		log.Println("error when building request ", err)
+		http.Redirect(w, r, accountLoginURLPath, http.StatusFound)
+		return
+	}
+	request.Header.Add("Content-Type", "application/json")
+	request.AddCookie(cookie)
+	response, err := client.Do(request)
+	if err != nil {
+		http.Redirect(w, r, accountLoginURLPath, http.StatusFound)
+		return
+	}
+	defer response.Body.Close()
+	bodyBytes, err := ioutil.ReadAll(response.Body)
+	if err != nil || response.StatusCode != http.StatusCreated {
+		log.Println("error occurred when reading response", err)
+		http.Redirect(w, r, accountLoginURLPath, http.StatusFound)
+		return
+	}
+	err = json.Unmarshal(bodyBytes, &token)
+	if err != nil {
+		log.Println("Decode response error", err)
+		http.Redirect(w, r, accountLoginURLPath, http.StatusFound)
+		return
+	}
+	page := passwordUpdatePage{
+		pageMeta: NewPageMeta(),
+		Token:    token.Value,
+	}
+	renderTemplate(w, passwordEditTemplate, &page)
+}
+
+func submitPasswordEdit(w http.ResponseWriter, r *http.Request) {
+	newPassword := r.FormValue("newpassword")
+	confirmPassword := r.FormValue("confirmpassword")
+	token := r.FormValue("token")
+	// Get cookie from browser
+	cookie, err := r.Cookie("V")
+	if err != nil {
+		http.Redirect(w, r, accountLoginURLPath, http.StatusFound)
+		return
+	}
+	page := passwordUpdatePage{
+		pageMeta: NewPageMeta(),
+		Token:    token,
+	}
+	if newPassword != confirmPassword {
+		page.ErrorMessage = "Passwords doesn't match"
+		renderTemplate(w, passwordEditTemplate, page)
+		return
+	}
+
+	// Get the standard token to change the regular information
+	client := &http.Client{}
+
+	passwordToUpdate := profile{
+		Password: &newPassword,
+	}
+
+	payload, err := instanceToPayLoad(passwordToUpdate)
+	if err != nil {
+		log.Println(err)
+		page.ErrorMessage = "Internal server error"
+		renderTemplate(w, passwordEditTemplate, page)
+		return
+	}
+	// Send http request
+	link := backendURL + "/accounts/@me?token=" + url.QueryEscape(token)
+	request, err := http.NewRequest("PUT", link, payload)
+	if err != nil {
+		log.Println(err)
+		page.ErrorMessage = "Internal server error"
+		renderTemplate(w, passwordEditTemplate, page)
+		return
+	}
+	request.Header.Add("Content-Type", "application/json")
+	request.AddCookie(cookie)
+	resp, err := client.Do(request)
+	if err != nil || resp.StatusCode != http.StatusNoContent {
+		log.Printf("Failed to update password: %s", err)
+		if err == nil && resp.StatusCode == http.StatusBadRequest {
+			page.ErrorMessage = "Password length must be >= 6 and <= 30"
+		} else {
+			page.ErrorMessage = "Internal server error"
+		}
+		renderTemplate(w, passwordEditTemplate, page)
 		return
 	}
 	client.CloseIdleConnections()
@@ -506,6 +626,10 @@ func main() {
 	router.HandleFunc(accountEditURLPath, renderProfileEdit).
 		Methods("GET")
 	router.HandleFunc(accountEditURLPath, submitProfileEdit).
+		Methods("POST")
+	router.HandleFunc(accountPasswordUpdateURLPath, renderPasswordEdit).
+		Methods("GET")
+	router.HandleFunc(accountPasswordUpdateURLPath, submitPasswordEdit).
 		Methods("POST")
 	router.HandleFunc(accountRegisterURLPath, renderAccountCreate).
 		Methods("GET")

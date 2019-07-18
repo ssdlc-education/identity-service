@@ -35,7 +35,11 @@ public class DefaultIdentityFactoryFixed implements IdentityFactory {
             accountService = new AccountServiceImplFixed(storage, passwordService, tokenService, systemService);
         CredentialService credentialService = new CredentialServiceImplFixed(keyService, accountService, systemService);
 
-        SessionService sessionService = new SessionServiceImpl(tokenService, accountService, credentialService);
+        SessionService sessionService = new SessionServiceImpl(
+            tokenService,
+            accountService,
+            credentialService,
+            systemService);
 
         return new Identity(sessionService);
     }

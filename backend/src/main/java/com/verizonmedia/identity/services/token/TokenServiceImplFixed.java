@@ -25,9 +25,15 @@ public class TokenServiceImplFixed extends TokenServiceImpl {
                                 (RSAPrivateKey) keyService.getPrivateKey(KEY_NAME, "RSA"));
     }
 
+    @Override
+    @Nonnull
+    public TokenCreate newTokenCreate() {
+        return new TokenCreateImplFixed(algorithm, systemService);
+    }
+
     @Nonnull
     Token createTokenFromJWT(@Nonnull DecodedJWT jwt) {
-        return new TokenImpl.Builder()
+        return new TokenImplFixed.Builder()
             .setSystemService(systemService)
             .setAlgorithm(algorithm)
             .setSubject(jwt.getSubject())

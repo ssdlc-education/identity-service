@@ -22,12 +22,12 @@ public class SingletonIdentityFactory {
 
     static {
         // To change to the version with vulnerabilities fixed, change to
-        // IdentityFactory factory = new DefaultIdentityFactoryFixed();
+        //IdentityFactory factory = new DefaultIdentityFactoryFixed();
         IdentityFactory factory = new DefaultIdentityFactory();
         Identity identity = factory.create();
         CookieParser cookieParser = new CookieParser();
         // To change to the version with vulnerabilities fixed, change to
-        // accountsApiService = new AccountsApiServiceImplFixed(identity, cookieParser);
+        //accountsApiService = new AccountsApiServiceImplFixed(identity, cookieParser);
         accountsApiService = new AccountsApiServiceImpl(identity, cookieParser);
         sessionsApiService = new SessionsApiServiceImpl(identity);
         tokenApiService = new TokensApiServiceImpl(identity, cookieParser);

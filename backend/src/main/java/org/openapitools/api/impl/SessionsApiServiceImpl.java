@@ -29,7 +29,8 @@ public class SessionsApiServiceImpl extends SessionsApiService {
         String cookieStr = loggedInSession.getCredential().toString();
         NewCookie cookie = new NewCookie(Cookies.NAME_CREDENTIAL, cookieStr);
 
-        return Response.status(Response.Status.CREATED).entity("The session is created successfully").cookie(cookie)
+        Session resp = new Session();
+        return Response.status(Response.Status.CREATED).entity(resp).cookie(cookie)
             .build();
     }
 }

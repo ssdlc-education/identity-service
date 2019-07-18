@@ -32,7 +32,11 @@ public class DefaultIdentityFactory implements IdentityFactory {
         CredentialService credentialService = new CredentialServiceImpl(keyService, accountService, systemService);
 
 
-        SessionService sessionService = new SessionServiceImpl(tokenService, accountService, credentialService);
+        SessionService sessionService = new SessionServiceImpl(
+            tokenService,
+            accountService,
+            credentialService,
+            systemService);
 
         return new Identity(sessionService);
     }

@@ -10,6 +10,9 @@ public interface TokenCreate {
     TokenCreate setUsername(@Nonnull String username);
 
     @Nonnull
+    TokenCreate setIssueTime(@Nonnull Instant issueTime);
+
+    @Nonnull
     TokenCreate setExpireTime(@Nonnull Instant expiryTime);
 
     @Nonnull
