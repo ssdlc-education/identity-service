@@ -55,13 +55,6 @@ public class StepDefinitions {
         logger.info("Go to page {}", url);
     }
 
-
-    @Given("^I go to the page with URL \"([^\"]*)\"$")
-    public void i_go_to_the_page_with_URL(String url) {
-        driver.get(url);
-        System.out.println(driver.getCurrentUrl());
-    }
-
     @When("^I fill in \"([^\"]*)\" with \"([^\"]*)\"$")
     public void i_fill_in_with(String elemName, String key) {
         driver.findElement(By.name(elemName)).sendKeys(key);
@@ -82,11 +75,6 @@ public class StepDefinitions {
     public void i_see_the_error_message(String message) {
         String text = driver.findElement(By.name("errormsg")).getText();
         Assert.assertEquals(text, message);
-    }
-
-    @Then("^I should be on the page with URL \"([^\"]*)\"$")
-    public void i_should_be_on_the_page_with_URL(String url) {
-        Assert.assertTrue(driverWait.until(ExpectedConditions.urlToBe(url)));
     }
 
     @Then("^I should be on \"([^\"]*)\" page$")
