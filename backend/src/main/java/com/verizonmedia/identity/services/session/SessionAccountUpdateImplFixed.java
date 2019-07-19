@@ -18,6 +18,7 @@ public class SessionAccountUpdateImplFixed extends SessionAccountUpdateImpl {
 
     private final Credential credential;
     private final SystemService systemService;
+    private TokenType tokenType = TokenType.STANDARD;
 
     public SessionAccountUpdateImplFixed(
         @Nonnull AccountUpdate accountUpdate,
@@ -28,6 +29,20 @@ public class SessionAccountUpdateImplFixed extends SessionAccountUpdateImpl {
         this.credential = credential;
         this.systemService = systemService;
 
+    }
+
+    @Nonnull
+    @Override
+    public SessionAccountUpdate setEmail(@Nonnull String email) {
+        tokenType = TokenType.CRITICAL;
+        return super.setEmail(email);
+    }
+
+    @Nonnull
+    @Override
+    public SessionAccountUpdate setPassword(@Nonnull String password) {
+        tokenType = TokenType.CRITICAL;
+        return super.setPassword(password);
     }
 
     @Override
