@@ -4,7 +4,6 @@ import com.verizonmedia.identity.IdentityException;
 import com.verizonmedia.identity.Validate;
 import com.verizonmedia.identity.services.account.AccountUpdate;
 import com.verizonmedia.identity.services.token.TokenService;
-import com.verizonmedia.identity.services.token.TokenType;
 
 import javax.annotation.Nonnull;
 
@@ -13,7 +12,6 @@ public class SessionAccountUpdateImpl implements SessionAccountUpdate {
     final AccountUpdate accountUpdate;
     final TokenService tokenService;
     String tokenStr;
-    TokenType tokenType = TokenType.STANDARD;
 
     public SessionAccountUpdateImpl(
         @Nonnull AccountUpdate accountUpdate,
@@ -32,7 +30,6 @@ public class SessionAccountUpdateImpl implements SessionAccountUpdate {
     @Nonnull
     @Override
     public SessionAccountUpdate setEmail(@Nonnull String email) {
-        tokenType = TokenType.CRITICAL;
         accountUpdate.setEmail(email);
         return this;
     }
@@ -40,7 +37,6 @@ public class SessionAccountUpdateImpl implements SessionAccountUpdate {
     @Nonnull
     @Override
     public SessionAccountUpdate setPassword(@Nonnull String password) {
-        tokenType = TokenType.CRITICAL;
         accountUpdate.setPassword(password);
         return this;
     }
