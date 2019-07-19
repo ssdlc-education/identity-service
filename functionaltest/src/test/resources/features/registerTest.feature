@@ -6,7 +6,7 @@ Feature: Sign up new account
   Scenario Outline: Successful Registration
     When I go to "home" page
     And I click on the "create" button
-    And I should be on the page with URL "http://identity-frontend:5000/account/register"
+    And I should be on "account register" page
     When I fill in "username" with "<username>"
     And I fill in "email" with "<email>"
     And I fill in "firstname" with "<firstname>"
@@ -14,7 +14,7 @@ Feature: Sign up new account
     And I fill in "password" with "<password>"
     And I fill in "description" with "<description>"
     And I click on the "register" button
-    Then I should be on the page with URL "http://identity-frontend:5000/account/view"
+    Then I should be on "account profile" page
     And I see in the field "username" there is "<user>"
     And I see in the field "firstname" there is "<first>"
     And I see in the field "lastname" there is "<last>"
