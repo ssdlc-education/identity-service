@@ -5,5 +5,5 @@ docker-compose up -d
 ./start_server_background.sh
 echo "=== Running functional test ==="
 docker-compose exec identity-functest mvn clean
-docker-compose exec identity-functest mvn test -Dcucumber.options="--tags @registerTest"
-docker-compose exec identity-functest mvn test -Dcucumber.options="--tags @loginTest,@updateTest"
+docker-compose exec identity-functest mvn test -Dcucumber.options="--strict --tags @registerTest"
+docker-compose exec identity-functest mvn test -Dcucumber.options="--strict --tags '@loginTest or @updateTest'"

@@ -30,6 +30,18 @@ public class StepDefinitions {
             case "home":
                 path = "";
                 break;
+            case "account profile":
+                path = "/account/view";
+                break;
+            case "account login":
+                path = "/account/login";
+                break;
+            case "account profile edit":
+                path = "/account/edit";
+                break;
+            case "account register":
+                path = "/account/register";
+                break;
             default:
                 throw new IllegalArgumentException("Invalid page name " + pageName);
         }
@@ -41,13 +53,6 @@ public class StepDefinitions {
         String url = pageNameToURL(pageName);
         driver.get(url);
         logger.info("Go to page {}", url);
-    }
-
-
-    @Given("^I go to the page with URL \"([^\"]*)\"$")
-    public void i_go_to_the_page_with_URL(String url) {
-        driver.get(url);
-        System.out.println(driver.getCurrentUrl());
     }
 
     @When("^I fill in \"([^\"]*)\" with \"([^\"]*)\"$")
@@ -72,8 +77,9 @@ public class StepDefinitions {
         Assert.assertEquals(text, message);
     }
 
-    @When("^I should be on the page with URL \"([^\"]*)\"$")
-    public void i_should_be_on_the_page_with_URL(String url) {
+    @Then("^I should be on \"([^\"]*)\" page$")
+    public void assertOnPage(String pageName) {
+        String url = pageNameToURL(pageName);
         Assert.assertTrue(driverWait.until(ExpectedConditions.urlToBe(url)));
     }
 
