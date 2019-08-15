@@ -1,3 +1,5 @@
+// Copyright 2019, Oath Inc.
+// Licensed under the terms of the MIT license. See LICENSE file in project root for terms.
 package org.openapitools.api.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
